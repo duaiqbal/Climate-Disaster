@@ -39,7 +39,7 @@ from fastapi.responses import JSONResponse
 
 from backend.database import init_db
 from backend.models.db_models import HealthResponse
-from backend.routers import alerts, auth, knowledge, sync
+from backend.routers import alerts, auth, knowledge, sync, monitor
 
 APP_VERSION = "1.0.0"
 
@@ -93,6 +93,7 @@ app.include_router(alerts.router)
 app.include_router(auth.router)
 app.include_router(knowledge.router)
 app.include_router(sync.router)
+app.include_router(monitor.router)
 
 
 # ── Health ────────────────────────────────────────────────────────────────────

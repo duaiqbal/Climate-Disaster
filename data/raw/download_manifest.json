@@ -1,0 +1,161 @@
+[
+  {
+    "id": "ndma_national_disaster_response_plan_2024",
+    "source_org": "NDMA",
+    "doc_title": "NDMA National Disaster Response Plan 2024-25",
+    "source_url": "https://www.ndma.gov.pk/public/storage/plans/July2024/wfXLVc2K9Cp1MjFHq6YE.pdf",
+    "language": "en",
+    "hazard_scope": [
+      "flood",
+      "flash_flood",
+      "landslide"
+    ],
+    "status": "downloaded",
+    "local_path": "C:\\Users\\Computer Arena\\OneDrive\\TOOBA INDUSTRY DOCUMENTS\\disaster_dss\\data\\raw\\ndma_national_disaster_response_plan_2024.pdf",
+    "fetch_timestamp": "2026-09-10T17:53:50.699566+00:00",
+    "sha256": "165912f8db97df9ac95364714399fdd40da3b16369761d20fabdc5bd68647204",
+    "size_bytes": 788195
+  },
+  {
+    "id": "ndma_monsoon_advisory_july2024",
+    "source_org": "NDMA",
+    "doc_title": "NDMA National Monsoon Contingency Advisory July 2024",
+    "source_url": "https://www.ndma.gov.pk/public/storage/guidelines/July2024/AxrPIigiZ2heJTluqNRl.pdf",
+    "language": "en",
+    "hazard_scope": [
+      "flood",
+      "flash_flood"
+    ],
+    "status": "downloaded",
+    "local_path": "C:\\Users\\Computer Arena\\OneDrive\\TOOBA INDUSTRY DOCUMENTS\\disaster_dss\\data\\raw\\ndma_monsoon_advisory_july2024.pdf",
+    "fetch_timestamp": "2026-09-10T17:53:53.746919+00:00",
+    "sha256": "fbd5f43bf8f82a70003c72c287aa863c1ec7501cef18cf9393333cb67601c9e5",
+    "size_bytes": 423163
+  },
+  {
+    "id": "ndma_flood_situation_2023_2024",
+    "source_org": "NDMA",
+    "doc_title": "NDMA Flood Situation Report 2023-2024",
+    "source_url": "http://ndma.gov.pk/storage/publications/September2025/KHBZlFM1dMY41qv8z6wl.pdf",
+    "language": "en",
+    "hazard_scope": [
+      "flood"
+    ],
+    "status": "downloaded",
+    "local_path": "C:\\Users\\Computer Arena\\OneDrive\\TOOBA INDUSTRY DOCUMENTS\\disaster_dss\\data\\raw\\ndma_flood_situation_2023_2024.pdf",
+    "fetch_timestamp": "2026-09-10T17:53:56.538685+00:00",
+    "sha256": "c3c1675fa5ee2b7e80e226ceff324edc5ecce786b9f95a104ff874fcab13ba7f",
+    "size_bytes": 6189228
+  },
+  {
+    "id": "ndma_preparedness_measures_2024",
+    "source_org": "NDMA",
+    "doc_title": "NDMA Preparedness and Preventive Measures 2024",
+    "source_url": "https://ndma.gov.pk/storage/publications/December2024/OJVEu8JCwHDSN32K3Han.pdf",
+    "language": "en",
+    "hazard_scope": [
+      "flood",
+      "landslide",
+      "general"
+    ],
+    "status": "downloaded",
+    "local_path": "C:\\Users\\Computer Arena\\OneDrive\\TOOBA INDUSTRY DOCUMENTS\\disaster_dss\\data\\raw\\ndma_preparedness_measures_2024.pdf",
+    "fetch_timestamp": "2026-09-10T17:54:12.842902+00:00",
+    "sha256": "95f76f14102ab471b02dd99d670820d3f5e62dbac3935743206c4ffef93c412c",
+    "size_bytes": 4575459
+  },
+  {
+    "id": "ndma_infrastructure_advisory_flood_2024",
+    "source_org": "NDMA",
+    "doc_title": "NDMA Infrastructure Advisory Against Flood 2024",
+    "source_url": "http://www.ndma.gov.pk/public/storage/ia-books/June2024/Gw6lHyqABXcT0NkYCTmo.pdf",
+    "language": "en",
+    "hazard_scope": [
+      "flood"
+    ],
+    "status": "downloaded",
+    "local_path": "C:\\Users\\Computer Arena\\OneDrive\\TOOBA INDUSTRY DOCUMENTS\\disaster_dss\\data\\raw\\ndma_infrastructure_advisory_flood_2024.pdf",
+    "fetch_timestamp": "2026-09-10T17:54:22.478661+00:00",
+    "sha256": "f03fcc175b1aeea1fd594924cef5029a86604b7007db316e3d4032511ea73863",
+    "size_bytes": 1131460
+  },
+  {
+    "id": "ndma_weather_advisory_july2024",
+    "source_org": "NDMA",
+    "doc_title": "NDMA Weather Advisory July 2024 — Flash Flood Warning",
+    "source_url": "https://ndma.gov.pk/public/storage/advisories/July2024/ug0ZMXj8528ghUhCRGQB.pdf",
+    "language": "en",
+    "hazard_scope": [
+      "flash_flood"
+    ],
+    "status": "downloaded",
+    "local_path": "C:\\Users\\Computer Arena\\OneDrive\\TOOBA INDUSTRY DOCUMENTS\\disaster_dss\\data\\raw\\ndma_weather_advisory_july2024.pdf",
+    "fetch_timestamp": "2026-09-10T17:54:26.905457+00:00",
+    "sha256": "a825d3117539529a0785a8f14ae2043b151e4b4d93362e2b1bc59c9b412c470f",
+    "size_bytes": 231397
+  },
+  {
+    "id": "ndma_monsoon_sitrep_72_2023",
+    "source_org": "NDMA",
+    "doc_title": "NDMA Monsoon 2023 Situation Report No.72",
+    "source_url": "http://ndma.gov.pk/public/storage/sitreps/September2023/LiaIqRyXAWBUzOuBAQJ6.pdf",
+    "language": "en",
+    "hazard_scope": [
+      "flood",
+      "flash_flood"
+    ],
+    "status": "downloaded",
+    "local_path": "C:\\Users\\Computer Arena\\OneDrive\\TOOBA INDUSTRY DOCUMENTS\\disaster_dss\\data\\raw\\ndma_monsoon_sitrep_72_2023.pdf",
+    "fetch_timestamp": "2026-09-10T17:54:29.776343+00:00",
+    "sha256": "66c3ff61cc4d2aa4467d50a1c83ca9f57e805f42543ea8be064f4c01afc73f0e",
+    "size_bytes": 1245120
+  },
+  {
+    "id": "ndma_monsoon_sitrep_18_2023",
+    "source_org": "NDMA",
+    "doc_title": "NDMA Monsoon 2023 Situation Report No.18",
+    "source_url": "http://www.ndma.gov.pk/public/storage/sitreps/July2023/Ji6xGMDUZDVpdOYATpga.pdf",
+    "language": "en",
+    "hazard_scope": [
+      "flood"
+    ],
+    "status": "downloaded",
+    "local_path": "C:\\Users\\Computer Arena\\OneDrive\\TOOBA INDUSTRY DOCUMENTS\\disaster_dss\\data\\raw\\ndma_monsoon_sitrep_18_2023.pdf",
+    "fetch_timestamp": "2026-09-10T17:54:34.232878+00:00",
+    "sha256": "f8e1edafa51c0b4d6f0d3de09d99ac3e4254632a2daf1dc5989ba7329a541726",
+    "size_bytes": 1236566
+  },
+  {
+    "id": "ndma_drm_strategy_plan_2024",
+    "source_org": "NDMA",
+    "doc_title": "NDMA DRM Strategy and Implementation Framework 2024",
+    "source_url": "http://www.ndma.gov.pk/storage/plans/July2024/vWxklzviXxzbgPGHuitB.pdf",
+    "language": "en",
+    "hazard_scope": [
+      "flood",
+      "landslide",
+      "general"
+    ],
+    "status": "downloaded",
+    "local_path": "C:\\Users\\Computer Arena\\OneDrive\\TOOBA INDUSTRY DOCUMENTS\\disaster_dss\\data\\raw\\ndma_drm_strategy_plan_2024.pdf",
+    "fetch_timestamp": "2026-09-10T17:54:38.728484+00:00",
+    "sha256": "5dae5e4f414d36596a7fe6351d54ee6fa5844712f60bb050ed194798bb6cbb69",
+    "size_bytes": 41976090
+  },
+  {
+    "id": "ndma_monsoon_preparedness_2025",
+    "source_org": "NDMA",
+    "doc_title": "NDMA Monsoon Preparedness Advisory 2025",
+    "source_url": "https://www.ndma.gov.pk/public/storage/ia-books/May2025/2ZaEfDaPTtrCkl71G6pL.pdf",
+    "language": "en",
+    "hazard_scope": [
+      "flood",
+      "flash_flood"
+    ],
+    "status": "downloaded",
+    "local_path": "C:\\Users\\Computer Arena\\OneDrive\\TOOBA INDUSTRY DOCUMENTS\\disaster_dss\\data\\raw\\ndma_monsoon_preparedness_2025.pdf",
+    "fetch_timestamp": "2026-09-10T17:55:44.375921+00:00",
+    "sha256": "be84b0c430c7fbb213c716fdaf31d1caa60533edff666c4b19bd6c3e09602405",
+    "size_bytes": 854220
+  }
+]

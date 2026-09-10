@@ -1,0 +1,311 @@
+[
+  {
+    "query": "What should I do during a flood?",
+    "language": "en",
+    "hazard_type": "flood",
+    "relevant_chunk_ids": [
+      "ndma_drm_strategy_plan_2024_c0004",
+      "ndma_flood_situation_2023_2024_c0002",
+      "ndma_flood_situation_2023_2024_c0024",
+      "ndma_flood_situation_2023_2024_c0026",
+      "ndma_flood_situation_2023_2024_c0028"
+    ],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "Flood evacuation procedure",
+    "language": "en",
+    "hazard_type": "flood",
+    "relevant_chunk_ids": [
+      "ndma_infrastructure_advisory_flood_2024_c0002",
+      "ndma_national_disaster_response_plan_2024_c0058",
+      "pdma_kp_flood_chitral_glof_c0005",
+      "ndma_drm_strategy_plan_2024_c0004",
+      "ndma_drm_strategy_plan_2024_c0005"
+    ],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "Flash flood warning signs",
+    "language": "en",
+    "hazard_type": "flash_flood",
+    "relevant_chunk_ids": [
+      "pdma_kp_flood_landslide_contingency_2026_c0001",
+      "ndma_drm_strategy_plan_2024_c0004",
+      "ndma_drm_strategy_plan_2024_c0012",
+      "ndma_drm_strategy_plan_2024_c0036",
+      "ndma_flood_situation_2023_2024_c0020"
+    ],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "How to prepare a go-bag",
+    "language": "en",
+    "hazard_type": "preparedness",
+    "relevant_chunk_ids": [
+      "ndma_drm_strategy_plan_2024_c0003",
+      "ndma_flood_situation_2023_2024_c0005",
+      "ndma_flood_situation_2023_2024_c0021",
+      "ndma_flood_situation_2023_2024_c0032",
+      "ndma_national_disaster_response_plan_2024_c0002"
+    ],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "Do not walk through floodwater",
+    "language": "en",
+    "hazard_type": "flood",
+    "relevant_chunk_ids": [
+      "ndma_national_disaster_response_plan_2024_c0031",
+      "ndma_vulnerable_groups_policy_2014_c0005",
+      "ndma_vulnerable_groups_policy_2014_c0020",
+      "ndma_drm_strategy_plan_2024_c0004",
+      "ndma_drm_strategy_plan_2024_c0013"
+    ],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "Turn off electricity before evacuation",
+    "language": "en",
+    "hazard_type": "flood",
+    "relevant_chunk_ids": [
+      "ndma_national_disaster_response_plan_2024_c0065",
+      "ndma_drm_strategy_plan_2024_c0005",
+      "ndma_drm_strategy_plan_2024_c0036",
+      "ndma_drm_strategy_plan_2024_c0050",
+      "ndma_drm_strategy_plan_2024_c0051"
+    ],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "NDMA flood advisory Chitral",
+    "language": "en",
+    "hazard_type": "flood",
+    "relevant_chunk_ids": [
+      "ndma_monsoon_preparedness_2025_c0002",
+      "ndma_drm_strategy_plan_2024_c0004",
+      "ndma_drm_strategy_plan_2024_c0013",
+      "ndma_drm_strategy_plan_2024_c0036",
+      "ndma_drm_strategy_plan_2024_c0037"
+    ],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "Landslide warning signs",
+    "language": "en",
+    "hazard_type": "landslide",
+    "relevant_chunk_ids": [
+      "ndma_drm_strategy_plan_2024_c0003",
+      "ndma_drm_strategy_plan_2024_c0004",
+      "ndma_drm_strategy_plan_2024_c0035",
+      "ndma_drm_strategy_plan_2024_c0036",
+      "ndma_drm_strategy_plan_2024_c0051"
+    ],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "Cracks in ground landslide risk",
+    "language": "en",
+    "hazard_type": "landslide",
+    "relevant_chunk_ids": [
+      "ndma_drm_strategy_plan_2024_c0036",
+      "ndma_vulnerable_groups_policy_2014_c0003",
+      "ndma_drm_strategy_plan_2024_c0003",
+      "ndma_drm_strategy_plan_2024_c0004",
+      "ndma_drm_strategy_plan_2024_c0005"
+    ],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "PDMA KP landslide advisory",
+    "language": "en",
+    "hazard_type": "landslide",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0002",
+      "ndma_drm_strategy_plan_2024_c0036",
+      "ndma_flood_situation_2023_2024_c0045",
+      "ndma_flood_situation_2023_2024_c0048",
+      "ndma_monsoon_sitrep_18_2023_c0002"
+    ],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "Move away from landslide path",
+    "language": "en",
+    "hazard_type": "landslide",
+    "relevant_chunk_ids": [
+      "ndma_drm_strategy_plan_2024_c0035",
+      "ndma_drm_strategy_plan_2024_c0036",
+      "ndma_flood_situation_2023_2024_c0002",
+      "ndma_flood_situation_2023_2024_c0010",
+      "ndma_flood_situation_2023_2024_c0034"
+    ],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "Emergency kit contents",
+    "language": "en",
+    "hazard_type": "preparedness",
+    "relevant_chunk_ids": [
+      "ndma_drm_strategy_plan_2024_c0027",
+      "ndma_drm_strategy_plan_2024_c0003",
+      "ndma_drm_strategy_plan_2024_c0004",
+      "ndma_drm_strategy_plan_2024_c0059",
+      "ndma_monsoon_advisory_july2024_c0007"
+    ],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "Monsoon season preparedness Pakistan",
+    "language": "en",
+    "hazard_type": "preparedness",
+    "relevant_chunk_ids": [
+      "ndma_flood_situation_2023_2024_c0023",
+      "ndma_flood_situation_2023_2024_c0024",
+      "ndma_national_disaster_response_plan_2024_c0002",
+      "ndma_drm_strategy_plan_2024_c0003",
+      "ndma_flood_situation_2023_2024_c0005"
+    ],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "PDMA KP helpline number",
+    "language": "en",
+    "hazard_type": "preparedness",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0002",
+      "ndma_drm_strategy_plan_2024_c0013",
+      "ndma_flood_situation_2023_2024_c0045",
+      "ndma_flood_situation_2023_2024_c0048",
+      "ndma_monsoon_sitrep_18_2023_c0002"
+    ],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "سیلاب کے دوران کیا کریں",
+    "language": "ur",
+    "hazard_type": "flood",
+    "relevant_chunk_ids": [],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "سیلاب سے پہلے تیاری",
+    "language": "ur",
+    "hazard_type": "flood",
+    "relevant_chunk_ids": [],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "اونچی جگہ پر جائیں",
+    "language": "ur",
+    "hazard_type": "flood",
+    "relevant_chunk_ids": [],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "ہنگامی کٹ تیار کریں",
+    "language": "ur",
+    "hazard_type": "preparedness",
+    "relevant_chunk_ids": [],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "لینڈ سلائیڈ کی علامات",
+    "language": "ur",
+    "hazard_type": "landslide",
+    "relevant_chunk_ids": [],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "زمین میں دراڑ لینڈ سلائیڈ",
+    "language": "ur",
+    "hazard_type": "landslide",
+    "relevant_chunk_ids": [],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "Flood mein kya karein",
+    "language": "ru",
+    "hazard_type": "flood",
+    "relevant_chunk_ids": [
+      "ndma_drm_strategy_plan_2024_c0004",
+      "ndma_drm_strategy_plan_2024_c0012",
+      "ndma_drm_strategy_plan_2024_c0013",
+      "ndma_drm_strategy_plan_2024_c0014",
+      "ndma_drm_strategy_plan_2024_c0027"
+    ],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "Selab se bachne ka tarika",
+    "language": "ru",
+    "hazard_type": "flood",
+    "relevant_chunk_ids": [
+      "ndma_drm_strategy_plan_2024_c0004",
+      "ndma_drm_strategy_plan_2024_c0005",
+      "ndma_drm_strategy_plan_2024_c0013",
+      "ndma_drm_strategy_plan_2024_c0016",
+      "ndma_drm_strategy_plan_2024_c0019"
+    ],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "Achanak selab ki nishanian",
+    "language": "ru",
+    "hazard_type": "flash_flood",
+    "relevant_chunk_ids": [
+      "ndma_vulnerable_groups_policy_2014_c0006",
+      "ndma_chitral_advisory_demo_c0001",
+      "ndma_drm_strategy_plan_2024_c0003",
+      "ndma_drm_strategy_plan_2024_c0004",
+      "ndma_drm_strategy_plan_2024_c0010"
+    ],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "Go-bag mein kya rakhein",
+    "language": "ru",
+    "hazard_type": "preparedness",
+    "relevant_chunk_ids": [],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "Paani aane pe ghar chhorein",
+    "language": "ru",
+    "hazard_type": "flood",
+    "relevant_chunk_ids": [
+      "ndma_drm_strategy_plan_2024_c0013",
+      "ndma_flood_situation_2023_2024_c0026",
+      "ndma_flood_situation_2023_2024_c0046",
+      "ndma_flood_situation_2023_2024_c0049",
+      "ndma_monsoon_preparedness_2025_c0001"
+    ],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "Zameeni khiskaav ke signs",
+    "language": "ru",
+    "hazard_type": "landslide",
+    "relevant_chunk_ids": [
+      "ndma_drm_strategy_plan_2024_c0035",
+      "ndma_drm_strategy_plan_2024_c0036",
+      "ndma_monsoon_sitrep_18_2023_c0003",
+      "ndma_drm_strategy_plan_2024_c0004",
+      "ndma_drm_strategy_plan_2024_c0013"
+    ],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  },
+  {
+    "query": "Pahaar se dur raho baarish mein",
+    "language": "ru",
+    "hazard_type": "landslide",
+    "relevant_chunk_ids": [
+      "ndma_drm_strategy_plan_2024_c0003",
+      "ndma_drm_strategy_plan_2024_c0005",
+      "ndma_drm_strategy_plan_2024_c0011",
+      "ndma_drm_strategy_plan_2024_c0019",
+      "ndma_flood_situation_2023_2024_c0024"
+    ],
+    "_annotation_note": "AUTO-PREFILLED from K=5 retrieval. Review and correct relevant_chunk_ids before using for eval."
+  }
+]

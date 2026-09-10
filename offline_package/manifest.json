@@ -1,13 +1,13 @@
 {
   "version": "1.0.0",
-  "built_at": "2026-09-10T08:58:34.185425+00:00",
-  "chunk_count": 76,
+  "built_at": "2026-09-10T17:56:23.147494+00:00",
+  "chunk_count": 315,
   "alert_count": 4,
-  "source_docs": 4,
-  "lang_en": 76,
+  "source_docs": 14,
+  "lang_en": 315,
   "lang_ur": 0,
   "lang_ru": 0,
   "grid_cell_count": "see hazard_grid.sqlite",
-  "knowledge_sqlite_checksum_sha256": "7c21cf9850cbd8e03a291d349ca5caf7e4a589c70a2ecf6f6ae8b09f07282b88",
-  "knowledge_sqlite_size_kb": 76
+  "knowledge_sqlite_checksum_sha256": "5659699e6cd56895b2ffdfb0a95ba7531caa51404a05014102a07ec07ca1a425",
+  "knowledge_sqlite_size_kb": 216
 }
