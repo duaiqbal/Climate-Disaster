@@ -1,0 +1,94 @@
+### Disaster DSS API Tests
+### Requires: REST Client extension in VS Code
+### Backend must be running: Task 7 "Start FastAPI Backend"
+
+@baseUrl = http://localhost:8000
+@adminKey = disaster-dss-dev-key-change-in-prod
+
+# ── Health Check ──────────────────────────────────────────────────────────────
+### Health
+GET {{baseUrl}}/health
+
+###
+
+# ── Alerts ────────────────────────────────────────────────────────────────────
+### List all alerts
+GET {{baseUrl}}/alerts
+
+###
+
+### List Chitral alerts only
+GET {{baseUrl}}/alerts?district=Chitral&active_only=true
+
+###
+
+### Create new alert (admin required)
+POST {{baseUrl}}/alerts
+X-Admin-Key: {{adminKey}}
+Content-Type: application/json
+
+{
+  "title": "Flood Alert – Chitral River",
+  "body": "NDMA warns of rising Chitral River levels. Communities near the river should move to higher ground immediately.",
+  "hazard_type": "flood",
+  "severity": "HIGH",
+  "issued_at": "2024-08-10T06:00:00",
+  "source_org": "NDMA",
+  "district": "Chitral",
+  "language": "en"
+}
+
+###
+
+# ── Auth ──────────────────────────────────────────────────────────────────────
+### Register
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Tooba Iqbal",
+  "email": "tooba@example.com",
+  "password": "test1234",
+  "district": "Chitral",
+  "language": "en"
+}
+
+###
+
+### Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "tooba@example.com",
+  "password": "test1234"
+}
+
+###
+
+# ── Knowledge Search ──────────────────────────────────────────────────────────
+### English search
+GET {{baseUrl}}/knowledge/search?q=flood+evacuation&language=en&limit=5
+
+###
+
+### Urdu search
+GET {{baseUrl}}/knowledge/search?q=سیلاب&language=ur&limit=5
+
+###
+
+### Roman Urdu search
+GET {{baseUrl}}/knowledge/search?q=selab+bachao&language=ru&limit=5
+
+###
+
+### Package metadata
+GET {{baseUrl}}/knowledge/meta
+
+###
+
+# ── Sync ──────────────────────────────────────────────────────────────────────
+### Package sync status
+GET {{baseUrl}}/sync/status
+
+###

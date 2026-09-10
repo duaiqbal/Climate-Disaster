@@ -1,0 +1,28 @@
+{
+	"folders": [
+		{
+			"path": "../../.."
+		},
+		{
+			"path": "../../../../backend"
+		},
+		{
+			"path": "../../../../data"
+		},
+		{
+			"path": "../../../../docs"
+		},
+		{
+			"path": "../../../../evaluation"
+		},
+		{
+			"path": "../../../../offline_package"
+		},
+		{
+			"path": "../../../../pipeline"
+		},
+		{
+			"path": "../../../../web_app"
+		}
+	]
+}

@@ -1,0 +1,134 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+
+    // ── 1. Flutter App (Android Emulator / Device) ───────────────────────────
+    {
+      "name": "Flutter App (Debug)",
+      "request": "launch",
+      "type": "dart",
+      "program": "${workspaceFolder}/app/lib/main.dart",
+      "cwd": "${workspaceFolder}/app",
+      "flutterMode": "debug",
+      "args": []
+    },
+    {
+      "name": "Flutter App (Release)",
+      "request": "launch",
+      "type": "dart",
+      "program": "${workspaceFolder}/app/lib/main.dart",
+      "cwd": "${workspaceFolder}/app",
+      "flutterMode": "release"
+    },
+
+    // ── 2. FastAPI Backend ────────────────────────────────────────────────────
+    {
+      "name": "FastAPI Backend",
+      "type": "python",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": [
+        "backend.main:app",
+        "--reload",
+        "--port", "8000",
+        "--host", "0.0.0.0"
+      ],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "ADMIN_API_KEY": "disaster-dss-dev-key-change-in-prod",
+        "SECRET_KEY": "dev-secret-key-change-in-production",
+        "SQL_ECHO": ""
+      },
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+
+    // ── 3. Run Full Pipeline ──────────────────────────────────────────────────
+    {
+      "name": "Run Pipeline (skip-embed)",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/pipeline/run_pipeline.py",
+      "args": ["--skip-embed"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Run Pipeline (full)",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/pipeline/run_pipeline.py",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "console": "integratedTerminal"
+    },
+
+    // ── 4. Evaluation ─────────────────────────────────────────────────────────
+    {
+      "name": "Run Evaluation (K=5)",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/evaluation/retrieval_eval.py",
+      "args": ["--k", "5"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Generate Ground Truth Template",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/evaluation/retrieval_eval.py",
+      "args": ["--create-gt"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "console": "integratedTerminal"
+    },
+
+    // ── 5. GIS Hazard Grid Only ───────────────────────────────────────────────
+    {
+      "name": "Compute Hazard Grid",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/pipeline/gis/compute_hazard_grid.py",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "console": "integratedTerminal"
+    },
+
+    // ── 6. Build SQLite Only ──────────────────────────────────────────────────
+    {
+      "name": "Build knowledge.sqlite",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/pipeline/package_builder/build_sqlite.py",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "console": "integratedTerminal"
+    }
+  ],
+
+  // ── Compound: run backend + watch flutter together ─────────────────────────
+  "compounds": [
+    {
+      "name": "Full Stack (Backend + Flutter)",
+      "configurations": ["FastAPI Backend", "Flutter App (Debug)"],
+      "stopAll": true
+    }
+  ]
+}

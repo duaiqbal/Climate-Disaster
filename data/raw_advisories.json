@@ -1,0 +1,62 @@
+[
+  {
+    "alert_id": "NDMA_20240701_001",
+    "title": "Pre-Monsoon Flood Advisory 2024 – Chitral",
+    "body": "NDMA advises all district administrations and communities in Chitral to prepare for the upcoming monsoon season (July–September 2024). Based on PMD seasonal outlook, above-normal rainfall is expected in northern KP including Chitral district. Communities living near the Chitral River, Mastuj River, and their tributaries should identify evacuation routes and prepare 72-hour emergency kits. Local administrations should pre-position relief supplies at accessible locations. PDMA KP Helpline: 1700.",
+    "hazard_type": "flood",
+    "severity": "MEDIUM",
+    "issued_at": "2024-07-01T09:00:00",
+    "source_org": "NDMA",
+    "district": "Chitral",
+    "language": "en",
+    "ingested_at": "2024-07-02T10:00:00Z"
+  },
+  {
+    "alert_id": "PDMA_KP_20240715_001",
+    "title": "Flash Flood Watch – Upper Chitral (Booni–Mastuj)",
+    "body": "PDMA KP issues a flash flood watch for the Booni–Mastuj corridor. Heavy rainfall in the upper Yarkhun and Mastuj catchments over the next 48 hours may cause rapid rise in river levels and flash flooding of low-lying areas and narrow valleys. Communities along these rivers should remain on high alert, avoid river crossings, and be prepared to evacuate to higher ground at short notice. Report incidents: 1700.",
+    "hazard_type": "flash_flood",
+    "severity": "HIGH",
+    "issued_at": "2024-07-15T06:00:00",
+    "source_org": "PDMA KP",
+    "district": "Upper Chitral",
+    "language": "en",
+    "ingested_at": "2024-07-15T08:00:00Z"
+  },
+  {
+    "alert_id": "PDMA_KP_20240720_002",
+    "title": "Landslide Advisory – Chitral District Roads",
+    "body": "PDMA KP warns of elevated landslide risk on main roads connecting Chitral city with Drosh, Mastuj, and Booni following sustained rainfall. Road users are advised to avoid travel on these routes during and immediately after heavy rain. Communities on or below steep slopes should monitor for ground movement, unusual sounds, or new cracks and evacuate proactively. Report visible ground movement to local administration or PDMA KP: 1700.",
+    "hazard_type": "landslide",
+    "severity": "HIGH",
+    "issued_at": "2024-07-20T12:00:00",
+    "source_org": "PDMA KP",
+    "district": "Chitral",
+    "language": "en",
+    "ingested_at": "2024-07-20T14:00:00Z"
+  },
+  {
+    "alert_id": "PMD_20240801_001",
+    "title": "Heavy Rainfall Warning – Northern KP (72 Hours)",
+    "body": "PMD issues a heavy rainfall warning for the next 72 hours for Chitral, Dir Upper, Dir Lower, and Swat districts. Rainfall of 30–60mm over 24 hours is expected with isolated heavier falls in upper catchments. Risk of flash flooding in narrow valleys, river flooding in low-lying areas, and landslides on steep slopes. Communities in high-risk areas should activate emergency preparedness plans.",
+    "hazard_type": "flood",
+    "severity": "HIGH",
+    "issued_at": "2024-08-01T06:00:00",
+    "source_org": "PMD",
+    "district": "Chitral",
+    "language": "en",
+    "ingested_at": "2024-08-01T07:30:00Z"
+  },
+  {
+    "alert_id": "NDMA_20240701_002_UR",
+    "title": "مون سون الرٹ – چترال 2024",
+    "body": "این ڈی ایم اے چترال: مون سون موسم (جولائی تا ستمبر) کے دوران تمام دریاؤں کے قریب رہائشی لوگ ہوشیار رہیں۔ اونچی جگہ کا راستہ معلوم رکھیں۔ ہنگامی کٹ: پانی، کھانا، ٹارچ، دستاویزات تیار رکھیں۔ بجلی کا مین سوئچ بند کرنا یاد رکھیں۔ پی ڈی ایم اے ہیلپ لائن: 1700",
+    "hazard_type": "flood",
+    "severity": "MEDIUM",
+    "issued_at": "2024-07-01T09:00:00",
+    "source_org": "NDMA",
+    "district": "Chitral",
+    "language": "ur",
+    "ingested_at": "2024-07-02T10:00:00Z"
+  }
+]

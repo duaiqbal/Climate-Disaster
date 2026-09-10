@@ -1,0 +1,259 @@
+[
+  {
+    "query": "What should I do during a flood?",
+    "language": "en",
+    "hazard_type": "flood",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0001",
+      "ndma_chitral_advisory_demo_c0002",
+      "ndma_chitral_advisory_demo_c0003"
+    ],
+    "_annotation_note": "Core flood response guidance. Any chunk containing move to higher ground, avoid floodwater, turn off electricity is relevant."
+  },
+  {
+    "query": "Flood evacuation procedure",
+    "language": "en",
+    "hazard_type": "flood",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0001",
+      "ndma_chitral_advisory_demo_c0004"
+    ],
+    "_annotation_note": "Evacuation steps specifically."
+  },
+  {
+    "query": "Flash flood warning signs",
+    "language": "en",
+    "hazard_type": "flash_flood",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0005",
+      "ndma_chitral_advisory_demo_c0006"
+    ],
+    "_annotation_note": "Flash flood cues: roaring sound, sudden river rise, debris."
+  },
+  {
+    "query": "How to prepare a go-bag",
+    "language": "en",
+    "hazard_type": "preparedness",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0007"
+    ],
+    "_annotation_note": "Go-bag contents: water, food, torch, documents."
+  },
+  {
+    "query": "Do not walk through floodwater",
+    "language": "en",
+    "hazard_type": "flood",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0002",
+      "ndma_chitral_advisory_demo_c0003"
+    ],
+    "_annotation_note": "Safety rule about not crossing floodwater."
+  },
+  {
+    "query": "Turn off electricity before evacuation",
+    "language": "en",
+    "hazard_type": "flood",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0001"
+    ],
+    "_annotation_note": "Utility shutoff before leaving."
+  },
+  {
+    "query": "NDMA flood advisory Chitral",
+    "language": "en",
+    "hazard_type": "flood",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0001",
+      "ndma_chitral_advisory_demo_c0002"
+    ],
+    "_annotation_note": "Organisation-specific query."
+  },
+  {
+    "query": "Landslide warning signs",
+    "language": "en",
+    "hazard_type": "landslide",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0009",
+      "ndma_chitral_advisory_demo_c0010"
+    ],
+    "_annotation_note": "Cracks, tilting trees, bulging ground, springs."
+  },
+  {
+    "query": "Cracks in ground landslide risk",
+    "language": "en",
+    "hazard_type": "landslide",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0009"
+    ],
+    "_annotation_note": "Specific landslide precursor."
+  },
+  {
+    "query": "PDMA KP landslide advisory",
+    "language": "en",
+    "hazard_type": "landslide",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0009",
+      "ndma_chitral_advisory_demo_c0010",
+      "ndma_chitral_advisory_demo_c0011"
+    ],
+    "_annotation_note": "PDMA KP organisation + landslide."
+  },
+  {
+    "query": "Move away from landslide path",
+    "language": "en",
+    "hazard_type": "landslide",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0010"
+    ],
+    "_annotation_note": "During-event action."
+  },
+  {
+    "query": "Emergency kit contents",
+    "language": "en",
+    "hazard_type": "preparedness",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0007",
+      "ndma_chitral_advisory_demo_c0008"
+    ],
+    "_annotation_note": "Go-bag / 72-hour kit items."
+  },
+  {
+    "query": "Monsoon season preparedness Pakistan",
+    "language": "en",
+    "hazard_type": "preparedness",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0012",
+      "ndma_chitral_advisory_demo_c0013"
+    ],
+    "_annotation_note": "PMD seasonal outlook + preparedness recs."
+  },
+  {
+    "query": "PDMA KP helpline number",
+    "language": "en",
+    "hazard_type": "preparedness",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0011"
+    ],
+    "_annotation_note": "1700 helpline."
+  },
+  {
+    "query": "سیلاب کے دوران کیا کریں",
+    "language": "ur",
+    "hazard_type": "flood",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0014",
+      "ndma_chitral_advisory_demo_c0015"
+    ],
+    "_annotation_note": "Urdu flood response actions."
+  },
+  {
+    "query": "سیلاب سے پہلے تیاری",
+    "language": "ur",
+    "hazard_type": "flood",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0015"
+    ],
+    "_annotation_note": "Urdu pre-flood preparation."
+  },
+  {
+    "query": "اونچی جگہ پر جائیں",
+    "language": "ur",
+    "hazard_type": "flood",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0014"
+    ],
+    "_annotation_note": "Urdu higher ground instruction."
+  },
+  {
+    "query": "ہنگامی کٹ تیار کریں",
+    "language": "ur",
+    "hazard_type": "preparedness",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0016"
+    ],
+    "_annotation_note": "Urdu emergency kit."
+  },
+  {
+    "query": "لینڈ سلائیڈ کی علامات",
+    "language": "ur",
+    "hazard_type": "landslide",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0017"
+    ],
+    "_annotation_note": "Urdu landslide warning signs."
+  },
+  {
+    "query": "زمین میں دراڑ لینڈ سلائیڈ",
+    "language": "ur",
+    "hazard_type": "landslide",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0017"
+    ],
+    "_annotation_note": "Urdu cracks in ground."
+  },
+  {
+    "query": "Flood mein kya karein",
+    "language": "ru",
+    "hazard_type": "flood",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0001",
+      "ndma_chitral_advisory_demo_c0002"
+    ],
+    "_annotation_note": "Roman Urdu flood query — expects English fallback or Roman Urdu chunks."
+  },
+  {
+    "query": "Selab se bachne ka tarika",
+    "language": "ru",
+    "hazard_type": "flood",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0001",
+      "ndma_chitral_advisory_demo_c0002"
+    ],
+    "_annotation_note": "Roman Urdu: selab variant expansion expected."
+  },
+  {
+    "query": "Achanak selab ki nishanian",
+    "language": "ru",
+    "hazard_type": "flash_flood",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0005"
+    ],
+    "_annotation_note": "Roman Urdu flash flood signs."
+  },
+  {
+    "query": "Go-bag mein kya rakhein",
+    "language": "ru",
+    "hazard_type": "preparedness",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0007"
+    ],
+    "_annotation_note": "Roman Urdu go-bag contents."
+  },
+  {
+    "query": "Paani aane pe ghar chhorein",
+    "language": "ru",
+    "hazard_type": "flood",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0001"
+    ],
+    "_annotation_note": "Roman Urdu leave home when water rises."
+  },
+  {
+    "query": "Zameeni khiskaav ke signs",
+    "language": "ru",
+    "hazard_type": "landslide",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0009"
+    ],
+    "_annotation_note": "Roman Urdu landslide signs — khiskaav variant."
+  },
+  {
+    "query": "Pahaar se dur raho baarish mein",
+    "language": "ru",
+    "hazard_type": "landslide",
+    "relevant_chunk_ids": [
+      "ndma_chitral_advisory_demo_c0010"
+    ],
+    "_annotation_note": "Roman Urdu avoid steep slopes in rain."
+  }
+]

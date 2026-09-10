@@ -1,0 +1,65 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# ── Large data files (never commit) ──────────────────────────────────────────
+data/raw/*.pdf
+data/raw/*.tif
+data/raw/*.gpkg
+data/raw/*.shp
+data/raw/*.dbf
+data/raw/*.shx
+data/raw/scraped/
+data/extracted/
+data/chunks/
+data/embeddings/
+
+# ── Built SQLite databases (regenerate via pipeline) ─────────────────────────
+offline_package/knowledge.sqlite
+offline_package/hazard_grid.sqlite
+app/assets/offline_package/knowledge.sqlite
+app/assets/offline_package/hazard_grid.sqlite
+
+# ── Backend runtime database ──────────────────────────────────────────────────
+backend/disaster_dss_backend.sqlite
+
+# ── Flutter / Dart ────────────────────────────────────────────────────────────
+app/.dart_tool/
+app/build/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/pubspec.lock
+
+# ── Android ───────────────────────────────────────────────────────────────────
+app/android/.gradle/
+app/android/local.properties
+app/android/key.properties
+app/android/app/google-services.json
+*.keystore
+*.jks
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.idea/
+.vscode/settings.json
+*.iml
+*.suo
+*.user
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Secrets ───────────────────────────────────────────────────────────────────
+.env
+.env.*
+secrets.json
+*.pem
+*.key

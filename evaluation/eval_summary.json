@@ -1,0 +1,29 @@
+{
+  "_note": "This is a placeholder generated at build time. Run evaluation/retrieval_eval.py after building knowledge.sqlite to populate with real results.",
+  "k": 5,
+  "overall": {
+    "queries": 27,
+    "precision@5": 0.0,
+    "recall@5": 0.0,
+    "mrr": 0.0,
+    "f1": 0.0
+  },
+  "by_language": {
+    "en": { "queries": 14, "precision@5": 0.0, "recall@5": 0.0, "mrr": 0.0, "f1": 0.0 },
+    "ur": { "queries":  6, "precision@5": 0.0, "recall@5": 0.0, "mrr": 0.0, "f1": 0.0 },
+    "ru": { "queries":  7, "precision@5": 0.0, "recall@5": 0.0, "mrr": 0.0, "f1": 0.0 }
+  },
+  "by_hazard_type": {
+    "flood":        { "queries": 10, "precision@5": 0.0, "recall@5": 0.0, "mrr": 0.0 },
+    "landslide":    { "queries":  8, "precision@5": 0.0, "recall@5": 0.0, "mrr": 0.0 },
+    "flash_flood":  { "queries":  3, "precision@5": 0.0, "recall@5": 0.0, "mrr": 0.0 },
+    "preparedness": { "queries":  6, "precision@5": 0.0, "recall@5": 0.0, "mrr": 0.0 }
+  },
+  "honest_limitations": [
+    "Ground truth is self-constructed by the project team, not an external benchmark.",
+    "Roman Urdu results reflect real spelling-variant coverage gaps where they exist.",
+    "Precision@K is bounded by K — low P does not always mean low relevance quality.",
+    "Recall is bounded by the number of annotated relevant chunks per query."
+  ],
+  "per_query": []
+}

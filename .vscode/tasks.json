@@ -1,0 +1,114 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+
+    // ── Python Setup ──────────────────────────────────────────────────────────
+    {
+      "label": "1. Setup Python venv",
+      "type": "shell",
+      "command": "python -m venv .venv ; .venv\\Scripts\\Activate.ps1 ; pip install -r requirements.txt",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "new" },
+      "problemMatcher": []
+    },
+
+    // ── Pipeline ──────────────────────────────────────────────────────────────
+    {
+      "label": "2. Run Pipeline (skip-embed) ⭐ START HERE",
+      "type": "shell",
+      "command": ".venv\\Scripts\\python.exe pipeline/run_pipeline.py --skip-embed",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "2b. Run Pipeline (full with embeddings)",
+      "type": "shell",
+      "command": ".venv\\Scripts\\python.exe pipeline/run_pipeline.py",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+
+    // ── Flutter ───────────────────────────────────────────────────────────────
+    {
+      "label": "3. Flutter pub get",
+      "type": "shell",
+      "command": "flutter pub get",
+      "options": { "cwd": "${workspaceFolder}/app" },
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": ["$dart-pub"]
+    },
+    {
+      "label": "4. Flutter analyze",
+      "type": "shell",
+      "command": "flutter analyze",
+      "options": { "cwd": "${workspaceFolder}/app" },
+      "group": "test",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": ["$dart"]
+    },
+    {
+      "label": "5. Flutter test",
+      "type": "shell",
+      "command": "flutter test",
+      "options": { "cwd": "${workspaceFolder}/app" },
+      "group": "test",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": ["$dart"]
+    },
+    {
+      "label": "6. Flutter build APK (release)",
+      "type": "shell",
+      "command": "flutter build apk --release",
+      "options": { "cwd": "${workspaceFolder}/app" },
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "new" },
+      "problemMatcher": ["$dart"]
+    },
+
+    // ── Backend ───────────────────────────────────────────────────────────────
+    {
+      "label": "7. Start FastAPI Backend",
+      "type": "shell",
+      "command": ".venv\\Scripts\\python.exe -m uvicorn backend.main:app --reload --port 8000",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "PYTHONPATH": "${workspaceFolder}",
+          "ADMIN_API_KEY": "disaster-dss-dev-key-change-in-prod"
+        }
+      },
+      "group": "build",
+      "isBackground": true,
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": []
+    },
+
+    // ── Evaluation ────────────────────────────────────────────────────────────
+    {
+      "label": "8. Run Evaluation (K=5)",
+      "type": "shell",
+      "command": ".venv\\Scripts\\python.exe evaluation/retrieval_eval.py --k 5",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "test",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+
+    // ── Copy SQLite to app assets ─────────────────────────────────────────────
+    {
+      "label": "9. Copy SQLite to Flutter assets",
+      "type": "shell",
+      "command": "Copy-Item -Force offline_package\\knowledge.sqlite app\\assets\\offline_package\\knowledge.sqlite ; Copy-Item -Force offline_package\\hazard_grid.sqlite app\\assets\\offline_package\\hazard_grid.sqlite ; Write-Host 'Copied!'",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    }
+  ]
+}

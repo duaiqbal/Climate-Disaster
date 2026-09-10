@@ -1,0 +1,35 @@
+# Disaster DSS — Full Python stack (pipeline + backend + evaluation)
+# Install: pip install -r requirements.txt
+
+# ── PDF extraction ────────────────────────────────────────────────────────────
+pymupdf==1.24.5
+
+# ── Data processing ───────────────────────────────────────────────────────────
+pandas==2.2.2
+numpy==1.26.4
+
+# ── Embeddings ────────────────────────────────────────────────────────────────
+sentence-transformers==3.0.1
+faiss-cpu==1.8.0
+
+# ── GIS processing (pipeline only — not on-device) ───────────────────────────
+rasterio==1.3.10
+geopandas==0.14.4
+shapely==2.0.4
+
+# ── Backend ───────────────────────────────────────────────────────────────────
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+sqlalchemy==2.0.30
+aiosqlite==0.20.0
+pydantic==2.7.1
+python-multipart==0.0.9
+
+# ── Web scraping (fetchers — optional) ───────────────────────────────────────
+requests==2.32.3
+beautifulsoup4==4.12.3
+
+# ── Testing ───────────────────────────────────────────────────────────────────
+pytest==8.2.2
+pytest-asyncio==0.23.7
+httpx==0.27.0
