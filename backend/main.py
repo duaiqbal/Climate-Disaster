@@ -66,8 +66,19 @@ app = FastAPI(
 )
 
 # ── CORS ──────────────────────────────────────────────────────────────────────
-_raw_origins = os.getenv("CORS_ORIGINS", "*")
-origins = [o.strip() for o in _raw_origins.split(",")]
+# When CORS_ORIGINS env var is not set, allow common local development origins.
+# allow_credentials=True cannot be used with wildcard "*" — browsers block it.
+_raw_origins = os.getenv("CORS_ORIGINS", "")
+if _raw_origins:
+    origins = [o.strip() for o in _raw_origins.split(",")]
+else:
+    origins = [
+        "http://localhost:8080",
+        "http://localhost:8081",
+        "http://localhost:3000",
+        "http://127.0.0.1:8080",
+        "http://127.0.0.1:3000",
+    ]
 
 app.add_middleware(
     CORSMiddleware,
