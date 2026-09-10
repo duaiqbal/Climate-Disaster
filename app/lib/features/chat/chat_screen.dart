@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/providers/language_provider.dart';
@@ -52,6 +53,23 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _ask(String query) async {
     if (query.trim().isEmpty) return;
+
+    // On web, SQLite offline retrieval is unavailable — inform user
+    if (kIsWeb) {
+      setState(() {
+        _messages.add(_ChatMessage(text: query, isUser: true));
+        _messages.add(const _ChatMessage(
+          text: 'Offline knowledge search requires the Android app. '
+              'On web, connect to the backend for knowledge queries.',
+          isUser: false,
+          isError: true,
+        ));
+      });
+      _queryCtrl.clear();
+      _scrollToBottom();
+      return;
+    }
+
     final lang = context.read<LanguageProvider>().languageCode;
 
     setState(() {

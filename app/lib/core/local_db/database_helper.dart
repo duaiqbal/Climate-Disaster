@@ -1,4 +1,5 @@
 ﻿import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -27,6 +28,7 @@ class DatabaseHelper {
   // ── Init ──────────────────────────────────────────────────────────────────
 
   Future<void> init() async {
+    if (kIsWeb) return; // sqflite not supported on web
     _knowledgeDb = await _openDb('knowledge.sqlite', versionKey: 'knowledge_db_version');
     _hazardDb    = await _openDb('hazard_grid.sqlite', versionKey: 'hazard_db_version');
     await _ensureAlertsTable(_knowledgeDb!);
@@ -90,7 +92,8 @@ class DatabaseHelper {
     required String language,
     int limit = 10,
   }) async {
-    final db     = _knowledgeDb!;
+    if (kIsWeb || _knowledgeDb == null) return [];
+    final db = _knowledgeDb!;
     final tokens = _tokenize(query, language);
     if (tokens.isEmpty) return [];
 
@@ -126,6 +129,7 @@ class DatabaseHelper {
     String language = 'en',
     int limit = 50,
   }) async {
+    if (kIsWeb || _knowledgeDb == null) return [];
     return _knowledgeDb!.query(
       'chunks',
       where: 'language = ?',
@@ -137,6 +141,7 @@ class DatabaseHelper {
 
   /// Returns all available alerts from the local cache.
   Future<List<Map<String, dynamic>>> getAlerts() async {
+    if (kIsWeb || _knowledgeDb == null) return [];
     try {
       return await _knowledgeDb!.query(
         'alerts',
@@ -150,6 +155,7 @@ class DatabaseHelper {
 
   /// Inserts or replaces a synced alert.
   Future<void> upsertAlert(Map<String, dynamic> alert) async {
+    if (kIsWeb || _knowledgeDb == null) return;
     try {
       await _knowledgeDb!.insert(
         'alerts',
@@ -166,6 +172,7 @@ class DatabaseHelper {
   /// Looks up the hazard cell nearest to [lat], [lon].
   /// Returns null if the coordinate is outside the study area.
   Future<Map<String, dynamic>?> getHazardCell(double lat, double lon) async {
+    if (kIsWeb || _hazardDb == null) return null;
     final db   = _hazardDb!;
     final rows = await db.rawQuery(
       '''
@@ -185,6 +192,7 @@ class DatabaseHelper {
   // ── Meta ──────────────────────────────────────────────────────────────────
 
   Future<Map<String, dynamic>?> getPackageMeta() async {
+    if (kIsWeb || _knowledgeDb == null) return null;
     try {
       final rows = await _knowledgeDb!.query('package_meta', limit: 1);
       return rows.isEmpty ? null : rows.first;

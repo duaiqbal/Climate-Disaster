@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,19 +18,23 @@ import 'features/dashboard/dashboard_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Lock to portrait
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
+  // Portrait lock — mobile only (web ignores this gracefully)
+  if (!kIsWeb) {
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+  }
 
-  // Initialize offline SQLite databases from bundled assets
-  await DatabaseHelper.instance.init();
+  // SQLite not supported on web — skip DB init, app uses backend API instead
+  if (!kIsWeb) {
+    await DatabaseHelper.instance.init();
+  }
 
   final prefs = await SharedPreferences.getInstance();
   final bool seenOnboarding = prefs.getBool('seen_onboarding') ?? false;
-  final bool isLoggedIn = prefs.getBool('is_logged_in') ?? false;
-  final String savedLang = prefs.getString('language') ?? 'en';
+  final bool isLoggedIn    = prefs.getBool('is_logged_in')    ?? false;
+  final String savedLang   = prefs.getString('language')      ?? 'en';
 
   runApp(
     MultiProvider(
