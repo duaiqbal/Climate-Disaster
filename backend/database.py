@@ -1,31 +1,23 @@
 """
 backend/database.py
 ====================
-SQLAlchemy async engine + session factory for the FastAPI backend.
-
-Database: SQLite with aiosqlite (development / single-server deployment)
-Upgrade path: swap DATABASE_URL to postgresql+asyncpg:// for production
-with zero application-code changes.
+SQLAlchemy async engine + session factory.
+Configuration comes from backend/core/config.py (never hardcoded here).
 """
-
-import os
-from pathlib import Path
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
-# ── DB path ────────────────────────────────────────────────────────────────────
-_DEFAULT_DB = str(Path(__file__).parent / "disaster_dss_backend.sqlite")
-DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite+aiosqlite:///{_DEFAULT_DB}")
+from backend.core.config import settings
 
 # ── Engine ─────────────────────────────────────────────────────────────────────
 _connect_args = {}
-if "sqlite" in DATABASE_URL:
+if "sqlite" in settings.database_url:
     _connect_args["check_same_thread"] = False
 
 engine = create_async_engine(
-    DATABASE_URL,
-    echo=bool(os.getenv("SQL_ECHO", "")),
+    settings.database_url,
+    echo=settings.sql_echo,
     connect_args=_connect_args,
 )
 
@@ -39,12 +31,12 @@ AsyncSessionLocal = async_sessionmaker(
 )
 
 
-# ── Base class for ORM models ──────────────────────────────────────────────────
+# ── Base class ─────────────────────────────────────────────────────────────────
 class Base(DeclarativeBase):
     pass
 
 
-# ── Dependency — yields a DB session per request ──────────────────────────────
+# ── Request-scoped session dependency ─────────────────────────────────────────
 async def get_db():
     async with AsyncSessionLocal() as session:
         try:

@@ -1,16 +1,37 @@
-# Disaster DSS — Backend Python dependencies
+# Disaster DSS — Backend Python dependencies (pinned for reproducibility)
 # Install: pip install -r backend/requirements.txt
 
+# ── Web framework ─────────────────────────────────────────────────────────────
 fastapi==0.111.0
 uvicorn[standard]==0.29.0
+
+# ── Database ──────────────────────────────────────────────────────────────────
 sqlalchemy==2.0.30
 aiosqlite==0.20.0
+alembic==1.13.1
+
+# ── Validation ────────────────────────────────────────────────────────────────
 pydantic==2.7.1
 python-multipart==0.0.9
-httpx==0.27.0          # for testing async endpoints
+
+# ── Authentication ────────────────────────────────────────────────────────────
+passlib[bcrypt]==1.7.4
+bcrypt==4.1.3
+python-jose[cryptography]==3.3.0
+
+# ── Rate limiting ─────────────────────────────────────────────────────────────
+slowapi==0.1.9
+
+# ── HTTP client (for monitor/fetchers) ───────────────────────────────────────
+httpx==0.27.0
+requests==2.31.0
+
+# ── HTML parsing (alert monitor) ─────────────────────────────────────────────
+beautifulsoup4==4.12.3
+
+# ── PDF extraction ────────────────────────────────────────────────────────────
+pymupdf==1.24.5
+
+# ── Testing ───────────────────────────────────────────────────────────────────
 pytest==8.2.2
 pytest-asyncio==0.23.7
-
-# Optional: swap SQLite for PostgreSQL in production
-# asyncpg==0.29.0
-# psycopg2-binary==2.9.9

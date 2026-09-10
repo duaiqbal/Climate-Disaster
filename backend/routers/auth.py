@@ -1,91 +1,75 @@
 """
 backend/routers/auth.py
 ========================
-User registration and login endpoints.
+Production-quality authentication endpoints.
 
-POST /auth/register   — create a new user account
-POST /auth/login      — authenticate and receive a token
+POST /auth/register      — create account (bcrypt password)
+POST /auth/login         — login → JWT access + opaque refresh token
+POST /auth/refresh        — exchange refresh token for new access token
+POST /auth/logout         — revoke refresh token
+GET  /auth/me             — get current user (requires valid access token)
 
-Token strategy: simple HMAC-SHA256 signed token (no JWT library dependency).
-In production, replace with python-jose + OAuth2 bearer tokens.
+Security:
+  - bcrypt password hashing (via passlib)
+  - JWT access tokens (python-jose, HS256, configurable TTL)
+  - Opaque refresh tokens stored as SHA-256 hashes in DB
+  - Refresh token rotation: each refresh issues a new token, old one revoked
+  - Brute-force protection: rate limiting via slowapi
+  - No default/hardcoded credentials
 """
 
 import hashlib
-import hmac
-import json
-import os
-import time
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.core.config import settings
+from backend.core.security import (
+    create_access_token,
+    generate_refresh_token,
+    get_current_user,
+    hash_password,
+    verify_password,
+)
 from backend.database import get_db
 from backend.models.db_models import (
     LoginRequest,
+    RefreshRequest,
+    RefreshTokenORM,
     TokenResponse,
     UserCreate,
     UserORM,
     UserResponse,
 )
 
-router = APIRouter(prefix="/auth", tags=["Auth"])
-
-SECRET_KEY = os.getenv("SECRET_KEY", "disaster-dss-dev-secret-change-in-production")
-TOKEN_TTL = int(os.getenv("TOKEN_TTL_SECONDS", "86400"))  # 24 h
+router  = APIRouter(prefix="/auth", tags=["Auth"])
+limiter = Limiter(key_func=get_remote_address)
 
 
-# ── Password hashing (PBKDF2-HMAC-SHA256) ────────────────────────────────────
-def _hash_password(password: str) -> str:
-    salt = os.urandom(16).hex()
-    dk = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 200_000)
-    return f"{salt}:{dk.hex()}"
-
-
-def _verify_password(password: str, stored: str) -> bool:
-    try:
-        salt, dk_hex = stored.split(":", 1)
-        dk = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 200_000)
-        return hmac.compare_digest(dk.hex(), dk_hex)
-    except Exception:
-        return False
-
-
-# ── Token creation/verification ───────────────────────────────────────────────
-def _create_token(user_id: int, email: str) -> str:
-    payload = json.dumps({"uid": user_id, "email": email, "exp": int(time.time()) + TOKEN_TTL})
-    sig = hmac.new(SECRET_KEY.encode(), payload.encode(), hashlib.sha256).hexdigest()
-    import base64
-    b64 = base64.urlsafe_b64encode(payload.encode()).decode()
-    return f"{b64}.{sig}"
-
-
-def _decode_token(token: str) -> Optional[dict]:
-    try:
-        import base64
-        b64, sig = token.rsplit(".", 1)
-        payload = base64.urlsafe_b64decode(b64 + "==").decode()
-        expected = hmac.new(SECRET_KEY.encode(), payload.encode(), hashlib.sha256).hexdigest()
-        if not hmac.compare_digest(sig, expected):
-            return None
-        data = json.loads(payload)
-        if data["exp"] < int(time.time()):
-            return None
-        return data
-    except Exception:
-        return None
+def _hash_refresh_token(token: str) -> str:
+    """Store only the hash of the refresh token, never the plaintext."""
+    return hashlib.sha256(token.encode()).hexdigest()
 
 
 # ── Register ──────────────────────────────────────────────────────────────────
 @router.post("/register", response_model=UserResponse,
              status_code=status.HTTP_201_CREATED)
-async def register(payload: UserCreate, db: AsyncSession = Depends(get_db)):
-    # Check email uniqueness
-    result = await db.execute(
-        select(UserORM).where(UserORM.email == payload.email.lower())
+@limiter.limit("5/minute")
+async def register(
+    request: Request,
+    payload: UserCreate,
+    db: AsyncSession = Depends(get_db),
+):
+    """Register a new user account with bcrypt-hashed password."""
+    existing = await db.execute(
+        select(UserORM).where(UserORM.email == payload.email.lower().strip())
     )
-    if result.scalar_one_or_none():
+    if existing.scalar_one_or_none():
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="An account with this email already exists.",
@@ -94,7 +78,8 @@ async def register(payload: UserCreate, db: AsyncSession = Depends(get_db)):
     user = UserORM(
         name=payload.name.strip(),
         email=payload.email.lower().strip(),
-        hashed_password=_hash_password(payload.password),
+        hashed_password=hash_password(payload.password),
+        role="user",
         district=payload.district,
         language=payload.language,
     )
@@ -106,13 +91,28 @@ async def register(payload: UserCreate, db: AsyncSession = Depends(get_db)):
 
 # ── Login ─────────────────────────────────────────────────────────────────────
 @router.post("/login", response_model=TokenResponse)
-async def login(payload: LoginRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit(settings.rate_limit_login)
+async def login(
+    request: Request,
+    payload: LoginRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    """Authenticate and return JWT access token + opaque refresh token."""
     result = await db.execute(
-        select(UserORM).where(UserORM.email == payload.email.lower())
+        select(UserORM).where(UserORM.email == payload.email.lower().strip())
     )
     user = result.scalar_one_or_none()
 
-    if not user or not _verify_password(payload.password, user.hashed_password):
+    # Constant-time comparison to prevent timing attacks on email enumeration
+    if not user:
+        # Still call verify to avoid timing difference revealing email existence
+        verify_password("dummy", "$2b$12$dummy.hash.to.prevent.timing.attack.here")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password.",
+        )
+
+    if not verify_password(payload.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password.",
@@ -124,9 +124,116 @@ async def login(payload: LoginRequest, db: AsyncSession = Depends(get_db)):
             detail="Account is deactivated.",
         )
 
-    token = _create_token(user.id, user.email)
+    # Issue access token
+    access_token = create_access_token(user.id, user.email, user.role)
+
+    # Issue refresh token (stored as hash)
+    refresh_plain = generate_refresh_token()
+    expires = datetime.now(timezone.utc) + timedelta(seconds=settings.refresh_token_ttl)
+    db.add(RefreshTokenORM(
+        user_id=user.id,
+        token_hash=_hash_refresh_token(refresh_plain),
+        expires_at=expires,
+        user_agent=request.headers.get("User-Agent", "")[:255],
+        ip_address=request.client.host if request.client else None,
+    ))
+    await db.flush()
+
     return TokenResponse(
-        access_token=token,
+        access_token=access_token,
+        refresh_token=refresh_plain,
         token_type="bearer",
+        expires_in=settings.access_token_ttl,
         user=UserResponse.model_validate(user),
     )
+
+
+# ── Refresh ───────────────────────────────────────────────────────────────────
+@router.post("/refresh", response_model=TokenResponse)
+async def refresh_token(
+    request: Request,
+    payload: RefreshRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Exchange a valid refresh token for a new access token.
+    Implements refresh token rotation: old token is revoked, new one issued.
+    """
+    token_hash = _hash_refresh_token(payload.refresh_token)
+
+    result = await db.execute(
+        select(RefreshTokenORM).where(RefreshTokenORM.token_hash == token_hash)
+    )
+    stored = result.scalar_one_or_none()
+
+    if not stored or stored.revoked:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or revoked refresh token.",
+        )
+
+    if stored.expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token has expired. Please log in again.",
+        )
+
+    # Revoke old token (rotation)
+    stored.revoked = True
+    stored.revoked_at = datetime.now(timezone.utc)
+
+    # Load user
+    user_result = await db.execute(
+        select(UserORM).where(UserORM.id == stored.user_id)
+    )
+    user = user_result.scalar_one_or_none()
+    if not user or not user.is_active:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="User not found or deactivated.")
+
+    # Issue new tokens
+    access_token = create_access_token(user.id, user.email, user.role)
+    new_refresh = generate_refresh_token()
+    expires = datetime.now(timezone.utc) + timedelta(seconds=settings.refresh_token_ttl)
+    db.add(RefreshTokenORM(
+        user_id=user.id,
+        token_hash=_hash_refresh_token(new_refresh),
+        expires_at=expires,
+        user_agent=request.headers.get("User-Agent", "")[:255],
+        ip_address=request.client.host if request.client else None,
+    ))
+    await db.flush()
+
+    return TokenResponse(
+        access_token=access_token,
+        refresh_token=new_refresh,
+        token_type="bearer",
+        expires_in=settings.access_token_ttl,
+        user=UserResponse.model_validate(user),
+    )
+
+
+# ── Logout ────────────────────────────────────────────────────────────────────
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+async def logout(
+    payload: RefreshRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    """Revoke a refresh token. Access token expires naturally via TTL."""
+    token_hash = _hash_refresh_token(payload.refresh_token)
+    result = await db.execute(
+        select(RefreshTokenORM).where(RefreshTokenORM.token_hash == token_hash)
+    )
+    stored = result.scalar_one_or_none()
+    if stored and not stored.revoked:
+        stored.revoked = True
+        stored.revoked_at = datetime.now(timezone.utc)
+        await db.flush()
+    # Always return 204 — don't reveal if token existed
+
+
+# ── Current user ──────────────────────────────────────────────────────────────
+@router.get("/me", response_model=UserResponse)
+async def get_me(user: UserORM = Depends(get_current_user)):
+    """Return the currently authenticated user's profile."""
+    return UserResponse.model_validate(user)
