@@ -26,9 +26,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from backend.core.config import settings
+from backend.core.rate_limit import RateLimitMiddleware
+from backend.core.scheduler import start_scheduler, stop_scheduler
 from backend.database import init_db
 from backend.models.db_models import HealthResponse
 from backend.routers import alerts, auth, knowledge, monitor, sync
+from backend.routers import rag as rag_router
 
 APP_VERSION = "2.0.0"
 limiter = None  # Rate limiting handled at infrastructure level in production
@@ -38,7 +41,9 @@ limiter = None  # Rate limiting handled at infrastructure level in production
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
+    start_scheduler()   # starts alert monitor background job
     yield
+    stop_scheduler()
 
 
 # ── App ────────────────────────────────────────────────────────────────────────
@@ -63,10 +68,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Rate limiting middleware (disabled in ENV=test)
+app.add_middleware(RateLimitMiddleware)
+
 # ── Routers ────────────────────────────────────────────────────────────────────
 app.include_router(auth.router)
 app.include_router(alerts.router)
 app.include_router(knowledge.router)
+app.include_router(rag_router.router)
 app.include_router(sync.router)
 app.include_router(monitor.router)
 

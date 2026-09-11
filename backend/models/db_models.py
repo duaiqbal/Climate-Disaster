@@ -195,6 +195,7 @@ class AlertCreate(BaseModel):
     hazard_type: str
     severity:    str
     issued_at:   datetime
+    fetch_timestamp: Optional[datetime] = Field(None, description="When this system fetched it")
     source_org:  str = Field(..., min_length=2, max_length=64)
     source_url:  Optional[str] = Field(None, max_length=512)
     district:    Optional[str] = Field(None, max_length=64)

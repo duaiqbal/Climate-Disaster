@@ -20,17 +20,17 @@ from fastapi.security import APIKeyHeader
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.core.config import settings
 from backend.database import get_db
 from backend.models.db_models import PackageUpdateORM, PackageUpdateResponse
 
 router = APIRouter(prefix="/sync", tags=["Sync"])
 
-ADMIN_API_KEY = os.getenv("ADMIN_API_KEY", "disaster-dss-dev-key-change-in-prod")
 _api_key_header = APIKeyHeader(name="X-Admin-Key", auto_error=False)
 
 
-async def require_admin(key: Optional[str] = Security(_api_key_header)) -> None:
-    if key != ADMIN_API_KEY:
+async def require_admin(key=Security(_api_key_header)) -> None:
+    if key != settings.admin_api_key:
         raise HTTPException(status_code=403, detail="Admin key required.")
 
 

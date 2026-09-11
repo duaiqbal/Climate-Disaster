@@ -3,6 +3,9 @@ backend/tests/conftest.py — fresh in-memory SQLite per test, no rate limiting.
 """
 
 import asyncio
+import os
+
+os.environ["ENV"] = "test"  # disables rate limiting middleware
 
 import pytest
 import pytest_asyncio
