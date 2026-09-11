@@ -1,230 +1,238 @@
-// app/test/widget_test.dart
-// =========================
-// Real Flutter widget and unit tests for Disaster DSS.
-// Tests are written to work without a running backend (offline-first principle).
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import 'package:disaster_dss/core/localization/app_localizations.dart';
-import 'package:disaster_dss/core/providers/language_provider.dart';
-import 'package:disaster_dss/core/providers/app_state_provider.dart';
-import 'package:disaster_dss/core/retrieval/roman_urdu_normalizer.dart';
-import 'package:disaster_dss/core/rules_engine/hazard_rules.dart';
-import 'package:disaster_dss/core/services/auth_service.dart';
-import 'package:disaster_dss/features/onboarding/onboarding_screen.dart';
-import 'package:disaster_dss/features/auth/login_screen.dart';
-
-// ── Helper ────────────────────────────────────────────────────────────────────
-
-Widget _wrap(Widget child, {String lang = 'en'}) {
-  return MultiProvider(
-    providers: [
-      ChangeNotifierProvider(create: (_) => LanguageProvider(lang)),
-      ChangeNotifierProvider(create: (_) => AppStateProvider()),
-    ],
-    child: MaterialApp(
-      locale: Locale(lang),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: child,
-    ),
-  );
-}
-
-// ── Unit tests: HazardRules ───────────────────────────────────────────────────
+import 'package:disaster_dss/core/theme/app_theme.dart';
+import 'package:disaster_dss/core/models/official_alert.dart';
+import 'package:disaster_dss/core/localization/language_service.dart';
+import 'package:disaster_dss/features/dashboard/screens/main_risk_dashboard_screen.dart';
+import 'package:disaster_dss/features/navigation/main_navigation_shell.dart';
+import 'package:disaster_dss/features/chat/chat_screen.dart';
+import 'package:disaster_dss/features/alerts/alert_details_screen.dart';
+import 'package:disaster_dss/features/safety/safety_hub_screen.dart';
+import 'package:disaster_dss/features/profile/emergency_contacts_screen.dart';
+import 'package:disaster_dss/features/simulator/decision_simulator_screen.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  testWidgets('MainRiskDashboardScreen renders all key Figma sections', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: const MainRiskDashboardScreen(),
+      ),
+    );
 
-  group('HazardRules — deterministic classifier', () {
-    test('HIGH flood: river < 0.5 km, elevation < 2000 m', () {
-      final result = HazardRules.classify(
-          slopeDeg: 10, riverDistKm: 0.3, elevationM: 1500);
-      expect(result.floodLevel, HazardLevel.high);
-      expect(result.overallLevel, HazardLevel.high);
-    });
+    // Initial frame
+    await tester.pump();
+    // Allow async repository futures to resolve
+    await tester.pump(const Duration(milliseconds: 100));
 
-    test('MEDIUM flood: river 0.5–1.5 km', () {
-      final result = HazardRules.classify(
-          slopeDeg: 5, riverDistKm: 1.0, elevationM: 1500);
-      expect(result.floodLevel, HazardLevel.medium);
-    });
+    // Verify header and user greeting
+    expect(find.text('Good evening, Hafsa'), findsOneWidget);
+    expect(find.text('Chitral, Khyber Pakhtunkhwa'), findsOneWidget);
 
-    test('LOW flood: river > 1.5 km, low slope', () {
-      final result = HazardRules.classify(
-          slopeDeg: 5, riverDistKm: 2.0, elevationM: 2500);
-      expect(result.floodLevel, HazardLevel.low);
-      expect(result.landslideLevel, HazardLevel.low);
-      expect(result.overallLevel, HazardLevel.low);
-    });
+    // Verify sections matching Main Risk Dashboard.png
+    expect(find.text('CURRENT CONDITIONS'), findsOneWidget);
+    expect(find.text('HOUSEHOLD RISK'), findsOneWidget);
+    expect(find.text('OFFICIAL WARNING'), findsOneWidget);
+    expect(find.text('COMMUNITY RISK'), findsOneWidget);
+    expect(find.text('AI Recommendation'), findsOneWidget);
+    expect(find.text('7-DAY FORECAST'), findsOneWidget);
 
-    test('HIGH landslide: slope > 30°', () {
-      final result = HazardRules.classify(
-          slopeDeg: 35, riverDistKm: 3.0, elevationM: 3000);
-      expect(result.landslideLevel, HazardLevel.high);
-      expect(result.overallLevel, HazardLevel.high);
-    });
-
-    test('MEDIUM landslide: slope 15–30°', () {
-      final result = HazardRules.classify(
-          slopeDeg: 20, riverDistKm: 3.0, elevationM: 3000);
-      expect(result.landslideLevel, HazardLevel.medium);
-    });
-
-    test('Worst-case combination: flood LOW + landslide HIGH = overall HIGH', () {
-      final result = HazardRules.classify(
-          slopeDeg: 35, riverDistKm: 2.0, elevationM: 3000);
-      expect(result.overallLevel, HazardLevel.high);
-    });
-
-    test('Disclaimer is always present', () {
-      expect(HazardAssessment.disclaimer, isNotEmpty);
-      expect(HazardAssessment.disclaimer.toLowerCase(), contains('not'));
-    });
-
-    test('Contributing factors populated when risk exists', () {
-      final result = HazardRules.classify(
-          slopeDeg: 35, riverDistKm: 0.3, elevationM: 1500);
-      expect(result.contributingFactors, isNotEmpty);
-    });
+    // Verify buttons and interactive CTAs
+    expect(find.text('View risk factors'), findsOneWidget);
+    expect(find.text('View Community Reports'), findsOneWidget);
+    expect(find.text('Ask AI Assistant'), findsOneWidget);
   });
 
-  // ── Unit tests: RomanUrduNormalizer ────────────────────────────────────────
+  testWidgets('MainNavigationShell renders 5 bottom tabs and floating action button', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: const MainNavigationShell(),
+      ),
+    );
 
-  group('RomanUrduNormalizer', () {
-    test('expands flood variants', () {
-      final expanded = RomanUrduNormalizer.expandQuery('selab');
-      expect(expanded, contains('selab'));
-      expect(expanded.length, greaterThan(1));
-    });
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
 
-    test('auto-detects Roman Urdu', () {
-      expect(RomanUrduNormalizer.isLikelyRomanUrdu('selab se bachao'), isTrue);
-      expect(RomanUrduNormalizer.isLikelyRomanUrdu('what is the weather'), isFalse);
-    });
+    // Verify bottom navigation items
+    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Forecast'), findsOneWidget);
+    expect(find.text('Map'), findsOneWidget);
+    expect(find.text('Alerts'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
 
-    test('returns original token when not in variant map', () {
-      final expanded = RomanUrduNormalizer.expandQuery('unknown_xyz');
-      expect(expanded, contains('unknown_xyz'));
-    });
-
-    test('expandQuery on multi-word query', () {
-      final expanded = RomanUrduNormalizer.expandQuery('flood mein bachao');
-      expect(expanded, isNotEmpty);
-      expect(expanded.length, greaterThan(2));
-    });
+    // Verify Floating Action Button for AI assistant
+    expect(find.byType(FloatingActionButton), findsOneWidget);
   });
 
-  // ── Unit tests: AuthException ──────────────────────────────────────────────
+  testWidgets('ChatScreen renders assistant header, greeting, chips, and input', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: const ChatScreen(),
+      ),
+    );
 
-  group('AuthException', () {
-    test('isUnauthorized true for 401', () {
-      const e = AuthException('Bad credentials', 401);
-      expect(e.isUnauthorized, isTrue);
-      expect(e.isForbidden, isFalse);
-    });
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
 
-    test('isRateLimited true for 429', () {
-      const e = AuthException('Too many requests', 429);
-      expect(e.isRateLimited, isTrue);
-    });
-
-    test('isServerError true for 500', () {
-      const e = AuthException('Server error', 500);
-      expect(e.isServerError, isTrue);
-    });
-
-    test('toString returns message', () {
-      const e = AuthException('Test message', 401);
-      expect(e.toString(), 'Test message');
-    });
+    expect(find.text('Climate Assistant'), findsOneWidget);
+    expect(find.text('Chitral, KP'), findsOneWidget);
+    expect(find.text('Context: Heavy Rainfall Alert'), findsOneWidget);
+    expect(find.text('Why is my risk moderate?'), findsOneWidget);
+    expect(find.text('What should I pack?'), findsOneWidget);
   });
 
-  // ── Widget tests: Onboarding ───────────────────────────────────────────────
+  testWidgets('AlertDetailsScreen renders official warning details and action buttons', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: const AlertDetailsScreen(alert: OfficialAlert.warningFromPMD),
+      ),
+    );
 
-  group('OnboardingScreen', () {
-    testWidgets('renders first page title', (tester) async {
-      SharedPreferences.setMockInitialValues({});
-      await tester.pumpWidget(_wrap(const OnboardingScreen()));
-      await tester.pump();
-      // Should show some onboarding content
-      expect(find.byType(PageView), findsOneWidget);
-    });
+    await tester.pump();
 
-    testWidgets('has navigation controls', (tester) async {
-      SharedPreferences.setMockInitialValues({});
-      await tester.pumpWidget(_wrap(const OnboardingScreen()));
-      await tester.pump();
-      // Should have a forward button
-      expect(find.byType(ElevatedButton), findsAtLeastNWidgets(1));
-    });
+    expect(find.text('Alert Details'), findsOneWidget);
+    expect(find.text('Heavy Rainfall Advisory'), findsOneWidget);
+    expect(find.text('What is happening'), findsOneWidget);
+    expect(find.text('What to do now'), findsOneWidget);
+    expect(find.text('View on Map'), findsOneWidget);
+    expect(find.text('Safety Guide'), findsOneWidget);
+    expect(find.text('Emergency Contacts'), findsOneWidget);
   });
 
-  // ── Widget tests: Login ────────────────────────────────────────────────────
+  testWidgets('SafetyHubScreen renders emergency checklist and hazard guides', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: const SafetyHubScreen(),
+      ),
+    );
 
-  group('LoginScreen', () {
-    testWidgets('renders email and password fields', (tester) async {
-      SharedPreferences.setMockInitialValues({});
-      await tester.pumpWidget(_wrap(const LoginScreen()));
-      await tester.pump();
-      expect(find.byType(TextFormField), findsAtLeastNWidgets(2));
-    });
+    await tester.pump();
 
-    testWidgets('renders login button', (tester) async {
-      SharedPreferences.setMockInitialValues({});
-      await tester.pumpWidget(_wrap(const LoginScreen()));
-      await tester.pump();
-      expect(find.byType(ElevatedButton), findsAtLeastNWidgets(1));
-    });
-
-    testWidgets('renders Continue Offline button', (tester) async {
-      SharedPreferences.setMockInitialValues({});
-      await tester.pumpWidget(_wrap(const LoginScreen()));
-      await tester.pump();
-      expect(find.byType(OutlinedButton), findsOneWidget);
-    });
-
-    testWidgets('validation fails on empty fields', (tester) async {
-      SharedPreferences.setMockInitialValues({});
-      await tester.pumpWidget(_wrap(const LoginScreen()));
-      await tester.pump();
-      // Tap login button without filling fields
-      final loginBtn = find.byType(ElevatedButton).first;
-      await tester.tap(loginBtn);
-      await tester.pump();
-      // Validation error text appears
-      expect(find.text('Required'), findsAtLeastNWidgets(1));
-    });
+    expect(find.text('Safety Hub'), findsOneWidget);
+    expect(find.text('Emergency Safe Bag Checklist'), findsOneWidget);
+    expect(find.text('Flash Flood & River Rise'), findsOneWidget);
+    expect(find.text('Slope Stability & Debris Flow'), findsOneWidget);
+    expect(find.text('Extreme Heat Waves'), findsOneWidget);
   });
 
-  // ── Widget tests: Language switching ──────────────────────────────────────
+  testWidgets('EmergencyContactsScreen renders all local helpline numbers', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: const EmergencyContactsScreen(),
+      ),
+    );
 
-  group('LanguageProvider', () {
-    test('initial language is set from constructor', () {
-      final provider = LanguageProvider('ur');
-      expect(provider.languageCode, 'ur');
-      expect(provider.isUrdu, isTrue);
-    });
+    await tester.pump();
 
-    test('setLanguage updates languageCode', () async {
-      SharedPreferences.setMockInitialValues({});
-      final provider = LanguageProvider('en');
-      await provider.setLanguage('ru');
-      expect(provider.languageCode, 'ru');
-      expect(provider.isRomanUrdu, isTrue);
-    });
+    expect(find.text('Emergency Contacts'), findsOneWidget);
+    expect(find.text('Rescue Service'), findsOneWidget);
+    expect(find.text('112'), findsOneWidget);
+    expect(find.text('100'), findsOneWidget);
 
-    test('textDirection is RTL for Urdu', () {
-      final provider = LanguageProvider('ur');
-      expect(provider.textDirection, TextDirection.rtl);
-    });
+    await tester.drag(find.byType(ListView), const Offset(0, -300));
+    await tester.pump();
 
-    test('textDirection is LTR for English and Roman Urdu', () {
-      expect(LanguageProvider('en').textDirection, TextDirection.ltr);
-      expect(LanguageProvider('ru').textDirection, TextDirection.ltr);
-    });
+    expect(find.text('1078'), findsOneWidget);
+  });
+
+  testWidgets('DecisionSimulatorScreen renders scenarios and comparisons', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: const DecisionSimulatorScreen(),
+      ),
+    );
+
+    await tester.pump();
+
+    expect(find.text('Decision Simulator'), findsOneWidget);
+    expect(find.text('Evacuate now'), findsOneWidget);
+    expect(find.text('Wait and monitor'), findsOneWidget);
+    expect(find.text('Risk Trajectory'), findsOneWidget);
+    expect(find.text('Factor Breakdown'), findsOneWidget);
+  });
+
+  testWidgets('Language switching dynamically translates navigation and dashboard to Urdu and Roman Urdu', (WidgetTester tester) async {
+    // Reset to English first
+    LanguageService.instance.setLanguage(AppLanguage.english);
+
+    await tester.pumpWidget(
+      ValueListenableBuilder<AppLanguage>(
+        valueListenable: LanguageService.instance.currentLanguage,
+        builder: (context, language, _) {
+          return MaterialApp(
+            theme: AppTheme.lightTheme,
+            builder: (context, child) => Directionality(
+              textDirection: LanguageService.instance.isRtl
+                  ? TextDirection.rtl
+                  : TextDirection.ltr,
+              child: KeyedSubtree(
+                key: ValueKey(language),
+                child: child!,
+              ),
+            ),
+            home: const MainNavigationShell(),
+          );
+        },
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Verify initial English tabs & dashboard
+    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Forecast'), findsOneWidget);
+    expect(find.text('Map'), findsOneWidget);
+    expect(find.text('Alerts'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
+    expect(find.text('Good evening, Hafsa'), findsOneWidget);
+    expect(find.text('CURRENT CONDITIONS'), findsOneWidget);
+    expect(find.text('HOUSEHOLD RISK'), findsOneWidget);
+    expect(find.text('OFFICIAL WARNING'), findsOneWidget);
+
+    // Switch to Urdu
+    LanguageService.instance.setLanguage(AppLanguage.urdu);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(LanguageService.instance.isRtl, isTrue);
+    expect(find.text('ہوم'), findsOneWidget);
+    expect(find.text('پیشن گوئی'), findsOneWidget);
+    expect(find.text('نقشہ'), findsOneWidget);
+    expect(find.text('اطلاعات'), findsOneWidget);
+    expect(find.text('پروفائل'), findsOneWidget);
+    expect(find.text('شب بخیر، حفصہ'), findsOneWidget);
+    expect(find.text('موجودہ موسمی صورتحال'), findsOneWidget);
+    expect(find.text('گھر کا خطرہ'), findsOneWidget);
+    expect(find.text('سرکاری تنبیہ'), findsOneWidget);
+
+    // Switch to Roman Urdu
+    LanguageService.instance.setLanguage(AppLanguage.romanUrdu);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(LanguageService.instance.isRtl, isFalse);
+    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Peshangoi'), findsOneWidget);
+    expect(find.text('Naqsha'), findsOneWidget);
+    expect(find.text('Ittilayein'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
+    expect(find.text('Shab-ba-khair, Hafsa'), findsOneWidget);
+    expect(find.text('MOJOODA MOUSAM'), findsOneWidget);
+    expect(find.text('GHAR KA KHATRA'), findsOneWidget);
+    expect(find.text('SARKARI ITTILA'), findsOneWidget);
+
+    // Reset back to English
+    LanguageService.instance.setLanguage(AppLanguage.english);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('Good evening, Hafsa'), findsOneWidget);
   });
 }
+
