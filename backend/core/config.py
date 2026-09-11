@@ -26,7 +26,10 @@ from pathlib import Path
 _DEV_SECRET   = "disaster-dss-dev-secret-change-in-production"
 _DEV_ADMIN_KEY = "disaster-dss-dev-key-change-in-prod"
 
-_DEFAULT_DB = str(Path(__file__).resolve().parents[2] / "backend" / "disaster_dss_backend.sqlite")
+# Use Windows TEMP folder so OneDrive sync cannot restore stale DB files.
+# Production: set DATABASE_URL env var to a proper path or PostgreSQL URL.
+_TEMP_DIR  = Path(os.environ.get("TEMP", os.environ.get("TMP", "/tmp")))
+_DEFAULT_DB = str(_TEMP_DIR / "disaster_dss_backend.sqlite")
 
 
 class Settings:

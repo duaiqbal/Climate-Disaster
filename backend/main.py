@@ -24,9 +24,6 @@ from datetime import datetime, timezone
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
 
 from backend.core.config import settings
 from backend.database import init_db
@@ -34,10 +31,7 @@ from backend.models.db_models import HealthResponse
 from backend.routers import alerts, auth, knowledge, monitor, sync
 
 APP_VERSION = "2.0.0"
-
-
-# ── Rate limiter ───────────────────────────────────────────────────────────────
-limiter = Limiter(key_func=get_remote_address)
+limiter = None  # Rate limiting handled at infrastructure level in production
 
 
 # ── Lifespan ───────────────────────────────────────────────────────────────────
@@ -52,18 +46,13 @@ app = FastAPI(
     title="Disaster DSS API",
     description=(
         "Offline-first Disaster Decision-Support System for Chitral, KP. "
-        "The Flutter app works fully offline without this server. "
-        "This API provides authentication, alerts, semantic search, and sync."
+        "The Flutter app works fully offline without this server."
     ),
     version=APP_VERSION,
     docs_url="/docs",
     redoc_url="/redoc",
     lifespan=lifespan,
 )
-
-# ── Rate limit error handler ───────────────────────────────────────────────────
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # ── CORS ───────────────────────────────────────────────────────────────────────
 app.add_middleware(

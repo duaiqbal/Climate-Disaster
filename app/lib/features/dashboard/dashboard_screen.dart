@@ -9,6 +9,7 @@ import '../alerts/alerts_screen.dart';
 import '../map/hazard_map_screen.dart';
 import '../safety/safety_checklist_screen.dart';
 import '../profile/profile_screen.dart';
+import '../go_bag/go_bag_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -27,6 +28,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     const AlertsScreen(),
     const HazardMapScreen(),
     const SafetyChecklistScreen(),
+    const GoBagScreen(),
   ];
 
   void _setTab(int index) => setState(() => _selectedIndex = index);
@@ -69,6 +71,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             icon: const Icon(Icons.checklist_outlined),
             selectedIcon: const Icon(Icons.checklist_rounded),
             label: loc.safetyChecklist,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.backpack_outlined),
+            selectedIcon: const Icon(Icons.backpack_rounded),
+            label: 'Go Bag',
           ),
         ],
       ),
@@ -206,6 +213,12 @@ class _HomeTab extends StatelessWidget {
                   label: loc.safetyChecklist,
                   color: AppColors.primaryDark,
                   onTap: () => onNavigate(4),
+                ),
+                _QuickActionCard(
+                  icon: Icons.backpack_rounded,
+                  label: 'Go Bag',
+                  color: AppColors.pmdColor,
+                  onTap: () => onNavigate(5),
                 ),
               ],
             ),

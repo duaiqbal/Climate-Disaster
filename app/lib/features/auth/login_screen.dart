@@ -46,10 +46,11 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.pushReplacementNamed(context, '/dashboard');
     } on AuthException catch (e) {
       if (!mounted) return;
-
       setState(() {
         _loading = false;
-        _errorMsg = e.message;
+        _errorMsg = e.isRateLimited
+            ? 'Too many attempts. Please wait a minute.'
+            : e.message;
       });
     } catch (_) {
       if (!mounted) return;

@@ -26,8 +26,12 @@ dependencies:
   # HTTP (optional online sync)
   http: ^1.2.1
 
-  # Shared preferences (settings, language pref, session)
+  # Shared preferences (settings, language pref)
   shared_preferences: ^2.3.1
+
+  # Secure token storage on mobile (flutter_secure_storage)
+  # Falls back to SharedPreferences on web (no secure enclave available)
+  flutter_secure_storage: ^9.2.2
 
   # Connectivity check
   connectivity_plus: ^6.0.3
