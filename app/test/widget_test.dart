@@ -131,7 +131,7 @@ void main() {
 
     expect(find.text('Emergency Contacts'), findsOneWidget);
     expect(find.text('Rescue Service'), findsOneWidget);
-    expect(find.text('112'), findsOneWidget);
+    expect(find.text('1122'), findsOneWidget);
     expect(find.text('100'), findsOneWidget);
 
     await tester.drag(find.byType(ListView), const Offset(0, -300));

@@ -1,6 +1,10 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'app_colors.dart';
 import 'app_text_styles.dart';
+
+// Re-export so existing files that import app_theme.dart get AppColors too
+export 'app_colors.dart';
+export 'app_text_styles.dart';
 
 class AppTheme {
   AppTheme._();

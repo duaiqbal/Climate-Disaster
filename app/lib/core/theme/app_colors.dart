@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 /// Centralized color palette derived from Figma screen designs in `assets/designs/`.
 class AppColors {
@@ -48,4 +48,19 @@ class AppColors {
   static const Color onlineGreen = Color(0xFF10B981);
   static const Color weatherPillBg = Color(0xFFF9FAFB);
   static const Color progressTrack = Color(0xFFE5E7EB);
+  // ── Legacy aliases (keep existing code compiling after redesign) ─────────────
+  static const Color hazardHigh    = riskHigh;
+  static const Color hazardMedium  = riskModerate;
+  static const Color hazardLow     = riskLow;
+  static const Color hazardUnknown = Color(0xFF757575);
+  static const Color accent        = Color(0xFFFFA000);
+  static const Color accentLight   = Color(0xFFFFCC02);
+  static const Color textDark      = textPrimary;
+  static const Color ndmaColor     = Color(0xFF1565C0);
+  static const Color pdmaColor     = Color(0xFF6A1B9A);
+  static const Color pmdColor      = Color(0xFF00838F);
+  static const Color cardLight     = Colors.white;
+  static const Color cardDark      = Color(0xFF2C2C2C);
+  static const Color surfaceDark   = Color(0xFF1E1E1E);
+  static const Color textLight     = Color(0xFFFAFAFA);
 }
