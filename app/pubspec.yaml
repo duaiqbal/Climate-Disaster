@@ -36,8 +36,8 @@ dependencies:
   # Icons
   cupertino_icons: ^1.0.8
 
-  # i18n
-  intl: ^0.20.3
+  # Internationalisation (dates, numbers)
+  intl: 0.20.2
 
   # Permissions
   permission_handler: ^11.3.1

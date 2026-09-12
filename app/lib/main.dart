@@ -6,7 +6,11 @@ import 'features/auth/splash_screen.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Restore persisted language before first frame
-  await LanguageService.instance.init();
+  try {
+    await LanguageService.instance.init();
+  } catch (e) {
+    debugPrint('LanguageService init failed, using default language: $e');
+  }
   runApp(const DisasterDssApp());
 }
 

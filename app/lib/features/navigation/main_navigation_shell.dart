@@ -11,6 +11,7 @@ import '../community/community_risk_screen.dart';
 import '../profile/profile_screen.dart';
 import '../chat/chat_screen.dart';
 import '../auth/login_screen.dart';
+import '../../core/services/user_session.dart';
 
 class MainNavigationShell extends StatefulWidget {
   final int initialTab;
@@ -44,6 +45,7 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
   }
 
   void _handleLogout() {
+    UserSession.instance.clear();
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const LoginScreen()),
       (route) => false,
@@ -112,11 +114,16 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildNavItem(0, Icons.home_outlined, Icons.home, Tr.t('tab_home')),
-                _buildNavItem(1, Icons.wb_sunny_outlined, Icons.wb_sunny, Tr.t('tab_forecast')),
-                _buildNavItem(2, Icons.map_outlined, Icons.map, Tr.t('tab_map')),
-                _buildNavItem(3, Icons.notifications_none_outlined, Icons.notifications, Tr.t('tab_alerts')),
-                _buildNavItem(4, Icons.person_outline, Icons.person, Tr.t('tab_profile')),
+                _buildNavItem(
+                    0, Icons.home_outlined, Icons.home, Tr.t('tab_home')),
+                _buildNavItem(1, Icons.wb_sunny_outlined, Icons.wb_sunny,
+                    Tr.t('tab_forecast')),
+                _buildNavItem(
+                    2, Icons.map_outlined, Icons.map, Tr.t('tab_map')),
+                _buildNavItem(3, Icons.notifications_none_outlined,
+                    Icons.notifications, Tr.t('tab_alerts')),
+                _buildNavItem(
+                    4, Icons.person_outline, Icons.person, Tr.t('tab_profile')),
               ],
             ),
           ),
@@ -125,7 +132,8 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
     );
   }
 
-  Widget _buildNavItem(int index, IconData unselectedIcon, IconData selectedIcon, String label) {
+  Widget _buildNavItem(
+      int index, IconData unselectedIcon, IconData selectedIcon, String label) {
     final isSelected = _currentIndex == index;
 
     return InkWell(

@@ -79,8 +79,7 @@ class _ChatScreenState extends State<ChatScreen> {
             '${s['source_org'] ?? ''}: ${s['doc_title'] ?? ''}'),
         );
       }
-      evidenceLabel = Tr.t('evidence_high');
-      }
+            evidenceLabel = Tr.t('evidence_high');
     } else {
       _isOnline = false;
       if (!kIsWeb) {
