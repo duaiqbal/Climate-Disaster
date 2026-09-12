@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/localization/app_translations.dart';
 import '../chat/chat_screen.dart';
+import '../screen_entrance.dart';
 
 class CommunityRiskScreen extends StatefulWidget {
   const CommunityRiskScreen({super.key});
@@ -35,66 +36,68 @@ class _CommunityRiskScreenState extends State<CommunityRiskScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        leading: const BackButton(color: AppColors.textPrimary),
-        title: Column(
-          children: [
-            Text(Tr.t('community_title'),
-                style: AppTextStyles.cardTitle.copyWith(fontSize: 17)),
-            Text(Tr.t('community_subtitle'),
-                style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textMuted, fontSize: 11)),
-          ],
+    return ScreenEntrance(
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          backgroundColor: AppColors.surface,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          centerTitle: true,
+          leading: const BackButton(color: AppColors.textPrimary),
+          title: Column(
+            children: [
+              Text(Tr.t('community_title'),
+                  style: AppTextStyles.cardTitle.copyWith(fontSize: 17)),
+              Text(Tr.t('community_subtitle'),
+                  style: AppTextStyles.caption
+                      .copyWith(color: AppColors.textMuted, fontSize: 11)),
+            ],
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'fab_community',
-        backgroundColor: AppColors.primary,
-        onPressed: () => Navigator.push(context,
-            MaterialPageRoute(builder: (_) => const ChatScreen())),
-        child: const Icon(Icons.smart_toy_outlined, color: Colors.white),
-      ),
-      body: _loading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary))
-          : RefreshIndicator(
-              onRefresh: _load,
-              color: AppColors.primary,
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  _PrivacyCard(),
-                  const SizedBox(height: 20),
-                  _SectionHeader(
-                    reportCount: _reports.length,
-                    isListView: _isListView,
-                    onToggle: (v) => setState(() => _isListView = v),
-                  ),
-                  const SizedBox(height: 12),
-                  if (_isListView)
-                    ..._reports.map((r) => _ReportCard(report: r))
-                  else
-                    const _CommunityMapPlaceholder(),
-                  const SizedBox(height: 12),
-                  _ReportCta(),
-                  const SizedBox(height: 16),
-                  Center(
-                    child: Text(
-                      Tr.t('prototype_data'),
-                      style: AppTextStyles.caption.copyWith(
-                          color: AppColors.textMuted, fontSize: 11),
+        floatingActionButton: FloatingActionButton(
+          heroTag: 'fab_community',
+          backgroundColor: AppColors.primary,
+          onPressed: () => Navigator.push(
+              context, MaterialPageRoute(builder: (_) => const ChatScreen())),
+          child: const Icon(Icons.smart_toy_outlined, color: Colors.white),
+        ),
+        body: _loading
+            ? const Center(
+                child: CircularProgressIndicator(color: AppColors.primary))
+            : RefreshIndicator(
+                onRefresh: _load,
+                color: AppColors.primary,
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    _PrivacyCard(),
+                    const SizedBox(height: 20),
+                    _SectionHeader(
+                      reportCount: _reports.length,
+                      isListView: _isListView,
+                      onToggle: (v) => setState(() => _isListView = v),
                     ),
-                  ),
-                  const SizedBox(height: 80),
-                ],
+                    const SizedBox(height: 12),
+                    if (_isListView)
+                      ..._reports.map((r) => _ReportCard(report: r))
+                    else
+                      const _CommunityMapPlaceholder(),
+                    const SizedBox(height: 12),
+                    _ReportCta(),
+                    const SizedBox(height: 16),
+                    Center(
+                      child: Text(
+                        Tr.t('prototype_data'),
+                        style: AppTextStyles.caption
+                            .copyWith(color: AppColors.textMuted, fontSize: 11),
+                      ),
+                    ),
+                    const SizedBox(height: 80),
+                  ],
+                ),
               ),
-            ),
+      ),
     );
   }
 }
@@ -125,11 +128,10 @@ class _PrivacyCard extends StatelessWidget {
                 const SizedBox(height: 6),
                 RichText(
                   text: TextSpan(
-                    style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textSecondary, height: 1.5),
+                    style: AppTextStyles.caption
+                        .copyWith(color: AppColors.textSecondary, height: 1.5),
                     children: [
-                      TextSpan(
-                          text: Tr.t('community_privacy_body')),
+                      TextSpan(text: Tr.t('community_privacy_body')),
                       TextSpan(
                           text: Tr.t('community_privacy_threshold'),
                           style: const TextStyle(fontWeight: FontWeight.w700)),
@@ -261,7 +263,8 @@ class _ReportCard extends StatelessWidget {
 
   String _translateType(String type) {
     final lower = type.toLowerCase();
-    if (lower.contains('road') || lower.contains('block')) return Tr.t('issue_road_block');
+    if (lower.contains('road') || lower.contains('block'))
+      return Tr.t('issue_road_block');
     if (lower.contains('land')) return Tr.t('issue_landslide');
     if (lower.contains('flood')) return Tr.t('issue_flood');
     if (lower.contains('water')) return Tr.t('issue_water_shortage');
@@ -292,14 +295,16 @@ class _ReportCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: isHazard
-                      ? AppColors.riskHighBg
-                      : const Color(0xFFEFF6FF),
+                  color:
+                      isHazard ? AppColors.riskHighBg : const Color(0xFFEFF6FF),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  isHazard ? Icons.warning_amber_rounded : Icons.water_drop_outlined,
-                  color: isHazard ? AppColors.riskHigh : const Color(0xFF2563EB),
+                  isHazard
+                      ? Icons.warning_amber_rounded
+                      : Icons.water_drop_outlined,
+                  color:
+                      isHazard ? AppColors.riskHigh : const Color(0xFF2563EB),
                   size: 20,
                 ),
               ),
@@ -312,8 +317,8 @@ class _ReportCard extends StatelessWidget {
                         style: AppTextStyles.cardTitle.copyWith(fontSize: 14)),
                     const SizedBox(height: 2),
                     Text('${Tr.t('report_area')}: ${report.area}',
-                        style: AppTextStyles.caption.copyWith(
-                            color: AppColors.textSecondary)),
+                        style: AppTextStyles.caption
+                            .copyWith(color: AppColors.textSecondary)),
                   ],
                 ),
               ),
@@ -327,8 +332,8 @@ class _ReportCard extends StatelessWidget {
                   report.area.contains('settlement')
                       ? Tr.t('report_status_recent')
                       : Tr.t('report_status_active'),
-                  style: AppTextStyles.caption.copyWith(
-                      color: AppColors.textMuted, fontSize: 11),
+                  style: AppTextStyles.caption
+                      .copyWith(color: AppColors.textMuted, fontSize: 11),
                 ),
               ),
             ],
@@ -382,8 +387,8 @@ class _ReportCta extends StatelessWidget {
               textAlign: TextAlign.center),
           const SizedBox(height: 4),
           Text(Tr.t('report_cta_sub'),
-              style: AppTextStyles.body.copyWith(
-                  color: AppColors.textMuted, fontSize: 13),
+              style: AppTextStyles.body
+                  .copyWith(color: AppColors.textMuted, fontSize: 13),
               textAlign: TextAlign.center),
           const SizedBox(height: 16),
           SizedBox(
@@ -400,8 +405,7 @@ class _ReportCta extends StatelessWidget {
               label: Text(Tr.t('report_issue_btn')),
               onPressed: () => Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (_) => const ReportHazardScreen()),
+                MaterialPageRoute(builder: (_) => const ReportHazardScreen()),
               ),
             ),
           ),
@@ -427,13 +431,13 @@ class _ReportHazardScreenState extends State<ReportHazardScreen> {
   bool _submitting = false;
 
   List<String> get _types => [
-    Tr.t('issue_road_block'),
-    Tr.t('issue_landslide'),
-    Tr.t('issue_flood'),
-    Tr.t('issue_water_shortage'),
-    Tr.t('issue_infrastructure'),
-    Tr.t('issue_other'),
-  ];
+        Tr.t('issue_road_block'),
+        Tr.t('issue_landslide'),
+        Tr.t('issue_flood'),
+        Tr.t('issue_water_shortage'),
+        Tr.t('issue_infrastructure'),
+        Tr.t('issue_other'),
+      ];
 
   @override
   void dispose() {
@@ -443,8 +447,8 @@ class _ReportHazardScreenState extends State<ReportHazardScreen> {
 
   Future<void> _submit() async {
     if (_selectedType == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(Tr.t('report_what_type'))));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(Tr.t('report_what_type'))));
       return;
     }
     setState(() => _submitting = true);
@@ -474,227 +478,237 @@ class _ReportHazardScreenState extends State<ReportHazardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        leading: const BackButton(color: AppColors.textPrimary),
-        title: Text(Tr.t('report_hazard_title'),
-            style: AppTextStyles.cardTitle.copyWith(color: AppColors.primary)),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: Icon(Icons.info_outline,
-                color: AppColors.textSecondary, size: 20),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(Tr.t('report_issue_title'),
-                style: AppTextStyles.screenHeader.copyWith(fontSize: 24)),
-            const SizedBox(height: 6),
-            Text(Tr.t('report_issue_sub'),
-                style: AppTextStyles.body.copyWith(
-                    color: AppColors.textSecondary, height: 1.5)),
-            const SizedBox(height: 20),
-
-            // Type card
-            _Card(
-              title: Tr.t('report_what_type'),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _types.map((t) {
-                  final sel = _selectedType == t;
-                  return GestureDetector(
-                    onTap: () => setState(() => _selectedType = t),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: sel ? AppColors.primaryContainer : AppColors.surface,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: sel ? AppColors.primary : AppColors.border,
-                          width: sel ? 1.5 : 1,
-                        ),
-                      ),
-                      child: Text(t,
-                          style: AppTextStyles.caption.copyWith(
-                              color: sel ? AppColors.primary : AppColors.textSecondary,
-                              fontWeight: sel ? FontWeight.w600 : FontWeight.normal)),
-                    ),
-                  );
-                }).toList(),
-              ),
+    return ScreenEntrance(
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          backgroundColor: AppColors.surface,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          centerTitle: true,
+          leading: const BackButton(color: AppColors.textPrimary),
+          title: Text(Tr.t('report_hazard_title'),
+              style:
+                  AppTextStyles.cardTitle.copyWith(color: AppColors.primary)),
+          actions: const [
+            Padding(
+              padding: EdgeInsets.only(right: 16),
+              child: Icon(Icons.info_outline,
+                  color: AppColors.textSecondary, size: 20),
             ),
-            const SizedBox(height: 12),
+          ],
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(Tr.t('report_issue_title'),
+                  style: AppTextStyles.screenHeader.copyWith(fontSize: 24)),
+              const SizedBox(height: 6),
+              Text(Tr.t('report_issue_sub'),
+                  style: AppTextStyles.body
+                      .copyWith(color: AppColors.textSecondary, height: 1.5)),
+              const SizedBox(height: 20),
 
-            // Location card
-            _Card(
-              title: Tr.t('report_where'),
-              titleSuffix: Text(Tr.t('report_location_change'),
-                  style: AppTextStyles.caption.copyWith(
-                      color: AppColors.primary, fontWeight: FontWeight.w600)),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 14, vertical: 12),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryContainer,
-                  borderRadius: BorderRadius.circular(10),
+              // Type card
+              _Card(
+                title: Tr.t('report_what_type'),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: _types.map((t) {
+                    final sel = _selectedType == t;
+                    return GestureDetector(
+                      onTap: () => setState(() => _selectedType = t),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: sel
+                              ? AppColors.primaryContainer
+                              : AppColors.surface,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: sel ? AppColors.primary : AppColors.border,
+                            width: sel ? 1.5 : 1,
+                          ),
+                        ),
+                        child: Text(t,
+                            style: AppTextStyles.caption.copyWith(
+                                color: sel
+                                    ? AppColors.primary
+                                    : AppColors.textSecondary,
+                                fontWeight:
+                                    sel ? FontWeight.w600 : FontWeight.normal)),
+                      ),
+                    );
+                  }).toList(),
                 ),
-                child: Row(
+              ),
+              const SizedBox(height: 12),
+
+              // Location card
+              _Card(
+                title: Tr.t('report_where'),
+                titleSuffix: Text(Tr.t('report_location_change'),
+                    style: AppTextStyles.caption.copyWith(
+                        color: AppColors.primary, fontWeight: FontWeight.w600)),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryContainer,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.location_on_outlined,
+                          color: AppColors.primary, size: 16),
+                      const SizedBox(width: 8),
+                      Text(Tr.t('location_chitral'),
+                          style: AppTextStyles.body.copyWith(
+                              color: AppColors.primary, fontSize: 14)),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Description card
+              _Card(
+                title: Tr.t('report_details'),
+                child: Column(
                   children: [
-                    const Icon(Icons.location_on_outlined,
-                        color: AppColors.primary, size: 16),
-                    const SizedBox(width: 8),
-                    Text(Tr.t('location_chitral'),
-                        style: AppTextStyles.body.copyWith(
-                            color: AppColors.primary, fontSize: 14)),
+                    TextField(
+                      controller: _descController,
+                      maxLines: 5,
+                      style: AppTextStyles.body.copyWith(fontSize: 14),
+                      decoration: InputDecoration(
+                        hintText: Tr.t('report_details_hint'),
+                        hintStyle: AppTextStyles.body.copyWith(
+                            color: AppColors.textDisabled, fontSize: 14),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                        contentPadding: const EdgeInsets.all(12),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextButton.icon(
+                      onPressed: () =>
+                          ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(Tr.t('photo_upload_soon'))),
+                      ),
+                      icon: const Icon(Icons.add_a_photo_outlined,
+                          size: 16, color: AppColors.primary),
+                      label: Text(Tr.t('report_add_photo'),
+                          style: AppTextStyles.caption
+                              .copyWith(color: AppColors.primary)),
+                      style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          alignment: Alignment.centerLeft),
+                    ),
                   ],
                 ),
               ),
-            ),
-            const SizedBox(height: 12),
+              const SizedBox(height: 12),
 
-            // Description card
-            _Card(
-              title: Tr.t('report_details'),
-              child: Column(
-                children: [
-                  TextField(
-                    controller: _descController,
-                    maxLines: 5,
-                    style: AppTextStyles.body.copyWith(fontSize: 14),
-                    decoration: InputDecoration(
-                      hintText: Tr.t('report_details_hint'),
-                      hintStyle: AppTextStyles.body.copyWith(
-                          color: AppColors.textDisabled, fontSize: 14),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: AppColors.border),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: AppColors.border),
-                      ),
-                      contentPadding: const EdgeInsets.all(12),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  TextButton.icon(
-                    onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content: Text(Tr.t('photo_upload_soon'))),
-                    ),
-                    icon: const Icon(Icons.add_a_photo_outlined,
-                        size: 16, color: AppColors.primary),
-                    label: Text(Tr.t('report_add_photo'),
-                        style: AppTextStyles.caption.copyWith(
-                            color: AppColors.primary)),
-                    style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        alignment: Alignment.centerLeft),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // Privacy card
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.primaryContainer,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppColors.aiCardBorder),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.shield_outlined,
-                          color: AppColors.primary, size: 18),
-                      const SizedBox(width: 8),
-                      Text(Tr.t('report_privacy_title'),
-                          style: AppTextStyles.caption.copyWith(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13)),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    Tr.t('report_privacy_full'),
-                    style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textSecondary, height: 1.5),
-                  ),
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 7),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface.withAlpha(180),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
+              // Privacy card
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryContainer,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.aiCardBorder),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        const Icon(Icons.people_outline,
-                            size: 14, color: AppColors.primary),
-                        const SizedBox(width: 6),
-                        Text(Tr.t('report_privacy_threshold'),
+                        const Icon(Icons.shield_outlined,
+                            color: AppColors.primary, size: 18),
+                        const SizedBox(width: 8),
+                        Text(Tr.t('report_privacy_title'),
                             style: AppTextStyles.caption.copyWith(
                                 color: AppColors.primary,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600)),
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13)),
                       ],
                     ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14)),
+                    const SizedBox(height: 8),
+                    Text(
+                      Tr.t('report_privacy_full'),
+                      style: AppTextStyles.caption.copyWith(
+                          color: AppColors.textSecondary, height: 1.5),
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 7),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface.withAlpha(180),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.people_outline,
+                              size: 14, color: AppColors.primary),
+                          const SizedBox(width: 6),
+                          Text(Tr.t('report_privacy_threshold'),
+                              style: AppTextStyles.caption.copyWith(
+                                  color: AppColors.primary,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600)),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                icon: _submitting
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.white))
-                    : const Icon(Icons.send_outlined, size: 18),
-                label: Text(_submitting ? Tr.t('report_submitting') : Tr.t('report_submit_btn')),
-                onPressed: _submitting ? null : _submit,
               ),
-            ),
-            const SizedBox(height: 16),
-            Center(
-              child: Text(
-                Tr.t('report_proto_note'),
-                style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textMuted, fontSize: 11),
+              const SizedBox(height: 24),
+
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                  ),
+                  icon: _submitting
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white))
+                      : const Icon(Icons.send_outlined, size: 18),
+                  label: Text(_submitting
+                      ? Tr.t('report_submitting')
+                      : Tr.t('report_submit_btn')),
+                  onPressed: _submitting ? null : _submit,
+                ),
               ),
-            ),
-            const SizedBox(height: 40),
-          ],
+              const SizedBox(height: 16),
+              Center(
+                child: Text(
+                  Tr.t('report_proto_note'),
+                  style: AppTextStyles.caption
+                      .copyWith(color: AppColors.textMuted, fontSize: 11),
+                ),
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
         ),
       ),
     );
@@ -737,15 +751,15 @@ class _ReportSuccessSheet extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             Tr.t('report_success_sub'),
-            style: AppTextStyles.body.copyWith(
-                color: AppColors.textSecondary, height: 1.5),
+            style: AppTextStyles.body
+                .copyWith(color: AppColors.textSecondary, height: 1.5),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
             Tr.t('report_success_note'),
-            style: AppTextStyles.caption.copyWith(
-                color: AppColors.textMuted, height: 1.5),
+            style: AppTextStyles.caption
+                .copyWith(color: AppColors.textMuted, height: 1.5),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
@@ -808,7 +822,8 @@ class _Card extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                  child: Text(title, style: AppTextStyles.cardTitle.copyWith(fontSize: 15))),
+                  child: Text(title,
+                      style: AppTextStyles.cardTitle.copyWith(fontSize: 15))),
               if (titleSuffix != null) titleSuffix!,
             ],
           ),

@@ -15,6 +15,7 @@ import '../widgets/community_risk_card.dart';
 import '../widgets/ai_recommendation_card.dart';
 import '../widgets/seven_day_forecast_preview.dart';
 import '../widgets/household_risk_bottom_sheet.dart';
+import '../../screen_entrance.dart';
 
 class MainRiskDashboardScreen extends StatefulWidget {
   final Function(int)? onNavigateToTab;
@@ -118,123 +119,125 @@ class _MainRiskDashboardScreenState extends State<MainRiskDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: _loadData,
-          color: AppColors.primary,
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(),
-                const SizedBox(height: 20),
-                if (_errorMessage != null)
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: AppColors.riskHighBg,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.info_outline,
-                            color: AppColors.riskHigh, size: 20),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            _errorMessage!,
-                            style: const TextStyle(
-                                fontSize: 13, color: AppColors.riskHigh),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: _loadData,
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: Text(
-                            Tr.t('retry'),
-                            style: const TextStyle(
-                              color: AppColors.riskHigh,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
+    return ScreenEntrance(
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: RefreshIndicator(
+            onRefresh: _loadData,
+            color: AppColors.primary,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(),
+                  const SizedBox(height: 20),
+                  if (_errorMessage != null)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: AppColors.riskHighBg,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.info_outline,
+                              color: AppColors.riskHigh, size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _errorMessage!,
+                              style: const TextStyle(
+                                  fontSize: 13, color: AppColors.riskHigh),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                if (_isLoading)
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 16),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.all(Radius.circular(4)),
-                      child: LinearProgressIndicator(
-                        minHeight: 3,
-                        color: AppColors.primary,
-                        backgroundColor: AppColors.primaryContainer,
+                          TextButton(
+                            onPressed: _loadData,
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: Text(
+                              Tr.t('retry'),
+                              style: const TextStyle(
+                                color: AppColors.riskHigh,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+                  if (_isLoading)
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 16),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.all(Radius.circular(4)),
+                        child: LinearProgressIndicator(
+                          minHeight: 3,
+                          color: AppColors.primary,
+                          backgroundColor: AppColors.primaryContainer,
+                        ),
+                      ),
+                    ),
+                  CurrentConditionsCard(conditions: _conditions),
+                  const SizedBox(height: 16),
+                  HouseholdRiskCard(
+                    risk: _risk,
+                    onViewFactors: () {
+                      HouseholdRiskBottomSheet.show(context, _risk);
+                    },
                   ),
-                CurrentConditionsCard(conditions: _conditions),
-                const SizedBox(height: 16),
-                HouseholdRiskCard(
-                  risk: _risk,
-                  onViewFactors: () {
-                    HouseholdRiskBottomSheet.show(context, _risk);
-                  },
-                ),
-                const SizedBox(height: 16),
-                OfficialWarningCard(
-                  alert: _alert,
-                  onViewAlert: () {
-                    if (widget.onOpenAlertDetails != null) {
-                      widget.onOpenAlertDetails!(_alert);
-                    } else if (widget.onNavigateToTab != null) {
-                      widget.onNavigateToTab!(3); // Alerts tab
-                    }
-                  },
-                ),
-                const SizedBox(height: 16),
-                CommunityRiskCard(
-                  onViewReports: () {
-                    if (widget.onOpenCommunityReports != null) {
-                      widget.onOpenCommunityReports!();
-                    } else if (widget.onNavigateToTab != null) {
-                      widget.onNavigateToTab!(2); // Map or Community tab
-                    }
-                  },
-                ),
-                const SizedBox(height: 16),
-                AiRecommendationCard(
-                  recommendation: _aiRecommendation,
-                  onAskAi: () {
-                    if (widget.onOpenAiAssistant != null) {
-                      widget.onOpenAiAssistant!();
-                    }
-                  },
-                ),
-                const SizedBox(height: 16),
-                SevenDayForecastPreview(
-                  forecasts: _forecasts,
-                  onViewFull: () {
-                    if (widget.onNavigateToTab != null) {
-                      widget.onNavigateToTab!(1); // Forecast tab
-                    }
-                  },
-                ),
-                const SizedBox(
-                    height: 80), // Padding above floating button / bottom bar
-              ],
+                  const SizedBox(height: 16),
+                  OfficialWarningCard(
+                    alert: _alert,
+                    onViewAlert: () {
+                      if (widget.onOpenAlertDetails != null) {
+                        widget.onOpenAlertDetails!(_alert);
+                      } else if (widget.onNavigateToTab != null) {
+                        widget.onNavigateToTab!(3); // Alerts tab
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  CommunityRiskCard(
+                    onViewReports: () {
+                      if (widget.onOpenCommunityReports != null) {
+                        widget.onOpenCommunityReports!();
+                      } else if (widget.onNavigateToTab != null) {
+                        widget.onNavigateToTab!(2); // Map or Community tab
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  AiRecommendationCard(
+                    recommendation: _aiRecommendation,
+                    onAskAi: () {
+                      if (widget.onOpenAiAssistant != null) {
+                        widget.onOpenAiAssistant!();
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  SevenDayForecastPreview(
+                    forecasts: _forecasts,
+                    onViewFull: () {
+                      if (widget.onNavigateToTab != null) {
+                        widget.onNavigateToTab!(1); // Forecast tab
+                      }
+                    },
+                  ),
+                  const SizedBox(
+                      height: 80), // Padding above floating button / bottom bar
+                ],
+              ),
             ),
           ),
         ),

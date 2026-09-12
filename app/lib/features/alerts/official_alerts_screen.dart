@@ -6,6 +6,7 @@ import '../../core/services/disaster_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import 'alert_details_screen.dart';
+import '../screen_entrance.dart';
 
 class OfficialAlertsScreen extends StatefulWidget {
   final Function(OfficialAlert)? onSelectAlert;
@@ -43,8 +44,7 @@ class _OfficialAlertsScreenState extends State<OfficialAlertsScreen> {
   List<OfficialAlert> get _filteredAlerts {
     if (_selectedCategory == 'All') return _alerts;
     return _alerts.where((a) {
-      final searchIn =
-          '${a.title} ${a.description}'.toLowerCase();
+      final searchIn = '${a.title} ${a.description}'.toLowerCase();
       return searchIn.contains(_selectedCategory.toLowerCase());
     }).toList();
   }
@@ -68,88 +68,93 @@ class _OfficialAlertsScreenState extends State<OfficialAlertsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return ScreenEntrance(
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(Tr.t('alerts_title'), style: AppTextStyles.screenHeader),
+              Text(Tr.t('alerts_subtitle'), style: AppTextStyles.caption),
+            ],
+          ),
+        ),
+        body: Column(
           children: [
-            Text(Tr.t('alerts_title'), style: AppTextStyles.screenHeader),
-            Text(Tr.t('alerts_subtitle'), style: AppTextStyles.caption),
+            const SizedBox(height: 12),
+            // Category filter chips
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: _categories.map((cat) {
+                  final selected = _selectedCategory == cat;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      label: Text(_getCategoryLabel(cat)),
+                      selected: selected,
+                      selectedColor: AppColors.primary,
+                      backgroundColor: AppColors.surface,
+                      labelStyle: TextStyle(
+                        color:
+                            selected ? Colors.white : AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        side: BorderSide(
+                          color:
+                              selected ? AppColors.primary : AppColors.border,
+                        ),
+                      ),
+                      onSelected: (_) =>
+                          setState(() => _selectedCategory = cat),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: _loading
+                  ? const Center(
+                      child:
+                          CircularProgressIndicator(color: AppColors.primary))
+                  : RefreshIndicator(
+                      onRefresh: _loadAlerts,
+                      color: AppColors.primary,
+                      child: _filteredAlerts.isEmpty
+                          ? Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.filter_list_off,
+                                      size: 48, color: AppColors.textMuted),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    Tr.t('no_alerts_filter'),
+                                    style: AppTextStyles.body,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            )
+                          : ListView.builder(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 8),
+                              itemCount: _filteredAlerts.length,
+                              itemBuilder: (context, index) {
+                                final alert = _filteredAlerts[index];
+                                return _buildAlertCard(alert);
+                              },
+                            ),
+                    ),
+            ),
           ],
         ),
-      ),
-      body: Column(
-        children: [
-          const SizedBox(height: 12),
-          // Category filter chips
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: _categories.map((cat) {
-                final selected = _selectedCategory == cat;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: ChoiceChip(
-                    label: Text(_getCategoryLabel(cat)),
-                    selected: selected,
-                    selectedColor: AppColors.primary,
-                    backgroundColor: AppColors.surface,
-                    labelStyle: TextStyle(
-                      color: selected ? Colors.white : AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      side: BorderSide(
-                        color: selected ? AppColors.primary : AppColors.border,
-                      ),
-                    ),
-                    onSelected: (_) =>
-                        setState(() => _selectedCategory = cat),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: _loading
-                ? const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary))
-                : RefreshIndicator(
-                    onRefresh: _loadAlerts,
-                    color: AppColors.primary,
-                    child: _filteredAlerts.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.filter_list_off,
-                                    size: 48, color: AppColors.textMuted),
-                                const SizedBox(height: 12),
-                                Text(
-                                  Tr.t('no_alerts_filter'),
-                                  style: AppTextStyles.body,
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                          )
-                        : ListView.builder(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 8),
-                            itemCount: _filteredAlerts.length,
-                            itemBuilder: (context, index) {
-                              final alert = _filteredAlerts[index];
-                              return _buildAlertCard(alert);
-                            },
-                          ),
-                  ),
-          ),
-        ],
       ),
     );
   }

@@ -4,6 +4,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/localization/app_translations.dart';
 import '../chat/chat_screen.dart';
 import '../profile/emergency_contacts_screen.dart';
+import '../screen_entrance.dart';
 
 // ============================================================
 // Safety Hub Screen
@@ -12,203 +13,208 @@ class SafetyHubScreen extends StatelessWidget {
   const SafetyHubScreen({super.key});
 
   List<_GuideEntry> get _guides => [
-    _GuideEntry(
-      emoji: '🌊',
-      title: Tr.t('guide_flood_title'),
-      subtitle: Tr.t('guide_flood_sub'),
-      doItems: [
-        Tr.t('flood_do_1'),
-        Tr.t('flood_do_2'),
-        Tr.t('flood_do_3'),
-        Tr.t('flood_do_4'),
-      ],
-      doNotItems: [
-        Tr.t('flood_dont_1'),
-        Tr.t('flood_dont_2'),
-        Tr.t('flood_dont_3'),
-      ],
-      watchForItems: [
-        Tr.t('flood_watch_1'),
-        Tr.t('flood_watch_2'),
-        Tr.t('flood_watch_3'),
-        Tr.t('flood_watch_4'),
-      ],
-    ),
-    _GuideEntry(
-      emoji: '⛰️',
-      title: Tr.t('guide_slope_title'),
-      subtitle: Tr.t('guide_slope_sub'),
-      doItems: [
-        Tr.t('slope_do_1'),
-        Tr.t('slope_do_2'),
-        Tr.t('slope_do_3'),
-        Tr.t('slope_do_4'),
-      ],
-      doNotItems: [
-        Tr.t('slope_dont_1'),
-        Tr.t('slope_dont_2'),
-        Tr.t('slope_dont_3'),
-      ],
-      watchForItems: [
-        Tr.t('slope_watch_1'),
-        Tr.t('slope_watch_2'),
-        Tr.t('slope_watch_3'),
-        Tr.t('slope_watch_4'),
-      ],
-    ),
-    _GuideEntry(
-      emoji: '☀️',
-      title: Tr.t('guide_heat_title'),
-      subtitle: Tr.t('guide_heat_sub'),
-      doItems: [
-        Tr.t('heat_do_1'),
-        Tr.t('heat_do_2'),
-        Tr.t('heat_do_3'),
-        Tr.t('heat_do_4'),
-      ],
-      doNotItems: [
-        Tr.t('heat_dont_1'),
-        Tr.t('heat_dont_2'),
-        Tr.t('heat_dont_3'),
-      ],
-      watchForItems: [
-        Tr.t('heat_watch_1'),
-        Tr.t('heat_watch_2'),
-        Tr.t('heat_watch_3'),
-        Tr.t('heat_watch_4'),
-      ],
-    ),
-    _GuideEntry(
-      emoji: '💨',
-      title: Tr.t('guide_wind_title'),
-      subtitle: Tr.t('guide_wind_sub'),
-      doItems: [
-        Tr.t('wind_do_1'),
-        Tr.t('wind_do_2'),
-        Tr.t('wind_do_3'),
-        Tr.t('wind_do_4'),
-      ],
-      doNotItems: [
-        Tr.t('wind_dont_1'),
-        Tr.t('wind_dont_2'),
-        Tr.t('wind_dont_3'),
-      ],
-      watchForItems: [
-        Tr.t('wind_watch_1'),
-        Tr.t('wind_watch_2'),
-        Tr.t('wind_watch_3'),
-        Tr.t('wind_watch_4'),
-      ],
-    ),
-    _GuideEntry(
-      emoji: '🌫️',
-      title: Tr.t('guide_dust_title'),
-      subtitle: Tr.t('guide_dust_sub'),
-      doItems: [
-        Tr.t('dust_do_1'),
-        Tr.t('dust_do_2'),
-        Tr.t('dust_do_3'),
-        Tr.t('dust_do_4'),
-      ],
-      doNotItems: [
-        Tr.t('dust_dont_1'),
-        Tr.t('dust_dont_2'),
-        Tr.t('dust_dont_3'),
-      ],
-      watchForItems: [
-        Tr.t('dust_watch_1'),
-        Tr.t('dust_watch_2'),
-        Tr.t('dust_watch_3'),
-      ],
-    ),
-  ];
+        _GuideEntry(
+          emoji: '🌊',
+          title: Tr.t('guide_flood_title'),
+          subtitle: Tr.t('guide_flood_sub'),
+          doItems: [
+            Tr.t('flood_do_1'),
+            Tr.t('flood_do_2'),
+            Tr.t('flood_do_3'),
+            Tr.t('flood_do_4'),
+          ],
+          doNotItems: [
+            Tr.t('flood_dont_1'),
+            Tr.t('flood_dont_2'),
+            Tr.t('flood_dont_3'),
+          ],
+          watchForItems: [
+            Tr.t('flood_watch_1'),
+            Tr.t('flood_watch_2'),
+            Tr.t('flood_watch_3'),
+            Tr.t('flood_watch_4'),
+          ],
+        ),
+        _GuideEntry(
+          emoji: '⛰️',
+          title: Tr.t('guide_slope_title'),
+          subtitle: Tr.t('guide_slope_sub'),
+          doItems: [
+            Tr.t('slope_do_1'),
+            Tr.t('slope_do_2'),
+            Tr.t('slope_do_3'),
+            Tr.t('slope_do_4'),
+          ],
+          doNotItems: [
+            Tr.t('slope_dont_1'),
+            Tr.t('slope_dont_2'),
+            Tr.t('slope_dont_3'),
+          ],
+          watchForItems: [
+            Tr.t('slope_watch_1'),
+            Tr.t('slope_watch_2'),
+            Tr.t('slope_watch_3'),
+            Tr.t('slope_watch_4'),
+          ],
+        ),
+        _GuideEntry(
+          emoji: '☀️',
+          title: Tr.t('guide_heat_title'),
+          subtitle: Tr.t('guide_heat_sub'),
+          doItems: [
+            Tr.t('heat_do_1'),
+            Tr.t('heat_do_2'),
+            Tr.t('heat_do_3'),
+            Tr.t('heat_do_4'),
+          ],
+          doNotItems: [
+            Tr.t('heat_dont_1'),
+            Tr.t('heat_dont_2'),
+            Tr.t('heat_dont_3'),
+          ],
+          watchForItems: [
+            Tr.t('heat_watch_1'),
+            Tr.t('heat_watch_2'),
+            Tr.t('heat_watch_3'),
+            Tr.t('heat_watch_4'),
+          ],
+        ),
+        _GuideEntry(
+          emoji: '💨',
+          title: Tr.t('guide_wind_title'),
+          subtitle: Tr.t('guide_wind_sub'),
+          doItems: [
+            Tr.t('wind_do_1'),
+            Tr.t('wind_do_2'),
+            Tr.t('wind_do_3'),
+            Tr.t('wind_do_4'),
+          ],
+          doNotItems: [
+            Tr.t('wind_dont_1'),
+            Tr.t('wind_dont_2'),
+            Tr.t('wind_dont_3'),
+          ],
+          watchForItems: [
+            Tr.t('wind_watch_1'),
+            Tr.t('wind_watch_2'),
+            Tr.t('wind_watch_3'),
+            Tr.t('wind_watch_4'),
+          ],
+        ),
+        _GuideEntry(
+          emoji: '🌫️',
+          title: Tr.t('guide_dust_title'),
+          subtitle: Tr.t('guide_dust_sub'),
+          doItems: [
+            Tr.t('dust_do_1'),
+            Tr.t('dust_do_2'),
+            Tr.t('dust_do_3'),
+            Tr.t('dust_do_4'),
+          ],
+          doNotItems: [
+            Tr.t('dust_dont_1'),
+            Tr.t('dust_dont_2'),
+            Tr.t('dust_dont_3'),
+          ],
+          watchForItems: [
+            Tr.t('dust_watch_1'),
+            Tr.t('dust_watch_2'),
+            Tr.t('dust_watch_3'),
+          ],
+        ),
+      ];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        leading: const BackButton(color: AppColors.textPrimary),
-        title: Text(Tr.t('safety_hub_title'),
-            style: AppTextStyles.cardTitle.copyWith(color: AppColors.primary)),
-      ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'fab_safety',
-        backgroundColor: AppColors.primary,
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const ChatScreen()),
+    return ScreenEntrance(
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          backgroundColor: AppColors.surface,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          centerTitle: true,
+          leading: const BackButton(color: AppColors.textPrimary),
+          title: Text(Tr.t('safety_hub_title'),
+              style:
+                  AppTextStyles.cardTitle.copyWith(color: AppColors.primary)),
         ),
-        child: const Icon(Icons.smart_toy_outlined, color: Colors.white),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Emergency Safe Bag section
-          Text(Tr.t('safety_bag_section'), style: AppTextStyles.sectionLabel),
-          const SizedBox(height: 10),
-          _HubCard(
-            icon: Icons.backpack_outlined,
-            title: Tr.t('safety_bag_title'),
-            subtitle: Tr.t('safety_bag_subtitle'),
-            onTap: () => showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-              builder: (_) => const _SafeBagBottomSheet(),
-            ),
+        floatingActionButton: FloatingActionButton(
+          heroTag: 'fab_safety',
+          backgroundColor: AppColors.primary,
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ChatScreen()),
           ),
-          const SizedBox(height: 24),
+          child: const Icon(Icons.smart_toy_outlined, color: Colors.white),
+        ),
+        body: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            // Emergency Safe Bag section
+            Text(Tr.t('safety_bag_section'), style: AppTextStyles.sectionLabel),
+            const SizedBox(height: 10),
+            _HubCard(
+              icon: Icons.backpack_outlined,
+              title: Tr.t('safety_bag_title'),
+              subtitle: Tr.t('safety_bag_subtitle'),
+              onTap: () => showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                shape: const RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(20))),
+                builder: (_) => const _SafeBagBottomSheet(),
+              ),
+            ),
+            const SizedBox(height: 24),
 
-          // Safety guides section
-          Text(Tr.t('safety_guides_section'), style: AppTextStyles.sectionLabel),
-          const SizedBox(height: 10),
-          ..._guides.map((g) => Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: _HubCard(
-                  emoji: g.emoji,
-                  title: g.title,
-                  subtitle: g.subtitle,
-                  onTap: () => showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    shape: const RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.vertical(top: Radius.circular(20))),
-                    builder: (_) => _SafetyGuideBottomSheet(guide: g),
+            // Safety guides section
+            Text(Tr.t('safety_guides_section'),
+                style: AppTextStyles.sectionLabel),
+            const SizedBox(height: 10),
+            ..._guides.map((g) => Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: _HubCard(
+                    emoji: g.emoji,
+                    title: g.title,
+                    subtitle: g.subtitle,
+                    onTap: () => showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      shape: const RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.vertical(top: Radius.circular(20))),
+                      builder: (_) => _SafetyGuideBottomSheet(guide: g),
+                    ),
                   ),
-                ),
-              )),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: AppColors.aiCardBg,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.aiCardBorder),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.info_outline,
-                    size: 15, color: AppColors.primary),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    Tr.t('safety_info_note'),
-                    style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textSecondary, height: 1.4),
+                )),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.aiCardBg,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.aiCardBorder),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.info_outline,
+                      size: 15, color: AppColors.primary),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      Tr.t('safety_info_note'),
+                      style: AppTextStyles.caption.copyWith(
+                          color: AppColors.textSecondary, height: 1.4),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 80),
-        ],
+            const SizedBox(height: 80),
+          ],
+        ),
       ),
     );
   }
@@ -252,8 +258,8 @@ class _HubCard extends StatelessWidget {
                 ),
                 child: emoji != null
                     ? Center(
-                        child: Text(emoji!,
-                            style: const TextStyle(fontSize: 22)))
+                        child:
+                            Text(emoji!, style: const TextStyle(fontSize: 22)))
                     : Icon(icon, color: AppColors.primary, size: 22),
               ),
               const SizedBox(width: 14),
@@ -261,7 +267,8 @@ class _HubCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: AppTextStyles.cardTitle.copyWith(fontSize: 14)),
+                    Text(title,
+                        style: AppTextStyles.cardTitle.copyWith(fontSize: 14)),
                     const SizedBox(height: 3),
                     Text(subtitle,
                         style: AppTextStyles.caption.copyWith(
@@ -290,20 +297,20 @@ class _SafeBagBottomSheet extends StatefulWidget {
 
 class _SafeBagBottomSheetState extends State<_SafeBagBottomSheet> {
   List<String> get _items => [
-    Tr.t('bag_water'),
-    Tr.t('bag_food'),
-    Tr.t('bag_first_aid'),
-    Tr.t('bag_medicines'),
-    Tr.t('bag_flashlight'),
-    Tr.t('bag_batteries'),
-    Tr.t('bag_power_bank'),
-    Tr.t('bag_documents'),
-    Tr.t('bag_contacts'),
-    Tr.t('bag_hygiene'),
-    Tr.t('bag_clothing'),
-    Tr.t('bag_whistle'),
-    Tr.t('bag_map'),
-  ];
+        Tr.t('bag_water'),
+        Tr.t('bag_food'),
+        Tr.t('bag_first_aid'),
+        Tr.t('bag_medicines'),
+        Tr.t('bag_flashlight'),
+        Tr.t('bag_batteries'),
+        Tr.t('bag_power_bank'),
+        Tr.t('bag_documents'),
+        Tr.t('bag_contacts'),
+        Tr.t('bag_hygiene'),
+        Tr.t('bag_clothing'),
+        Tr.t('bag_whistle'),
+        Tr.t('bag_map'),
+      ];
 
   late final List<bool> _checked;
 
@@ -333,18 +340,19 @@ class _SafeBagBottomSheetState extends State<_SafeBagBottomSheet> {
                     height: 4,
                     margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
-                       color: AppColors.border,
-                       borderRadius: BorderRadius.circular(2),
+                      color: AppColors.border,
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                   Row(
                     children: [
                       Expanded(
                           child: Text(Tr.t('safety_bag_title'),
-                              style: AppTextStyles.cardTitle.copyWith(
-                                  fontSize: 18))),
+                              style: AppTextStyles.cardTitle
+                                  .copyWith(fontSize: 18))),
                       IconButton(
-                        icon: const Icon(Icons.close, color: AppColors.textMuted),
+                        icon:
+                            const Icon(Icons.close, color: AppColors.textMuted),
                         onPressed: () => Navigator.pop(ctx),
                       ),
                     ],
@@ -352,8 +360,8 @@ class _SafeBagBottomSheetState extends State<_SafeBagBottomSheet> {
                   const SizedBox(height: 4),
                   Text(
                     Tr.t('safety_bag_subtitle'),
-                    style: AppTextStyles.body.copyWith(
-                        color: AppColors.textSecondary),
+                    style: AppTextStyles.body
+                        .copyWith(color: AppColors.textSecondary),
                   ),
                 ],
               ),
@@ -371,9 +379,8 @@ class _SafeBagBottomSheetState extends State<_SafeBagBottomSheet> {
                     onChanged: (v) => setState(() => _checked[i] = v ?? false),
                     title: Text(_items[i],
                         style: AppTextStyles.body.copyWith(
-                            decoration: _checked[i]
-                                ? TextDecoration.lineThrough
-                                : null,
+                            decoration:
+                                _checked[i] ? TextDecoration.lineThrough : null,
                             color: _checked[i]
                                 ? AppColors.textMuted
                                 : AppColors.textPrimary)),
@@ -400,8 +407,8 @@ class _SafeBagBottomSheetState extends State<_SafeBagBottomSheet> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(Tr.t('safety_bag_hint'),
-                        style: AppTextStyles.caption.copyWith(
-                            color: AppColors.textSecondary)),
+                        style: AppTextStyles.caption
+                            .copyWith(color: AppColors.textSecondary)),
                   ),
                 ],
               ),
@@ -511,18 +518,19 @@ class _SafetyGuideBottomSheet extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(guide.title,
-                            style: AppTextStyles.cardTitle.copyWith(
-                                fontSize: 18)),
+                            style:
+                                AppTextStyles.cardTitle.copyWith(fontSize: 18)),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.close, color: AppColors.textMuted),
+                        icon:
+                            const Icon(Icons.close, color: AppColors.textMuted),
                         onPressed: () => Navigator.pop(ctx),
                       ),
                     ],
                   ),
                   Text(guide.subtitle,
-                      style: AppTextStyles.body.copyWith(
-                          color: AppColors.textSecondary)),
+                      style: AppTextStyles.body
+                          .copyWith(color: AppColors.textSecondary)),
                 ],
               ),
             ),
@@ -650,8 +658,8 @@ class _GuideSection extends StatelessWidget {
           ...items.map((item) => Padding(
                 padding: const EdgeInsets.only(bottom: 6),
                 child: Text(item,
-                    style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textSecondary, height: 1.4)),
+                    style: AppTextStyles.caption
+                        .copyWith(color: AppColors.textSecondary, height: 1.4)),
               )),
         ],
       ),
