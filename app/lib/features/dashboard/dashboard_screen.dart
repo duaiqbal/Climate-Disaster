@@ -1,13 +1,14 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/localization/app_localizations.dart';
+import '../../core/localization/language_service.dart';
 import '../../core/providers/app_state_provider.dart';
 import '../../core/providers/language_provider.dart';
-import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_colors.dart';
 import '../chat/chat_screen.dart';
-import '../alerts/alerts_screen.dart';
-import '../map/hazard_map_screen.dart';
-import '../safety/safety_checklist_screen.dart';
+import '../alerts/official_alerts_screen.dart';
+import '../map/map_screen.dart';
+import '../safety/safety_hub_screen.dart';
 import '../profile/profile_screen.dart';
 import '../go_bag/go_bag_screen.dart';
 
@@ -25,9 +26,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   late final List<Widget> _screens = [
     _HomeTab(onNavigate: _setTab),
     const ChatScreen(),
-    const AlertsScreen(),
-    const HazardMapScreen(),
-    const SafetyChecklistScreen(),
+    const OfficialAlertsScreen(),
+    const MapScreen(),
+    const SafetyHubScreen(),
     const GoBagScreen(),
   ];
 

@@ -12,7 +12,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  # Local database
+  # Database
   sqflite: ^2.3.3
   path: ^1.9.0
   path_provider: ^2.1.3
@@ -20,30 +20,30 @@ dependencies:
   # State management
   provider: ^6.1.2
 
-  # Location / GPS
+  # Location
   geolocator: ^12.0.0
 
-  # HTTP (optional online sync)
+  # HTTP
   http: ^1.2.1
 
-  # Shared preferences (settings, language pref)
+  # Storage
   shared_preferences: ^2.3.1
-
-  # Secure token storage on mobile (flutter_secure_storage)
-  # Falls back to SharedPreferences on web (no secure enclave available)
   flutter_secure_storage: ^9.2.2
 
-  # Connectivity check
+  # Connectivity
   connectivity_plus: ^6.0.3
 
   # Icons
   cupertino_icons: ^1.0.8
 
   # Internationalisation (dates, numbers)
-  intl: 0.20.2
+  intl: ^0.20.3
 
-  # Permission handling (location)
+  # Permissions
   permission_handler: ^11.3.1
+
+  # URL launcher
+  url_launcher: ^6.2.4
 
 dev_dependencies:
   flutter_test:
@@ -52,21 +52,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-
   assets:
     - assets/offline_package/knowledge.sqlite
     - assets/offline_package/hazard_grid.sqlite
     - assets/images/
     - assets/icons/
-
-  # Font declarations removed — font files not present in assets/fonts/.
-  # Flutter will use system fonts. Add font files and uncomment to re-enable.
-  # fonts:
-  #   - family: NotoNastaliqUrdu
-  #     fonts:
-  #       - asset: assets/fonts/NotoNastaliqUrdu-Regular.ttf
-  #   - family: Roboto
-  #     fonts:
-  #       - asset: assets/fonts/Roboto-Regular.ttf
-  #       - asset: assets/fonts/Roboto-Bold.ttf
-  #         weight: 700

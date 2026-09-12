@@ -16,8 +16,8 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from backend.routers.knowledge import _get_db_path, _do_search, _run_query
-from backend.services.rag_service import RAGResponse, query_rag
+from routers.knowledge import _get_db_path, _do_search, _run_query
+from services.rag_service import RAGResponse, query_rag
 
 router = APIRouter(prefix="/rag", tags=["RAG"])
 

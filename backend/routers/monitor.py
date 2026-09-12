@@ -20,8 +20,8 @@ from fastapi import APIRouter, Depends, HTTPException, Security
 from fastapi.security import APIKeyHeader
 from pydantic import BaseModel
 
-from backend.core.config import settings
-from backend.core.scheduler import get_scheduler_status
+from core.config import settings
+from core.scheduler import get_scheduler_status
 
 router = APIRouter(prefix="/monitor", tags=["Alert Monitor"])
 

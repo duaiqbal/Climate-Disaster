@@ -9,7 +9,7 @@ PRODUCTION BEHAVIOUR:
   This prevents accidentally running production with dev credentials.
 
 Usage:
-  from backend.core.config import settings
+  from core.config import settings
 
   settings.secret_key        # JWT signing secret
   settings.admin_api_key     # Admin endpoint key

@@ -25,13 +25,13 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from backend.core.config import settings
-from backend.core.rate_limit import RateLimitMiddleware
-from backend.core.scheduler import start_scheduler, stop_scheduler
-from backend.database import init_db
-from backend.models.db_models import HealthResponse
-from backend.routers import alerts, auth, knowledge, monitor, sync
-from backend.routers import rag as rag_router
+from core.config import settings
+from core.rate_limit import RateLimitMiddleware
+from core.scheduler import start_scheduler, stop_scheduler
+from database import init_db
+from models.db_models import HealthResponse
+from routers import alerts, auth, knowledge, monitor, sync
+from routers import rag as rag_router
 
 APP_VERSION = "2.0.0"
 limiter = None  # Rate limiting handled at infrastructure level in production

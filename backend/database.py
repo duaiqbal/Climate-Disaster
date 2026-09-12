@@ -8,7 +8,7 @@ Configuration comes from backend/core/config.py (never hardcoded here).
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
-from backend.core.config import settings
+from core.config import settings
 
 # ── Engine ─────────────────────────────────────────────────────────────────────
 _connect_args = {}
