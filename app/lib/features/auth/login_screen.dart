@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/localization/app_translations.dart';
+import '../../core/services/api_service.dart';
+import '../../core/services/user_session.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/auth_tab_switch.dart';
@@ -21,6 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _obscurePassword = true;
+  String? _errorMessage;
 
   @override
   void dispose() {
@@ -32,17 +34,37 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 500));
-    final prefs = await SharedPreferences.getInstance();
-    if (!prefs.containsKey('user_email')) {
-      await prefs.setString('user_email', _emailController.text.trim());
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      final response = await ApiService.postDetailed('/auth/login', {
+        'email': _emailController.text.trim(),
+        'password': _passwordController.text,
+      });
+      if (response.statusCode != 200 || response.body is! Map) {
+        throw ApiException(
+            _apiError(response.body, 'Login failed.'), response.statusCode);
+      }
+      UserSession.instance.setFromLoginResponse(
+        Map<String, dynamic>.from(response.body as Map),
+      );
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const MainNavigationShell()),
+      );
+    } catch (error) {
+      if (mounted) setState(() => _errorMessage = error.toString());
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
-    if (!mounted) return;
-    setState(() => _isLoading = false);
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const MainNavigationShell()),
-    );
+  }
+
+  String _apiError(dynamic body, String fallback) {
+    if (body is Map && body['detail'] is String)
+      return body['detail'] as String;
+    return fallback;
   }
 
   @override
@@ -82,7 +104,8 @@ class _LoginScreenState extends State<LoginScreen> {
               Text(
                 Tr.t('app_subtitle'),
                 textAlign: TextAlign.center,
-                style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+                style:
+                    AppTextStyles.body.copyWith(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 24),
               Container(
@@ -115,6 +138,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                       ),
                       const SizedBox(height: 20),
+                      if (_errorMessage != null) ...[
+                        Text(_errorMessage!,
+                            style: const TextStyle(color: Colors.red)),
+                        const SizedBox(height: 12),
+                      ],
                       Text(Tr.t('email'),
                           style: AppTextStyles.bodyMedium
                               .copyWith(fontWeight: FontWeight.w600)),

@@ -1,5 +1,4 @@
-﻿import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/localization/app_translations.dart';
@@ -8,6 +7,7 @@ import '../../../core/models/weather_data.dart';
 import '../../../core/models/household_risk.dart';
 import '../../../core/models/official_alert.dart';
 import '../../../core/services/disaster_repository.dart';
+import '../../../core/services/user_session.dart';
 import '../widgets/current_conditions_card.dart';
 import '../widgets/household_risk_card.dart';
 import '../widgets/official_warning_card.dart';
@@ -33,7 +33,8 @@ class MainRiskDashboardScreen extends StatefulWidget {
   });
 
   @override
-  State<MainRiskDashboardScreen> createState() => _MainRiskDashboardScreenState();
+  State<MainRiskDashboardScreen> createState() =>
+      _MainRiskDashboardScreenState();
 }
 
 class _MainRiskDashboardScreenState extends State<MainRiskDashboardScreen> {
@@ -42,7 +43,7 @@ class _MainRiskDashboardScreenState extends State<MainRiskDashboardScreen> {
   bool _isLoading = true;
   String? _errorMessage;
   String? _userInitials;
-  String _userName = '';  // actual name from SharedPreferences
+  String _userName = '';
 
   CurrentConditions _conditions = CurrentConditions.defaultChitral;
   HouseholdRisk _risk = HouseholdRisk.defaultModerate;
@@ -62,8 +63,7 @@ class _MainRiskDashboardScreenState extends State<MainRiskDashboardScreen> {
   }
 
   Future<void> _loadUserInitials() async {
-    final prefs = await SharedPreferences.getInstance();
-    final name = prefs.getString('user_name') ?? '';
+    final name = UserSession.instance.name ?? '';
     if (name.trim().isNotEmpty) {
       final parts = name.trim().split(RegExp(r'\s+'));
       String initials;
@@ -135,25 +135,29 @@ class _MainRiskDashboardScreenState extends State<MainRiskDashboardScreen> {
                 if (_errorMessage != null)
                   Container(
                     margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 10),
                     decoration: BoxDecoration(
                       color: AppColors.riskHighBg,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.info_outline, color: AppColors.riskHigh, size: 20),
+                        const Icon(Icons.info_outline,
+                            color: AppColors.riskHigh, size: 20),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             _errorMessage!,
-                            style: const TextStyle(fontSize: 13, color: AppColors.riskHigh),
+                            style: const TextStyle(
+                                fontSize: 13, color: AppColors.riskHigh),
                           ),
                         ),
                         TextButton(
                           onPressed: _loadData,
                           style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
                             minimumSize: Size.zero,
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
@@ -184,53 +188,54 @@ class _MainRiskDashboardScreenState extends State<MainRiskDashboardScreen> {
                 CurrentConditionsCard(conditions: _conditions),
                 const SizedBox(height: 16),
                 HouseholdRiskCard(
-                    risk: _risk,
-                    onViewFactors: () {
-                      HouseholdRiskBottomSheet.show(context, _risk);
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  OfficialWarningCard(
-                    alert: _alert,
-                    onViewAlert: () {
-                      if (widget.onOpenAlertDetails != null) {
-                        widget.onOpenAlertDetails!(_alert);
-                      } else if (widget.onNavigateToTab != null) {
-                        widget.onNavigateToTab!(3); // Alerts tab
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  CommunityRiskCard(
-                    onViewReports: () {
-                      if (widget.onOpenCommunityReports != null) {
-                        widget.onOpenCommunityReports!();
-                      } else if (widget.onNavigateToTab != null) {
-                        widget.onNavigateToTab!(2); // Map or Community tab
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  AiRecommendationCard(
-                    recommendation: _aiRecommendation,
-                    onAskAi: () {
-                      if (widget.onOpenAiAssistant != null) {
-                        widget.onOpenAiAssistant!();
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  SevenDayForecastPreview(
-                    forecasts: _forecasts,
-                    onViewFull: () {
-                      if (widget.onNavigateToTab != null) {
-                        widget.onNavigateToTab!(1); // Forecast tab
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 80), // Padding above floating button / bottom bar
-                ],
-              ),
+                  risk: _risk,
+                  onViewFactors: () {
+                    HouseholdRiskBottomSheet.show(context, _risk);
+                  },
+                ),
+                const SizedBox(height: 16),
+                OfficialWarningCard(
+                  alert: _alert,
+                  onViewAlert: () {
+                    if (widget.onOpenAlertDetails != null) {
+                      widget.onOpenAlertDetails!(_alert);
+                    } else if (widget.onNavigateToTab != null) {
+                      widget.onNavigateToTab!(3); // Alerts tab
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+                CommunityRiskCard(
+                  onViewReports: () {
+                    if (widget.onOpenCommunityReports != null) {
+                      widget.onOpenCommunityReports!();
+                    } else if (widget.onNavigateToTab != null) {
+                      widget.onNavigateToTab!(2); // Map or Community tab
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+                AiRecommendationCard(
+                  recommendation: _aiRecommendation,
+                  onAskAi: () {
+                    if (widget.onOpenAiAssistant != null) {
+                      widget.onOpenAiAssistant!();
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+                SevenDayForecastPreview(
+                  forecasts: _forecasts,
+                  onViewFull: () {
+                    if (widget.onNavigateToTab != null) {
+                      widget.onNavigateToTab!(1); // Forecast tab
+                    }
+                  },
+                ),
+                const SizedBox(
+                    height: 80), // Padding above floating button / bottom bar
+              ],
+            ),
           ),
         ),
       ),
@@ -242,17 +247,26 @@ class _MainRiskDashboardScreenState extends State<MainRiskDashboardScreen> {
     final hour = DateTime.now().hour;
     final String timeGreeting;
     if (LanguageService.instance.isUrdu) {
-      if (hour < 12) timeGreeting = 'صبح بخیر';
-      else if (hour < 17) timeGreeting = 'دوپہر بخیر';
-      else timeGreeting = 'شب بخیر';
+      if (hour < 12)
+        timeGreeting = 'صبح بخیر';
+      else if (hour < 17)
+        timeGreeting = 'دوپہر بخیر';
+      else
+        timeGreeting = 'شب بخیر';
     } else if (LanguageService.instance.isRomanUrdu) {
-      if (hour < 12) timeGreeting = 'Subh-ba-khair';
-      else if (hour < 17) timeGreeting = 'Dopahar-ba-khair';
-      else timeGreeting = 'Shab-ba-khair';
+      if (hour < 12)
+        timeGreeting = 'Subh-ba-khair';
+      else if (hour < 17)
+        timeGreeting = 'Dopahar-ba-khair';
+      else
+        timeGreeting = 'Shab-ba-khair';
     } else {
-      if (hour < 12) timeGreeting = 'Good morning';
-      else if (hour < 17) timeGreeting = 'Good afternoon';
-      else timeGreeting = 'Good evening';
+      if (hour < 12)
+        timeGreeting = 'Good morning';
+      else if (hour < 17)
+        timeGreeting = 'Good afternoon';
+      else
+        timeGreeting = 'Good evening';
     }
 
     if (_userName.isNotEmpty) {

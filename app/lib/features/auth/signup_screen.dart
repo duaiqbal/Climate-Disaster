@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/localization/app_translations.dart';
+import '../../core/services/api_service.dart';
+import '../../core/services/user_session.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/auth_tab_switch.dart';
@@ -23,6 +24,7 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  String? _errorMessage;
 
   @override
   void dispose() {
@@ -36,19 +38,56 @@ class _SignupScreenState extends State<SignupScreen> {
   Future<void> _handleCreateAccount() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 500));
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      final registration = await ApiService.postDetailed('/auth/register', {
+        'name': _nameController.text.trim(),
+        'email': _emailController.text.trim(),
+        'password': _passwordController.text,
+        'language': 'en',
+      });
+      if (registration.statusCode != 201 || registration.body is! Map) {
+        throw ApiException(_apiError(registration.body, 'Registration failed.'),
+            registration.statusCode);
+      }
 
-    // Save profile to SharedPreferences for dynamic profile display
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('user_name', _nameController.text.trim());
-    await prefs.setString('user_email', _emailController.text.trim());
+      // Registration returns the profile only; login obtains the access token.
+      final login = await ApiService.postDetailed('/auth/login', {
+        'email': _emailController.text.trim(),
+        'password': _passwordController.text,
+      });
+      if (login.statusCode != 200 || login.body is! Map) {
+        throw ApiException(
+            _apiError(login.body, 'Account created, but login failed.'),
+            login.statusCode);
+      }
+      UserSession.instance.setFromLoginResponse(
+        Map<String, dynamic>.from(login.body as Map),
+      );
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const MainNavigationShell()),
+      );
+    } catch (error) {
+      if (mounted) setState(() => _errorMessage = error.toString());
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
-    if (!mounted) return;
-    setState(() => _isLoading = false);
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const MainNavigationShell()),
-    );
+  String _apiError(dynamic body, String fallback) {
+    if (body is Map && body['detail'] is String)
+      return body['detail'] as String;
+    if (body is Map && body['detail'] is List) {
+      return (body['detail'] as List).map((item) {
+        if (item is Map && item['msg'] != null) return item['msg'].toString();
+        return item.toString();
+      }).join(', ');
+    }
+    return fallback;
   }
 
   @override
@@ -88,7 +127,8 @@ class _SignupScreenState extends State<SignupScreen> {
               Text(
                 Tr.t('app_subtitle'),
                 textAlign: TextAlign.center,
-                style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+                style:
+                    AppTextStyles.body.copyWith(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 24),
               Container(
@@ -121,6 +161,11 @@ class _SignupScreenState extends State<SignupScreen> {
                         onCreateAccountTap: () {},
                       ),
                       const SizedBox(height: 20),
+                      if (_errorMessage != null) ...[
+                        Text(_errorMessage!,
+                            style: const TextStyle(color: Colors.red)),
+                        const SizedBox(height: 12),
+                      ],
                       Text(Tr.t('name'),
                           style: AppTextStyles.bodyMedium
                               .copyWith(fontWeight: FontWeight.w600)),
@@ -242,7 +287,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           if (v == null || v.isEmpty) {
                             return Tr.t('validation_password_required');
                           }
-                          if (v.length < 6) {
+                          if (v.length < 8) {
                             return Tr.t('validation_password_short');
                           }
                           return null;
