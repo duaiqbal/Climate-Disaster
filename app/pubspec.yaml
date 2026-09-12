@@ -1,4 +1,4 @@
-﻿name: disaster_dss
+name: disaster_dss
 description: Offline-first disaster decision-support system for Chitral, KP.
 publish_to: 'none'
 version: 1.0.0+1
@@ -40,7 +40,7 @@ dependencies:
   cupertino_icons: ^1.0.8
 
   # Internationalisation (dates, numbers)
-  intl: ^0.20.3
+  intl: 0.20.2
 
   # Permission handling (location)
   permission_handler: ^11.3.1
