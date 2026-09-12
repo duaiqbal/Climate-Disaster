@@ -9,6 +9,7 @@ import '../safety/safety_hub_screen.dart';
 import '../feedback/feedback_screen.dart';
 import '../auth/language_selection_screen.dart';
 import '../../core/services/user_session.dart';
+import '../screen_entrance.dart';
 
 class ProfileScreen extends StatefulWidget {
   final VoidCallback? onLogout;
@@ -44,217 +45,219 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: UserSession.instance,
-      builder: (context, _) => Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: AppBar(
-          title: Text(Tr.t('tab_profile'), style: AppTextStyles.screenHeader),
-        ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Column(
-            children: [
-              // User Avatar & Name
-              Center(
-                child: Container(
-                  width: 72,
-                  height: 72,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    _displayInitials,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 24,
+    return ScreenEntrance(
+      child: AnimatedBuilder(
+        animation: UserSession.instance,
+        builder: (context, _) => Scaffold(
+          backgroundColor: AppColors.background,
+          appBar: AppBar(
+            title: Text(Tr.t('tab_profile'), style: AppTextStyles.screenHeader),
+          ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Column(
+              children: [
+                // User Avatar & Name
+                Center(
+                  child: Container(
+                    width: 72,
+                    height: 72,
+                    decoration: const BoxDecoration(
+                      color: AppColors.primary,
+                      shape: BoxShape.circle,
                     ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                _displayName,
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                _displayEmail,
-                style: AppTextStyles.caption,
-              ),
-              const SizedBox(height: 4),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.location_on_outlined,
-                      size: 14, color: AppColors.textMuted),
-                  const SizedBox(width: 4),
-                  Text(Tr.t('location_chitral_pk'),
-                      style: AppTextStyles.caption),
-                ],
-              ),
-              const SizedBox(height: 24),
-              // Household Risk preview card
-              Container(
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          Tr.t('household_risk'),
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        Icon(Icons.home_outlined, color: Colors.grey[700]),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.riskModerateBg,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '${Tr.riskLevel('Moderate Risk')} (68/100)',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.riskModerate,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      Tr.t('household_risk_desc'),
+                    alignment: Alignment.center,
+                    child: Text(
+                      _displayInitials,
                       style: const TextStyle(
-                          fontSize: 13, color: AppColors.textSecondary),
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
+                      ),
                     ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.push(
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  _displayName,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _displayEmail,
+                  style: AppTextStyles.caption,
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.location_on_outlined,
+                        size: 14, color: AppColors.textMuted),
+                    const SizedBox(width: 4),
+                    Text(Tr.t('location_chitral_pk'),
+                        style: AppTextStyles.caption),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                // Household Risk preview card
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            Tr.t('household_risk'),
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                          Icon(Icons.home_outlined, color: Colors.grey[700]),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.riskModerateBg,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '${Tr.riskLevel('Moderate Risk')} (68/100)',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.riskModerate,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        Tr.t('household_risk_desc'),
+                        style: const TextStyle(
+                            fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const RiskProfileScreen()),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Text(Tr.t('view_risk_profile')),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Settings menu card
+                Material(
+                  color: AppColors.surface,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: const BorderSide(color: AppColors.border),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildMenuItem(
+                        context: context,
+                        icon: Icons.person_search_outlined,
+                        title: Tr.t('menu_risk_profile'),
+                        subtitle: Tr.t('menu_risk_profile_sub'),
+                        onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (_) => const RiskProfileScreen()),
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                      ),
+                      const Divider(height: 1, indent: 56),
+                      _buildMenuItem(
+                        context: context,
+                        icon: Icons.contact_phone_outlined,
+                        title: Tr.t('menu_emergency_contacts'),
+                        subtitle: Tr.t('menu_emergency_contacts_sub'),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const EmergencyContactsScreen()),
+                        ),
+                      ),
+                      const Divider(height: 1, indent: 56),
+                      _buildMenuItem(
+                        context: context,
+                        icon: Icons.health_and_safety_outlined,
+                        title: Tr.t('menu_safety_hub'),
+                        subtitle: Tr.t('menu_safety_hub_sub'),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const SafetyHubScreen()),
+                        ),
+                      ),
+                      const Divider(height: 1, indent: 56),
+                      _buildMenuItem(
+                        context: context,
+                        icon: Icons.rate_review_outlined,
+                        title: Tr.t('menu_feedback'),
+                        subtitle: Tr.t('menu_feedback_sub'),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const FeedbackScreen()),
+                        ),
+                      ),
+                      const Divider(height: 1, indent: 56),
+                      _buildMenuItem(
+                        context: context,
+                        icon: Icons.language,
+                        title: Tr.t('menu_language'),
+                        subtitle: LanguageService.instance.displayName,
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LanguageSelectionScreen(),
                           ),
                         ),
-                        child: Text(Tr.t('view_risk_profile')),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Settings menu card
-              Material(
-                color: AppColors.surface,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  side: const BorderSide(color: AppColors.border),
-                ),
-                child: Column(
-                  children: [
-                    _buildMenuItem(
-                      context: context,
-                      icon: Icons.person_search_outlined,
-                      title: Tr.t('menu_risk_profile'),
-                      subtitle: Tr.t('menu_risk_profile_sub'),
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const RiskProfileScreen()),
-                      ),
-                    ),
-                    const Divider(height: 1, indent: 56),
-                    _buildMenuItem(
-                      context: context,
-                      icon: Icons.contact_phone_outlined,
-                      title: Tr.t('menu_emergency_contacts'),
-                      subtitle: Tr.t('menu_emergency_contacts_sub'),
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const EmergencyContactsScreen()),
-                      ),
-                    ),
-                    const Divider(height: 1, indent: 56),
-                    _buildMenuItem(
-                      context: context,
-                      icon: Icons.health_and_safety_outlined,
-                      title: Tr.t('menu_safety_hub'),
-                      subtitle: Tr.t('menu_safety_hub_sub'),
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const SafetyHubScreen()),
-                      ),
-                    ),
-                    const Divider(height: 1, indent: 56),
-                    _buildMenuItem(
-                      context: context,
-                      icon: Icons.rate_review_outlined,
-                      title: Tr.t('menu_feedback'),
-                      subtitle: Tr.t('menu_feedback_sub'),
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const FeedbackScreen()),
-                      ),
-                    ),
-                    const Divider(height: 1, indent: 56),
-                    _buildMenuItem(
-                      context: context,
-                      icon: Icons.language,
-                      title: Tr.t('menu_language'),
-                      subtitle: LanguageService.instance.displayName,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const LanguageSelectionScreen(),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: () => _showLogoutDialog(context),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.riskHigh,
-                    side: const BorderSide(color: AppColors.riskHigh),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                    ],
                   ),
-                  child: Text(Tr.t('log_out')),
                 ),
-              ),
-              const SizedBox(height: 60),
-            ],
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () => _showLogoutDialog(context),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.riskHigh,
+                      side: const BorderSide(color: AppColors.riskHigh),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Text(Tr.t('log_out')),
+                  ),
+                ),
+                const SizedBox(height: 60),
+              ],
+            ),
           ),
         ),
       ),

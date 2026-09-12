@@ -5,6 +5,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../chat/chat_screen.dart';
 import '../safety/safety_hub_screen.dart';
 import '../feedback/feedback_screen.dart';
+import '../screen_entrance.dart';
 
 class DecisionSimulatorScreen extends StatefulWidget {
   const DecisionSimulatorScreen({super.key});
@@ -18,123 +19,125 @@ class _DecisionSimulatorScreenState extends State<DecisionSimulatorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        leading: const BackButton(color: AppColors.textPrimary),
-        title: Text(Tr.t('sim_appbar_title'),
-            style: AppTextStyles.cardTitle.copyWith(
-                color: AppColors.textPrimary, fontSize: 16)),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(Tr.t('sim_title'),
-                style: AppTextStyles.screenHeader.copyWith(fontSize: 24)),
-            const SizedBox(height: 6),
-            Text(
-              Tr.t('sim_subtitle'),
-              style: AppTextStyles.body.copyWith(
-                  color: AppColors.textSecondary, height: 1.5),
-            ),
-            const SizedBox(height: 10),
-            OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primary,
-                side: const BorderSide(color: AppColors.primary),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20)),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 8),
+    return ScreenEntrance(
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          backgroundColor: AppColors.surface,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          leading: const BackButton(color: AppColors.textPrimary),
+          title: Text(Tr.t('sim_appbar_title'),
+              style: AppTextStyles.cardTitle
+                  .copyWith(color: AppColors.textPrimary, fontSize: 16)),
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(Tr.t('sim_title'),
+                  style: AppTextStyles.screenHeader.copyWith(fontSize: 24)),
+              const SizedBox(height: 6),
+              Text(
+                Tr.t('sim_subtitle'),
+                style: AppTextStyles.body
+                    .copyWith(color: AppColors.textSecondary, height: 1.5),
               ),
-              icon: const Icon(Icons.smart_toy_outlined, size: 16),
-              label: Text(Tr.t('sim_ask_ai')),
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ChatScreen()),
+              const SizedBox(height: 10),
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  side: const BorderSide(color: AppColors.primary),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20)),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                ),
+                icon: const Icon(Icons.smart_toy_outlined, size: 16),
+                label: Text(Tr.t('sim_ask_ai')),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ChatScreen()),
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            // Disclaimer
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: AppColors.aiCardBg,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.aiCardBorder),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.info_outline,
-                      size: 16, color: AppColors.primary),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      Tr.t('sim_disclaimer'),
-                      style: AppTextStyles.caption.copyWith(
-                          color: AppColors.textSecondary, height: 1.4),
+              // Disclaimer
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: AppColors.aiCardBg,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.aiCardBorder),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline,
+                        size: 16, color: AppColors.primary),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        Tr.t('sim_disclaimer'),
+                        style: AppTextStyles.caption.copyWith(
+                            color: AppColors.textSecondary, height: 1.4),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-            Text(Tr.t('sim_scenarios'), style: AppTextStyles.sectionLabel),
-            const SizedBox(height: 12),
+              Text(Tr.t('sim_scenarios'), style: AppTextStyles.sectionLabel),
+              const SizedBox(height: 12),
 
-            // Evacuate card
-            _ScenarioCard(
-              icon: Icons.directions_run,
-              title: Tr.t('sim_evacuate_title'),
-              subtitle: Tr.t('sim_evacuate_sub'),
-              selected: _selected == 'evacuate',
-              onTap: () {
-                setState(() => _selected = 'evacuate');
-                _showEvacuateSheet(context);
-              },
-            ),
-            const SizedBox(height: 10),
-
-            // Wait card
-            _ScenarioCard(
-              icon: Icons.visibility_outlined,
-              title: Tr.t('sim_wait_title'),
-              subtitle: Tr.t('sim_wait_sub'),
-              selected: _selected == 'wait',
-              onTap: () {
-                setState(() => _selected = 'wait');
-                _showWaitSheet(context);
-              },
-            ),
-            const SizedBox(height: 24),
-
-            // Risk trajectory chart (simplified custom paint)
-            _RiskTrajectoryCard(selected: _selected),
-            const SizedBox(height: 24),
-
-            // Factor breakdown
-            _FactorBreakdownCard(selected: _selected),
-            const SizedBox(height: 24),
-
-            // XAI card
-            _XaiCard(),
-            const SizedBox(height: 16),
-            Center(
-              child: Text(
-                Tr.t('sim_footer'),
-                style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textMuted, fontSize: 11),
+              // Evacuate card
+              _ScenarioCard(
+                icon: Icons.directions_run,
+                title: Tr.t('sim_evacuate_title'),
+                subtitle: Tr.t('sim_evacuate_sub'),
+                selected: _selected == 'evacuate',
+                onTap: () {
+                  setState(() => _selected = 'evacuate');
+                  _showEvacuateSheet(context);
+                },
               ),
-            ),
-            const SizedBox(height: 80),
-          ],
+              const SizedBox(height: 10),
+
+              // Wait card
+              _ScenarioCard(
+                icon: Icons.visibility_outlined,
+                title: Tr.t('sim_wait_title'),
+                subtitle: Tr.t('sim_wait_sub'),
+                selected: _selected == 'wait',
+                onTap: () {
+                  setState(() => _selected = 'wait');
+                  _showWaitSheet(context);
+                },
+              ),
+              const SizedBox(height: 24),
+
+              // Risk trajectory chart (simplified custom paint)
+              _RiskTrajectoryCard(selected: _selected),
+              const SizedBox(height: 24),
+
+              // Factor breakdown
+              _FactorBreakdownCard(selected: _selected),
+              const SizedBox(height: 24),
+
+              // XAI card
+              _XaiCard(),
+              const SizedBox(height: 16),
+              Center(
+                child: Text(
+                  Tr.t('sim_footer'),
+                  style: AppTextStyles.caption
+                      .copyWith(color: AppColors.textMuted, fontSize: 11),
+                ),
+              ),
+              const SizedBox(height: 80),
+            ],
+          ),
         ),
       ),
     );
@@ -181,7 +184,8 @@ class _DecisionSimulatorScreenState extends State<DecisionSimulatorScreen> {
             ),
             Text(
               Tr.t('sim_outcomes_subtitle'),
-              style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+              style: AppTextStyles.caption
+                  .copyWith(color: AppColors.textSecondary),
             ),
             const SizedBox(height: 16),
             Text(
@@ -195,17 +199,25 @@ class _DecisionSimulatorScreenState extends State<DecisionSimulatorScreen> {
             const SizedBox(height: 8),
             Row(
               children: [
-                Expanded(child: _conditionCell(Tr.t('sim_cond_flash_flood'), Tr.t('sim_cond_high'), AppColors.riskHigh)),
+                Expanded(
+                    child: _conditionCell(Tr.t('sim_cond_flash_flood'),
+                        Tr.t('sim_cond_high'), AppColors.riskHigh)),
                 const SizedBox(width: 8),
-                Expanded(child: _conditionCell(Tr.t('sim_cond_landslide'), Tr.t('sim_cond_moderate'), AppColors.textPrimary)),
+                Expanded(
+                    child: _conditionCell(Tr.t('sim_cond_landslide'),
+                        Tr.t('sim_cond_moderate'), AppColors.textPrimary)),
               ],
             ),
             const SizedBox(height: 8),
             Row(
               children: [
-                Expanded(child: _conditionCell(Tr.t('sim_cond_road'), Tr.t('sim_cond_at_risk'), AppColors.riskHigh)),
+                Expanded(
+                    child: _conditionCell(Tr.t('sim_cond_road'),
+                        Tr.t('sim_cond_at_risk'), AppColors.riskHigh)),
                 const SizedBox(width: 8),
-                Expanded(child: _conditionCell(Tr.t('sim_cond_rainfall'), Tr.t('sim_cond_heavy'), AppColors.primary)),
+                Expanded(
+                    child: _conditionCell(Tr.t('sim_cond_rainfall'),
+                        Tr.t('sim_cond_heavy'), AppColors.primary)),
               ],
             ),
             const SizedBox(height: 16),
@@ -231,24 +243,36 @@ class _DecisionSimulatorScreenState extends State<DecisionSimulatorScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(Tr.t('sim_risk_exposure'), style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
-                      Text(Tr.t('sim_lower'), style: AppTextStyles.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700)),
+                      Text(Tr.t('sim_risk_exposure'),
+                          style: AppTextStyles.caption
+                              .copyWith(color: AppColors.textSecondary)),
+                      Text(Tr.t('sim_lower'),
+                          style: AppTextStyles.caption.copyWith(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w700)),
                     ],
                   ),
                   const SizedBox(height: 6),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(Tr.t('sim_route_difficulty'), style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
-                      Text(Tr.t('sim_moderate_val'), style: AppTextStyles.caption.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+                      Text(Tr.t('sim_route_difficulty'),
+                          style: AppTextStyles.caption
+                              .copyWith(color: AppColors.textSecondary)),
+                      Text(Tr.t('sim_moderate_val'),
+                          style: AppTextStyles.caption.copyWith(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w700)),
                     ],
                   ),
                   const Divider(height: 16),
                   Text(Tr.t('sim_potential_benefit'),
-                      style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+                      style: AppTextStyles.caption
+                          .copyWith(color: AppColors.textSecondary)),
                   const SizedBox(height: 4),
                   Text(Tr.t('sim_potential_tradeoff'),
-                      style: AppTextStyles.caption.copyWith(color: AppColors.textMuted)),
+                      style: AppTextStyles.caption
+                          .copyWith(color: AppColors.textMuted)),
                 ],
               ),
             ),
@@ -261,11 +285,15 @@ class _DecisionSimulatorScreenState extends State<DecisionSimulatorScreen> {
                       foregroundColor: AppColors.primary,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       side: const BorderSide(color: AppColors.border),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     onPressed: () {
                       Navigator.pop(context);
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const FeedbackScreen()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const FeedbackScreen()));
                     },
                     child: Text(Tr.t('sim_give_feedback')),
                   ),
@@ -277,11 +305,15 @@ class _DecisionSimulatorScreenState extends State<DecisionSimulatorScreen> {
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     onPressed: () {
                       Navigator.pop(context);
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const SafetyHubScreen()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const SafetyHubScreen()));
                     },
                     child: Text(Tr.t('sim_view_safety')),
                   ),
@@ -349,22 +381,31 @@ class _DecisionSimulatorScreenState extends State<DecisionSimulatorScreen> {
             ),
             Text(
               Tr.t('sim_outcomes_subtitle'),
-              style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+              style: AppTextStyles.caption
+                  .copyWith(color: AppColors.textSecondary),
             ),
             const SizedBox(height: 16),
             Row(
               children: [
-                Expanded(child: _conditionCell(Tr.t('sim_cond_flash_flood'), Tr.t('sim_cond_high'), AppColors.riskHigh)),
+                Expanded(
+                    child: _conditionCell(Tr.t('sim_cond_flash_flood'),
+                        Tr.t('sim_cond_high'), AppColors.riskHigh)),
                 const SizedBox(width: 8),
-                Expanded(child: _conditionCell(Tr.t('sim_cond_landslide'), Tr.t('sim_cond_moderate'), AppColors.textPrimary)),
+                Expanded(
+                    child: _conditionCell(Tr.t('sim_cond_landslide'),
+                        Tr.t('sim_cond_moderate'), AppColors.textPrimary)),
               ],
             ),
             const SizedBox(height: 8),
             Row(
               children: [
-                Expanded(child: _conditionCell(Tr.t('sim_cond_road'), Tr.t('sim_cond_at_risk'), AppColors.primary)),
+                Expanded(
+                    child: _conditionCell(Tr.t('sim_cond_road'),
+                        Tr.t('sim_cond_at_risk'), AppColors.primary)),
                 const SizedBox(width: 8),
-                Expanded(child: _conditionCell(Tr.t('sim_cond_rainfall'), Tr.t('sim_cond_heavy'), AppColors.textPrimary)),
+                Expanded(
+                    child: _conditionCell(Tr.t('sim_cond_rainfall'),
+                        Tr.t('sim_cond_heavy'), AppColors.textPrimary)),
               ],
             ),
             const SizedBox(height: 16),
@@ -379,37 +420,53 @@ class _DecisionSimulatorScreenState extends State<DecisionSimulatorScreen> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.bar_chart, size: 16, color: AppColors.primary),
+                      const Icon(Icons.bar_chart,
+                          size: 16, color: AppColors.primary),
                       const SizedBox(width: 6),
-                      Text(Tr.t('sim_simulated_outcome'), style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                      Text(Tr.t('sim_simulated_outcome'),
+                          style: AppTextStyles.caption.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary)),
                     ],
                   ),
                   const SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(Tr.t('sim_risk_exposure'), style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
-                      Text(Tr.t('sim_moderate_val'), style: AppTextStyles.caption.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+                      Text(Tr.t('sim_risk_exposure'),
+                          style: AppTextStyles.caption
+                              .copyWith(color: AppColors.textSecondary)),
+                      Text(Tr.t('sim_moderate_val'),
+                          style: AppTextStyles.caption.copyWith(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w700)),
                     ],
                   ),
                   const SizedBox(height: 4),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(Tr.t('sim_route_difficulty'), style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
-                      Text(Tr.t('sim_manageable'), style: AppTextStyles.caption.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+                      Text(Tr.t('sim_route_difficulty'),
+                          style: AppTextStyles.caption
+                              .copyWith(color: AppColors.textSecondary)),
+                      Text(Tr.t('sim_manageable'),
+                          style: AppTextStyles.caption.copyWith(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w700)),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.check_circle_outline, size: 14, color: AppColors.primary),
+                      const Icon(Icons.check_circle_outline,
+                          size: 14, color: AppColors.primary),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           Tr.t('sim_wait_avoid'),
-                          style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                          style: AppTextStyles.caption
+                              .copyWith(color: AppColors.textSecondary),
                         ),
                       ),
                     ],
@@ -418,12 +475,14 @@ class _DecisionSimulatorScreenState extends State<DecisionSimulatorScreen> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.warning_amber_rounded, size: 14, color: AppColors.riskHigh),
+                      const Icon(Icons.warning_amber_rounded,
+                          size: 14, color: AppColors.riskHigh),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           Tr.t('sim_wait_warning'),
-                          style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                          style: AppTextStyles.caption
+                              .copyWith(color: AppColors.textSecondary),
                         ),
                       ),
                     ],
@@ -435,7 +494,8 @@ class _DecisionSimulatorScreenState extends State<DecisionSimulatorScreen> {
             Center(
               child: Text(
                 Tr.t('sim_sim_note'),
-                style: AppTextStyles.caption.copyWith(color: AppColors.textMuted, fontSize: 11),
+                style: AppTextStyles.caption
+                    .copyWith(color: AppColors.textMuted, fontSize: 11),
               ),
             ),
             const SizedBox(height: 16),
@@ -446,13 +506,17 @@ class _DecisionSimulatorScreenState extends State<DecisionSimulatorScreen> {
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
                 icon: const Icon(Icons.menu_book_outlined, size: 16),
                 label: Text(Tr.t('sim_view_safety')),
                 onPressed: () {
                   Navigator.pop(context);
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const SafetyHubScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const SafetyHubScreen()));
                 },
               ),
             ),
@@ -464,11 +528,15 @@ class _DecisionSimulatorScreenState extends State<DecisionSimulatorScreen> {
                   foregroundColor: AppColors.primary,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   side: const BorderSide(color: AppColors.border),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: () {
                   Navigator.pop(context);
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const FeedbackScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const FeedbackScreen()));
                 },
                 child: Text(Tr.t('sim_give_feedback')),
               ),
@@ -490,9 +558,13 @@ class _DecisionSimulatorScreenState extends State<DecisionSimulatorScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: AppTextStyles.caption.copyWith(fontSize: 10, color: AppColors.textMuted)),
+          Text(label,
+              style: AppTextStyles.caption
+                  .copyWith(fontSize: 10, color: AppColors.textMuted)),
           const SizedBox(height: 3),
-          Text(val, style: AppTextStyles.cardTitle.copyWith(fontSize: 13, color: color)),
+          Text(val,
+              style:
+                  AppTextStyles.cardTitle.copyWith(fontSize: 13, color: color)),
         ],
       ),
     );
@@ -548,8 +620,8 @@ class _ScenarioCard extends StatelessWidget {
                       style: AppTextStyles.cardTitle.copyWith(fontSize: 16)),
                   const SizedBox(height: 3),
                   Text(subtitle,
-                      style: AppTextStyles.caption.copyWith(
-                          color: AppColors.textSecondary)),
+                      style: AppTextStyles.caption
+                          .copyWith(color: AppColors.textSecondary)),
                 ],
               ),
             ),
@@ -579,9 +651,11 @@ class _RiskTrajectoryCard extends StatelessWidget {
           const SizedBox(height: 16),
           Row(
             children: [
-              _LegendDot(color: AppColors.primary, label: Tr.t('sim_evacuate_legend')),
+              _LegendDot(
+                  color: AppColors.primary, label: Tr.t('sim_evacuate_legend')),
               const SizedBox(width: 16),
-              _LegendDot(color: AppColors.riskHigh, label: Tr.t('sim_wait_legend')),
+              _LegendDot(
+                  color: AppColors.riskHigh, label: Tr.t('sim_wait_legend')),
             ],
           ),
           const SizedBox(height: 12),
@@ -600,14 +674,14 @@ class _RiskTrajectoryCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(Tr.t('sim_current_risk'),
-                  style: AppTextStyles.caption.copyWith(
-                      color: AppColors.textMuted, fontSize: 11)),
+                  style: AppTextStyles.caption
+                      .copyWith(color: AppColors.textMuted, fontSize: 11)),
               Text(Tr.t('sim_6_hours'),
-                  style: AppTextStyles.caption.copyWith(
-                      color: AppColors.textMuted, fontSize: 11)),
+                  style: AppTextStyles.caption
+                      .copyWith(color: AppColors.textMuted, fontSize: 11)),
               Text(Tr.t('sim_12_hours'),
-                  style: AppTextStyles.caption.copyWith(
-                      color: AppColors.textMuted, fontSize: 11)),
+                  style: AppTextStyles.caption
+                      .copyWith(color: AppColors.textMuted, fontSize: 11)),
             ],
           ),
         ],
@@ -631,8 +705,8 @@ class _LegendDot extends StatelessWidget {
                 color: color, borderRadius: BorderRadius.circular(2))),
         const SizedBox(width: 5),
         Text(label,
-            style: AppTextStyles.caption.copyWith(
-                color: AppColors.textMuted, fontSize: 11)),
+            style: AppTextStyles.caption
+                .copyWith(color: AppColors.textMuted, fontSize: 11)),
       ],
     );
   }
@@ -661,18 +735,24 @@ class _TrajectoryPainter extends CustomPainter {
     final evacuatePath = Path();
     evacuatePath.moveTo(0, size.height * 0.5);
     evacuatePath.cubicTo(
-      size.width * 0.33, size.height * 0.45,
-      size.width * 0.66, size.height * 0.3,
-      size.width, size.height * 0.2,
+      size.width * 0.33,
+      size.height * 0.45,
+      size.width * 0.66,
+      size.height * 0.3,
+      size.width,
+      size.height * 0.2,
     );
 
     // Wait: curves up (higher risk trajectory)
     final waitPath = Path();
     waitPath.moveTo(0, size.height * 0.5);
     waitPath.cubicTo(
-      size.width * 0.33, size.height * 0.55,
-      size.width * 0.66, size.height * 0.75,
-      size.width, size.height * 0.9,
+      size.width * 0.33,
+      size.height * 0.55,
+      size.width * 0.66,
+      size.height * 0.75,
+      size.width,
+      size.height * 0.9,
     );
 
     // dashed wait path
@@ -714,11 +794,15 @@ class _FactorBreakdownCard extends StatelessWidget {
   const _FactorBreakdownCard({required this.selected});
 
   List<_FactorRow> get _factors => [
-    _FactorRow(Tr.t('sim_f_household'), Tr.t('sim_f_lower'), Tr.t('sim_f_higher'), true),
-    _FactorRow(Tr.t('sim_f_isolation'), Tr.t('sim_f_lower'), Tr.t('sim_f_pot_higher'), true),
-    _FactorRow(Tr.t('sim_f_road'), Tr.t('sim_f_open'), Tr.t('sim_f_blockage'), true),
-    _FactorRow(Tr.t('sim_f_prep'), Tr.t('sim_f_immediate'), Tr.t('sim_f_monitor'), false),
-  ];
+        _FactorRow(Tr.t('sim_f_household'), Tr.t('sim_f_lower'),
+            Tr.t('sim_f_higher'), true),
+        _FactorRow(Tr.t('sim_f_isolation'), Tr.t('sim_f_lower'),
+            Tr.t('sim_f_pot_higher'), true),
+        _FactorRow(Tr.t('sim_f_road'), Tr.t('sim_f_open'),
+            Tr.t('sim_f_blockage'), true),
+        _FactorRow(Tr.t('sim_f_prep'), Tr.t('sim_f_immediate'),
+            Tr.t('sim_f_monitor'), false),
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -833,11 +917,13 @@ class _XaiCardState extends State<_XaiCard> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(Tr.t('sim_xai_title'),
-                        style: AppTextStyles.cardTitle.copyWith(
-                            color: AppColors.primary, fontSize: 15)),
+                        style: AppTextStyles.cardTitle
+                            .copyWith(color: AppColors.primary, fontSize: 15)),
                   ),
                   Icon(
-                    _expanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                    _expanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
                     color: AppColors.textMuted,
                   ),
                 ],
@@ -849,9 +935,11 @@ class _XaiCardState extends State<_XaiCard> {
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: Column(
                 children: [
-                  _XaiRow(Tr.t('sim_xai_decision'), Tr.t('sim_xai_decision_val')),
+                  _XaiRow(
+                      Tr.t('sim_xai_decision'), Tr.t('sim_xai_decision_val')),
                   const SizedBox(height: 8),
-                  _XaiRow(Tr.t('sim_xai_evidence'), Tr.t('sim_xai_evidence_val')),
+                  _XaiRow(
+                      Tr.t('sim_xai_evidence'), Tr.t('sim_xai_evidence_val')),
                   const SizedBox(height: 8),
                   _XaiRow(Tr.t('sim_xai_reason'), Tr.t('sim_xai_reason_val')),
                   const SizedBox(height: 8),
@@ -923,12 +1011,12 @@ class _XaiRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label,
-              style: AppTextStyles.caption.copyWith(
-                  color: AppColors.textMuted, fontSize: 11)),
+              style: AppTextStyles.caption
+                  .copyWith(color: AppColors.textMuted, fontSize: 11)),
           const SizedBox(height: 4),
           Text(value,
-              style: AppTextStyles.caption.copyWith(
-                  color: AppColors.textPrimary, height: 1.4)),
+              style: AppTextStyles.caption
+                  .copyWith(color: AppColors.textPrimary, height: 1.4)),
         ],
       ),
     );

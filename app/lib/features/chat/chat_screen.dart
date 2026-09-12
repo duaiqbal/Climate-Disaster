@@ -1,4 +1,4 @@
-﻿import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import '../../core/retrieval/retrieval_engine.dart';
 import '../../core/rules_engine/rules_engine.dart';
@@ -6,6 +6,7 @@ import '../../core/services/api_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/localization/app_translations.dart';
+import '../screen_entrance.dart';
 
 class _ChatMessage {
   final String text;
@@ -39,11 +40,11 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _isOnline = false;
 
   List<String> get _suggestionChips => [
-    Tr.t('chip_why_risk'),
-    Tr.t('chip_heavy_rain'),
-    Tr.t('chip_what_pack'),
-    Tr.t('chip_alert_mean'),
-  ];
+        Tr.t('chip_why_risk'),
+        Tr.t('chip_heavy_rain'),
+        Tr.t('chip_what_pack'),
+        Tr.t('chip_alert_mean'),
+      ];
 
   @override
   void dispose() {
@@ -68,26 +69,31 @@ class _ChatScreenState extends State<ChatScreen> {
     List<String> sources = [];
     String? evidenceLabel;
 
-    final apiResponse = await ApiService.post('/rag/query', {'question': query, 'language': 'en', 'top_k': 5});
-    if (apiResponse != null && apiResponse['answer'] != null &&
+    final apiResponse = await ApiService.post(
+        '/rag/query', {'question': query, 'language': 'en', 'top_k': 5});
+    if (apiResponse != null &&
+        apiResponse['answer'] != null &&
         apiResponse['confidence'] != 'insufficient') {
       _isOnline = true;
       answerText = apiResponse['answer'] as String;
       if (apiResponse['sources'] is List) {
         sources = List<String>.from(
-          (apiResponse['sources'] as List).map((s) =>
-            '${s['source_org'] ?? ''}: ${s['doc_title'] ?? ''}'),
+          (apiResponse['sources'] as List)
+              .map((s) => '${s['source_org'] ?? ''}: ${s['doc_title'] ?? ''}'),
         );
       }
-            evidenceLabel = Tr.t('evidence_high');
+      evidenceLabel = Tr.t('evidence_high');
     } else {
       _isOnline = false;
       if (!kIsWeb) {
         final chunks = await RetrievalEngine.search(query);
-        final response = RulesEngine.buildResponse(query, chunks, offline: true);
+        final response =
+            RulesEngine.buildResponse(query, chunks, offline: true);
         answerText = response.answerText;
         evidenceLabel = _evidenceLabel(response.evidenceLevel);
-        sources = response.sources.map((s) => '${s.sourceOrg}: ${s.sourceTitle}').toList();
+        sources = response.sources
+            .map((s) => '${s.sourceOrg}: ${s.sourceTitle}')
+            .toList();
       } else {
         answerText = 'Offline knowledge search is available on the mobile app. '
             'Please connect to the backend or use the Android app for offline queries.';
@@ -141,16 +147,18 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: _buildAppBar(),
-      body: Column(
-        children: [
-          _buildContextChips(),
-          Expanded(child: _buildChatArea()),
-          _buildDisclaimer(),
-          _buildInputBar(),
-        ],
+    return ScreenEntrance(
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: _buildAppBar(),
+        body: Column(
+          children: [
+            _buildContextChips(),
+            Expanded(child: _buildChatArea()),
+            _buildDisclaimer(),
+            _buildInputBar(),
+          ],
+        ),
       ),
     );
   }
@@ -191,8 +199,8 @@ class _ChatScreenState extends State<ChatScreen> {
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: _isOnline
-                ? AppColors.onlineGreen.withValues(alpha: 0.4)
-                : AppColors.textMuted.withValues(alpha: 0.3),
+                  ? AppColors.onlineGreen.withValues(alpha: 0.4)
+                  : AppColors.textMuted.withValues(alpha: 0.3),
             ),
           ),
           child: Row(
@@ -202,7 +210,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 width: 7,
                 height: 7,
                 decoration: BoxDecoration(
-                  color: _isOnline ? AppColors.onlineGreen : AppColors.textMuted,
+                  color:
+                      _isOnline ? AppColors.onlineGreen : AppColors.textMuted,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -211,7 +220,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 _isOnline ? Tr.t('chat_online') : Tr.t('chat_offline'),
                 style: AppTextStyles.caption.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: _isOnline ? AppColors.onlineGreen : AppColors.textMuted,
+                  color:
+                      _isOnline ? AppColors.onlineGreen : AppColors.textMuted,
                   fontSize: 12,
                 ),
               ),
@@ -648,7 +658,8 @@ class _ChatScreenState extends State<ChatScreen> {
         color: AppColors.primary,
         shape: BoxShape.circle,
       ),
-      child: const Icon(Icons.smart_toy_outlined, color: Colors.white, size: 18),
+      child:
+          const Icon(Icons.smart_toy_outlined, color: Colors.white, size: 18),
     );
   }
 

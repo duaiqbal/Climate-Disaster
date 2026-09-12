@@ -11,6 +11,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../chat/chat_screen.dart';
 import '../safety/safety_hub_screen.dart';
+import '../screen_entrance.dart';
 
 class _HazardInfo {
   final String hazardLevel;
@@ -121,64 +122,66 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Stack(
-        children: [
-          // ── Map placeholder ──────────────────────────────────────────────
-          _buildMapPlaceholder(),
+    return ScreenEntrance(
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: Stack(
+          children: [
+            // ── Map placeholder ──────────────────────────────────────────────
+            _buildMapPlaceholder(),
 
-          // ── App bar overlay ──────────────────────────────────────────────
-          SafeArea(
-            child: Column(
-              children: [
-                _buildMapAppBar(),
-                const SizedBox(height: 8),
-                _buildFilterChips(),
-              ],
+            // ── App bar overlay ──────────────────────────────────────────────
+            SafeArea(
+              child: Column(
+                children: [
+                  _buildMapAppBar(),
+                  const SizedBox(height: 8),
+                  _buildFilterChips(),
+                ],
+              ),
             ),
-          ),
 
-          // ── Zoom controls ────────────────────────────────────────────────
-          Positioned(
-            right: 12,
-            top: 160,
-            child: _buildZoomControls(),
-          ),
+            // ── Zoom controls ────────────────────────────────────────────────
+            Positioned(
+              right: 12,
+              top: 160,
+              child: _buildZoomControls(),
+            ),
 
-          // ── Locate me button ─────────────────────────────────────────────
-          Positioned(
-            right: 12,
-            top: 230,
-            child: _buildLocateButton(),
-          ),
+            // ── Locate me button ─────────────────────────────────────────────
+            Positioned(
+              right: 12,
+              top: 230,
+              child: _buildLocateButton(),
+            ),
 
-          // ── Risk pin overlay ─────────────────────────────────────────────
-          Positioned(
-            left: 0,
-            right: 0,
-            top: 230,
-            child: Center(child: _buildRiskPin()),
-          ),
-
-          // ── Bottom info sheet ────────────────────────────────────────────
-          if (_bottomSheetVisible)
+            // ── Risk pin overlay ─────────────────────────────────────────────
             Positioned(
               left: 0,
               right: 0,
-              bottom: 0,
-              child: _buildBottomInfoSheet(),
+              top: 230,
+              child: Center(child: _buildRiskPin()),
             ),
 
-          // ── Loading overlay ──────────────────────────────────────────────
-          if (_loading)
-            Container(
-              color: Colors.black.withValues(alpha: 0.25),
-              child: const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
+            // ── Bottom info sheet ────────────────────────────────────────────
+            if (_bottomSheetVisible)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: _buildBottomInfoSheet(),
               ),
-            ),
-        ],
+
+            // ── Loading overlay ──────────────────────────────────────────────
+            if (_loading)
+              Container(
+                color: Colors.black.withValues(alpha: 0.25),
+                child: const Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -279,8 +282,8 @@ class _MapScreenState extends State<MapScreen> {
             child: GestureDetector(
               onTap: () => setState(() => _activeFilterId = filter.id),
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 14, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
                   color: isActive ? AppColors.primary : AppColors.surface,
                   borderRadius: BorderRadius.circular(20),
@@ -307,9 +310,8 @@ class _MapScreenState extends State<MapScreen> {
                     Text(
                       Tr.t(filter.labelKey),
                       style: AppTextStyles.caption.copyWith(
-                        color: isActive
-                            ? Colors.white
-                            : AppColors.textSecondary,
+                        color:
+                            isActive ? Colors.white : AppColors.textSecondary,
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
                       ),
@@ -682,7 +684,8 @@ class _MapScreenState extends State<MapScreen> {
               LanguageService.instance.isUrdu
                   ? 'اس علاقے کے موجودہ خطرے کے عوامل۔'
                   : 'Current risk factors for this area.',
-              style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+              style: AppTextStyles.caption
+                  .copyWith(color: AppColors.textSecondary),
             ),
             const SizedBox(height: 16),
             Container(
@@ -697,10 +700,13 @@ class _MapScreenState extends State<MapScreen> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.insert_chart_outlined, size: 16, color: AppColors.primary),
+                      const Icon(Icons.insert_chart_outlined,
+                          size: 16, color: AppColors.primary),
                       const SizedBox(width: 6),
                       Text(
-                        LanguageService.instance.isUrdu ? 'اہم اشارے' : 'Key Indicators',
+                        LanguageService.instance.isUrdu
+                            ? 'اہم اشارے'
+                            : 'Key Indicators',
                         style: AppTextStyles.caption.copyWith(
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
@@ -733,7 +739,9 @@ class _MapScreenState extends State<MapScreen> {
                     children: [
                       Expanded(
                         child: _indicatorBox(
-                          LanguageService.instance.isUrdu ? 'ڈھلوان کا استحکام' : 'Slope Stability',
+                          LanguageService.instance.isUrdu
+                              ? 'ڈھلوان کا استحکام'
+                              : 'Slope Stability',
                           Tr.t('risk_low'),
                           AppColors.riskHigh,
                         ),
@@ -741,8 +749,12 @@ class _MapScreenState extends State<MapScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: _indicatorBox(
-                          LanguageService.instance.isUrdu ? 'سڑک تک رسائی' : 'Road Access',
-                          LanguageService.instance.isUrdu ? 'خطرے میں' : 'At Risk',
+                          LanguageService.instance.isUrdu
+                              ? 'سڑک تک رسائی'
+                              : 'Road Access',
+                          LanguageService.instance.isUrdu
+                              ? 'خطرے میں'
+                              : 'At Risk',
                           AppColors.primary,
                         ),
                       ),
@@ -763,10 +775,13 @@ class _MapScreenState extends State<MapScreen> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.info_outline, size: 16, color: AppColors.primary),
+                      const Icon(Icons.info_outline,
+                          size: 16, color: AppColors.primary),
                       const SizedBox(width: 6),
                       Text(
-                        LanguageService.instance.isUrdu ? 'اس علاقے کو خطرہ کیوں ہے' : 'Why this area is at risk',
+                        LanguageService.instance.isUrdu
+                            ? 'اس علاقے کو خطرہ کیوں ہے'
+                            : 'Why this area is at risk',
                         style: AppTextStyles.caption.copyWith(
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
@@ -800,7 +815,8 @@ class _MapScreenState extends State<MapScreen> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.shield_outlined, size: 16, color: AppColors.primary),
+                      const Icon(Icons.shield_outlined,
+                          size: 16, color: AppColors.primary),
                       const SizedBox(width: 6),
                       Text(
                         Tr.t('what_to_do_now'),
@@ -813,18 +829,27 @@ class _MapScreenState extends State<MapScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    LanguageService.instance.isUrdu ? '• غیر مستحکم ڈھلوانوں سے دور رہیں۔' : '• Avoid unstable slopes.',
-                    style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                    LanguageService.instance.isUrdu
+                        ? '• غیر مستحکم ڈھلوانوں سے دور رہیں۔'
+                        : '• Avoid unstable slopes.',
+                    style: AppTextStyles.caption
+                        .copyWith(color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    LanguageService.instance.isUrdu ? '• سرکاری انتباہات پر نظر رکھیں۔' : '• Monitor official alerts.',
-                    style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                    LanguageService.instance.isUrdu
+                        ? '• سرکاری انتباہات پر نظر رکھیں۔'
+                        : '• Monitor official alerts.',
+                    style: AppTextStyles.caption
+                        .copyWith(color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    LanguageService.instance.isUrdu ? '• انخلاء کے راستے تیار رکھیں۔' : '• Keep evacuation routes ready.',
-                    style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                    LanguageService.instance.isUrdu
+                        ? '• انخلاء کے راستے تیار رکھیں۔'
+                        : '• Keep evacuation routes ready.',
+                    style: AppTextStyles.caption
+                        .copyWith(color: AppColors.textSecondary),
                   ),
                 ],
               ),
@@ -837,13 +862,17 @@ class _MapScreenState extends State<MapScreen> {
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
                 icon: const Icon(Icons.menu_book_outlined, size: 16),
                 label: Text(Tr.t('view_safety_guide')),
                 onPressed: () {
                   Navigator.pop(context);
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const SafetyHubScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const SafetyHubScreen()));
                 },
               ),
             ),
@@ -855,7 +884,8 @@ class _MapScreenState extends State<MapScreen> {
                   foregroundColor: AppColors.primary,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   side: const BorderSide(color: AppColors.border),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
                 icon: const Icon(Icons.close, size: 16),
                 label: Text(Tr.t('close')),
@@ -863,7 +893,6 @@ class _MapScreenState extends State<MapScreen> {
               ),
             ),
             const SizedBox(height: 12),
-
           ],
         ),
       ),
@@ -881,9 +910,13 @@ class _MapScreenState extends State<MapScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: AppTextStyles.caption.copyWith(fontSize: 11, color: AppColors.textMuted)),
+          Text(title,
+              style: AppTextStyles.caption
+                  .copyWith(fontSize: 11, color: AppColors.textMuted)),
           const SizedBox(height: 4),
-          Text(value, style: AppTextStyles.cardTitle.copyWith(fontSize: 14, color: valueColor)),
+          Text(value,
+              style: AppTextStyles.cardTitle
+                  .copyWith(fontSize: 14, color: valueColor)),
         ],
       ),
     );
@@ -948,9 +981,12 @@ class _TerrainPainter extends CustomPainter {
       final y = size.height * (0.1 + i * 0.1);
       path.moveTo(0, y + 20 * (i % 3 == 0 ? 1 : -1));
       path.cubicTo(
-        size.width * 0.25, y - 30 * (i % 2 == 0 ? 1 : -0.5),
-        size.width * 0.5, y + 20 * (i % 3 == 1 ? 1 : -1),
-        size.width * 0.75, y - 10,
+        size.width * 0.25,
+        y - 30 * (i % 2 == 0 ? 1 : -0.5),
+        size.width * 0.5,
+        y + 20 * (i % 3 == 1 ? 1 : -1),
+        size.width * 0.75,
+        y - 10,
       );
       path.lineTo(size.width, y + 15 * (i % 2));
       canvas.drawPath(path, paint);

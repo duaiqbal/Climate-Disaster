@@ -5,6 +5,7 @@ import '../../core/localization/language_service.dart';
 import '../../core/services/api_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../screen_entrance.dart';
 
 class RiskProfileScreen extends StatefulWidget {
   const RiskProfileScreen({super.key});
@@ -86,294 +87,310 @@ class _RiskProfileScreenState extends State<RiskProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        leading: const BackButton(color: AppColors.textPrimary),
-        title: Text(Tr.t('risk_setup_appbar'),
-            style: AppTextStyles.cardTitle.copyWith(color: AppColors.primary)),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(Tr.t('risk_setup_title'),
-                style: AppTextStyles.screenHeader.copyWith(fontSize: 24)),
-            const SizedBox(height: 6),
-            Text(
-              Tr.t('risk_setup_subtitle'),
-              style: AppTextStyles.body.copyWith(
-                  color: AppColors.textSecondary, height: 1.5),
-            ),
-            const SizedBox(height: 10),
-            // Breadcrumb
-            Row(
-              children: [
-                _BreadcrumbStep(label: Tr.t('step_location'), active: true),
-                const Icon(Icons.arrow_forward_ios,
-                    size: 10, color: AppColors.textMuted),
-                _BreadcrumbStep(label: Tr.t('step_household'), active: true),
-                const Icon(Icons.arrow_forward_ios,
-                    size: 10, color: AppColors.textMuted),
-                _BreadcrumbStep(label: Tr.t('step_done'), active: false),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // Location section
-            _SectionCard(
-              title: Tr.t('loc_section_title'),
-              child: Column(
+    return ScreenEntrance(
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          backgroundColor: AppColors.surface,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          centerTitle: true,
+          leading: const BackButton(color: AppColors.textPrimary),
+          title: Text(Tr.t('risk_setup_appbar'),
+              style:
+                  AppTextStyles.cardTitle.copyWith(color: AppColors.primary)),
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(Tr.t('risk_setup_title'),
+                  style: AppTextStyles.screenHeader.copyWith(fontSize: 24)),
+              const SizedBox(height: 6),
+              Text(
+                Tr.t('risk_setup_subtitle'),
+                style: AppTextStyles.body
+                    .copyWith(color: AppColors.textSecondary, height: 1.5),
+              ),
+              const SizedBox(height: 10),
+              // Breadcrumb
+              Row(
                 children: [
-                  _PrimaryBtn(
-                    icon: Icons.my_location,
-                    label: Tr.t('btn_current_loc'),
-                    onTap: () {},
-                  ),
-                  const SizedBox(height: 10),
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.textPrimary,
-                      side: const BorderSide(color: AppColors.border),
-                      minimumSize: const Size(double.infinity, 48),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                  _BreadcrumbStep(label: Tr.t('step_location'), active: true),
+                  const Icon(Icons.arrow_forward_ios,
+                      size: 10, color: AppColors.textMuted),
+                  _BreadcrumbStep(label: Tr.t('step_household'), active: true),
+                  const Icon(Icons.arrow_forward_ios,
+                      size: 10, color: AppColors.textMuted),
+                  _BreadcrumbStep(label: Tr.t('step_done'), active: false),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Location section
+              _SectionCard(
+                title: Tr.t('loc_section_title'),
+                child: Column(
+                  children: [
+                    _PrimaryBtn(
+                      icon: Icons.my_location,
+                      label: Tr.t('btn_current_loc'),
+                      onTap: () {},
                     ),
-                    icon: const Icon(Icons.map_outlined, size: 16),
-                    label: Text(Tr.t('btn_select_loc')),
-                    onPressed: () {},
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryContainer,
-                      borderRadius: BorderRadius.circular(10),
+                    const SizedBox(height: 10),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.textPrimary,
+                        side: const BorderSide(color: AppColors.border),
+                        minimumSize: const Size(double.infinity, 48),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                      icon: const Icon(Icons.map_outlined, size: 16),
+                      label: Text(Tr.t('btn_select_loc')),
+                      onPressed: () {},
                     ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.location_on,
-                            color: AppColors.primary, size: 16),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(Tr.t('lbl_selected_loc'),
-                                  style: AppTextStyles.caption.copyWith(
-                                      color: AppColors.textMuted,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w700)),
-                              Text(Tr.t('location_chitral'),
-                                  style: AppTextStyles.body.copyWith(
-                                      color: AppColors.primary, fontSize: 14)),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // Construction
-            _SectionCard(
-              title: Tr.t('house_const_title'),
-              child: _RadioGroup(
-                options: [
-                  _OptionItem('Reinforced', Tr.t('const_reinforced')),
-                  _OptionItem('Masonry', Tr.t('const_masonry')),
-                  _OptionItem('Mud / unreinforced', Tr.t('const_mud')),
-                  _OptionItem('Other', Tr.t('const_other')),
-                ],
-                selected: _construction,
-                onChanged: (v) => setState(() => _construction = v),
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // River
-            _SectionCard(
-              title: Tr.t('river_dist_title'),
-              child: _RadioGroup(
-                options: [
-                  _OptionItem('Very close', Tr.t('dist_very_close')),
-                  _OptionItem('Nearby', Tr.t('dist_nearby')),
-                  _OptionItem('Far', Tr.t('dist_far')),
-                ],
-                selected: _riverDistance,
-                onChanged: (v) => setState(() => _riverDistance = v),
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // Slope
-            _SectionCard(
-              title: Tr.t('slope_dist_title'),
-              child: _RadioGroup(
-                options: [
-                  _OptionItem('Very close', Tr.t('dist_very_close')),
-                  _OptionItem('Nearby', Tr.t('dist_nearby')),
-                  _OptionItem('Far', Tr.t('dist_far')),
-                ],
-                selected: _slopeDistance,
-                onChanged: (v) => setState(() => _slopeDistance = v),
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // Vulnerable members (multi-select)
-            _SectionCard(
-              title: Tr.t('vuln_title'),
-              subtitle: Tr.t('vuln_subtitle'),
-              child: Column(
-                children: [
-                  CheckboxListTile(
-                    value: _noVulnerable,
-                    onChanged: (v) => setState(() {
-                      _noVulnerable = v ?? false;
-                      if (_noVulnerable) {
-                        _elderly = false;
-                        _children = false;
-                        _disability = false;
-                      }
-                    }),
-                    title: Text(Tr.t('vuln_none')),
-                    activeColor: AppColors.primary,
-                    contentPadding: EdgeInsets.zero,
-                    controlAffinity: ListTileControlAffinity.leading,
-                  ),
-                  ...[
-                    (Tr.t('vuln_elderly'), _elderly, (v) {
-                      _elderly = v ?? false;
-                      if (_elderly) _noVulnerable = false;
-                    }),
-                    (Tr.t('vuln_children'), _children, (v) {
-                      _children = v ?? false;
-                      if (_children) _noVulnerable = false;
-                    }),
-                    (Tr.t('vuln_disability'), _disability, (v) {
-                      _disability = v ?? false;
-                      if (_disability) _noVulnerable = false;
-                    }),
-                  ].map((entry) {
-                    final label = entry.$1;
-                    final checked = entry.$2;
-                    final onChanged = entry.$3 as void Function(bool?);
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 6),
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: checked ? AppColors.primaryContainer : null,
-                        borderRadius: BorderRadius.circular(8),
-                        border: checked
-                            ? Border.all(color: AppColors.primary)
-                            : null,
+                        color: AppColors.primaryContainer,
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      child: CheckboxListTile(
-                        value: checked,
-                        onChanged: (v) => setState(() => onChanged(v)),
-                        title: Text(label),
-                        activeColor: AppColors.primary,
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 8),
-                        controlAffinity: ListTileControlAffinity.leading,
+                      child: Row(
+                        children: [
+                          const Icon(Icons.location_on,
+                              color: AppColors.primary, size: 16),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(Tr.t('lbl_selected_loc'),
+                                    style: AppTextStyles.caption.copyWith(
+                                        color: AppColors.textMuted,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700)),
+                                Text(Tr.t('location_chitral'),
+                                    style: AppTextStyles.body.copyWith(
+                                        color: AppColors.primary,
+                                        fontSize: 14)),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                    );
-                  }),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // Livestock
-            _SectionCard(
-              title: Tr.t('livestock_title'),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _ToggleBtn(
-                      label: LanguageService.instance.isUrdu ? 'ہاں' : 'Yes',
-                      active: _livestock,
-                      onTap: () => setState(() => _livestock = true),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _ToggleBtn(
-                      label: LanguageService.instance.isUrdu ? 'نہیں' : 'No',
-                      active: !_livestock,
-                      onTap: () => setState(() => _livestock = false),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // Transport
-            _SectionCard(
-              title: Tr.t('transport_title'),
-              child: _RadioGroup(
-                options: [
-                  _OptionItem('Easy vehicle access', Tr.t('trans_easy')),
-                  _OptionItem('Limited access', Tr.t('trans_limited')),
-                  _OptionItem('No vehicle access', Tr.t('trans_none')),
-                ],
-                selected: _transport,
-                onChanged: (v) => setState(() => _transport = v),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14)),
+                  ],
                 ),
-                onPressed: _saving ? null : _save,
-                child: _saving
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.white))
-                    : Text(Tr.t('save_risk_profile')),
               ),
-            ),
-            const SizedBox(height: 16),
-            Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.lock_outline,
-                      size: 12, color: AppColors.textMuted),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      Tr.t('risk_profile_privacy_note'),
-                      style: AppTextStyles.caption.copyWith(
-                          color: AppColors.textMuted, fontSize: 11),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+              const SizedBox(height: 12),
 
-            const SizedBox(height: 40),
-          ],
+              // Construction
+              _SectionCard(
+                title: Tr.t('house_const_title'),
+                child: _RadioGroup(
+                  options: [
+                    _OptionItem('Reinforced', Tr.t('const_reinforced')),
+                    _OptionItem('Masonry', Tr.t('const_masonry')),
+                    _OptionItem('Mud / unreinforced', Tr.t('const_mud')),
+                    _OptionItem('Other', Tr.t('const_other')),
+                  ],
+                  selected: _construction,
+                  onChanged: (v) => setState(() => _construction = v),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // River
+              _SectionCard(
+                title: Tr.t('river_dist_title'),
+                child: _RadioGroup(
+                  options: [
+                    _OptionItem('Very close', Tr.t('dist_very_close')),
+                    _OptionItem('Nearby', Tr.t('dist_nearby')),
+                    _OptionItem('Far', Tr.t('dist_far')),
+                  ],
+                  selected: _riverDistance,
+                  onChanged: (v) => setState(() => _riverDistance = v),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Slope
+              _SectionCard(
+                title: Tr.t('slope_dist_title'),
+                child: _RadioGroup(
+                  options: [
+                    _OptionItem('Very close', Tr.t('dist_very_close')),
+                    _OptionItem('Nearby', Tr.t('dist_nearby')),
+                    _OptionItem('Far', Tr.t('dist_far')),
+                  ],
+                  selected: _slopeDistance,
+                  onChanged: (v) => setState(() => _slopeDistance = v),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Vulnerable members (multi-select)
+              _SectionCard(
+                title: Tr.t('vuln_title'),
+                subtitle: Tr.t('vuln_subtitle'),
+                child: Column(
+                  children: [
+                    CheckboxListTile(
+                      value: _noVulnerable,
+                      onChanged: (v) => setState(() {
+                        _noVulnerable = v ?? false;
+                        if (_noVulnerable) {
+                          _elderly = false;
+                          _children = false;
+                          _disability = false;
+                        }
+                      }),
+                      title: Text(Tr.t('vuln_none')),
+                      activeColor: AppColors.primary,
+                      contentPadding: EdgeInsets.zero,
+                      controlAffinity: ListTileControlAffinity.leading,
+                    ),
+                    ...[
+                      (
+                        Tr.t('vuln_elderly'),
+                        _elderly,
+                        (v) {
+                          _elderly = v ?? false;
+                          if (_elderly) _noVulnerable = false;
+                        }
+                      ),
+                      (
+                        Tr.t('vuln_children'),
+                        _children,
+                        (v) {
+                          _children = v ?? false;
+                          if (_children) _noVulnerable = false;
+                        }
+                      ),
+                      (
+                        Tr.t('vuln_disability'),
+                        _disability,
+                        (v) {
+                          _disability = v ?? false;
+                          if (_disability) _noVulnerable = false;
+                        }
+                      ),
+                    ].map((entry) {
+                      final label = entry.$1;
+                      final checked = entry.$2;
+                      final onChanged = entry.$3 as void Function(bool?);
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 6),
+                        decoration: BoxDecoration(
+                          color: checked ? AppColors.primaryContainer : null,
+                          borderRadius: BorderRadius.circular(8),
+                          border: checked
+                              ? Border.all(color: AppColors.primary)
+                              : null,
+                        ),
+                        child: CheckboxListTile(
+                          value: checked,
+                          onChanged: (v) => setState(() => onChanged(v)),
+                          title: Text(label),
+                          activeColor: AppColors.primary,
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 8),
+                          controlAffinity: ListTileControlAffinity.leading,
+                        ),
+                      );
+                    }),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Livestock
+              _SectionCard(
+                title: Tr.t('livestock_title'),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _ToggleBtn(
+                        label: LanguageService.instance.isUrdu ? 'ہاں' : 'Yes',
+                        active: _livestock,
+                        onTap: () => setState(() => _livestock = true),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _ToggleBtn(
+                        label: LanguageService.instance.isUrdu ? 'نہیں' : 'No',
+                        active: !_livestock,
+                        onTap: () => setState(() => _livestock = false),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Transport
+              _SectionCard(
+                title: Tr.t('transport_title'),
+                child: _RadioGroup(
+                  options: [
+                    _OptionItem('Easy vehicle access', Tr.t('trans_easy')),
+                    _OptionItem('Limited access', Tr.t('trans_limited')),
+                    _OptionItem('No vehicle access', Tr.t('trans_none')),
+                  ],
+                  selected: _transport,
+                  onChanged: (v) => setState(() => _transport = v),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                  ),
+                  onPressed: _saving ? null : _save,
+                  child: _saving
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white))
+                      : Text(Tr.t('save_risk_profile')),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.lock_outline,
+                        size: 12, color: AppColors.textMuted),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        Tr.t('risk_profile_privacy_note'),
+                        style: AppTextStyles.caption
+                            .copyWith(color: AppColors.textMuted, fontSize: 11),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 40),
+            ],
+          ),
         ),
       ),
     );
@@ -418,8 +435,8 @@ class _SectionCard extends StatelessWidget {
           if (subtitle != null) ...[
             const SizedBox(height: 2),
             Text(subtitle!,
-                style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textMuted, fontSize: 12)),
+                style: AppTextStyles.caption
+                    .copyWith(color: AppColors.textMuted, fontSize: 12)),
           ],
           const SizedBox(height: 12),
           child,
@@ -456,7 +473,8 @@ class _RadioGroup extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 8),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: isSelected ? AppColors.primaryContainer : AppColors.surface,
+              color:
+                  isSelected ? AppColors.primaryContainer : AppColors.surface,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
                 color: isSelected ? AppColors.primary : AppColors.border,
@@ -465,8 +483,10 @@ class _RadioGroup extends StatelessWidget {
             ),
             child: Text(opt.label,
                 style: AppTextStyles.body.copyWith(
-                    color: isSelected ? AppColors.primary : AppColors.textPrimary,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    color:
+                        isSelected ? AppColors.primary : AppColors.textPrimary,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
                     fontSize: 14)),
           ),
         );
@@ -479,7 +499,8 @@ class _PrimaryBtn extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  const _PrimaryBtn({required this.icon, required this.label, required this.onTap});
+  const _PrimaryBtn(
+      {required this.icon, required this.label, required this.onTap});
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -489,8 +510,8 @@ class _PrimaryBtn extends StatelessWidget {
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         icon: Icon(icon, size: 16),
         label: Text(label),
@@ -504,7 +525,8 @@ class _ToggleBtn extends StatelessWidget {
   final String label;
   final bool active;
   final VoidCallback onTap;
-  const _ToggleBtn({required this.label, required this.active, required this.onTap});
+  const _ToggleBtn(
+      {required this.label, required this.active, required this.onTap});
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
