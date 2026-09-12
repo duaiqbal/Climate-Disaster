@@ -22,8 +22,8 @@ class AppConfig {
   static String get backendUrl {
     if (_customUrl.isNotEmpty) return _customUrl;
     if (kIsWeb) return 'http://localhost:8002';
-    // Android emulator loopback; physical device needs --dart-define=BACKEND_URL
-    return 'http://10.0.2.2:8002';
+    // LAN backend for physical devices; override with BACKEND_URL when needed.
+    return 'http://192.168.18.253:8002';
   }
 
   // ── Feature flags ───────────────────────────────────────────────────────────
