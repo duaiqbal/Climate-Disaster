@@ -1,10 +1,11 @@
-// UNVERIFIED DRAFT — not run/tested against a real Flutter build.
+﻿// UNVERIFIED DRAFT — not run/tested against a real Flutter build.
 // Copies bundled offline_package sqlite files (knowledge.sqlite,
 // hazard_grid.sqlite) from assets to app storage on first launch,
 // then opens them for querying.
 
 
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -25,6 +26,7 @@ class LocalDb {
   }
 
   static Future<Database> _openOrCopy(String fileName) async {
+    if (kIsWeb) throw UnsupportedError('SQLite not supported on web');
     final dbDir = await getApplicationDocumentsDirectory();
     final dbPath = join(dbDir.path, fileName);
 

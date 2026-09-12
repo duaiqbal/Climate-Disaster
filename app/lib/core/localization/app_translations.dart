@@ -1,4 +1,4 @@
-import 'language_service.dart';
+﻿import 'language_service.dart';
 
 class Tr {
   static String t(String key) {
@@ -46,7 +46,7 @@ class Tr {
       'tab_profile': 'Profile',
 
       // Greeting & Header
-      'greeting': 'Good evening, Hafsa',
+      'greeting': 'Hello',
       'location_chitral': 'Chitral, Khyber Pakhtunkhwa',
       'location_chitral_pk': 'Chitral, Pakistan',
       'app_title': 'Climate Risk Assistant',
@@ -572,7 +572,7 @@ class Tr {
       'tab_profile': 'پروفائل',
 
       // Greeting & Header
-      'greeting': 'شب بخیر، حفصہ',
+      'greeting': 'ہیلو',
       'location_chitral': 'چترال، خیبر پختونخوا',
       'location_chitral_pk': 'چترال، پاکستان',
       'app_title': 'کلائمیٹ رسک اسسٹنٹ',
@@ -1097,7 +1097,7 @@ class Tr {
       'tab_profile': 'Profile',
 
       // Greeting & Header
-      'greeting': 'Shab-ba-khair, Hafsa',
+      'greeting': 'Salam',
       'location_chitral': 'Chitral, Khyber Pakhtunkhwa',
       'app_title': 'Climate Risk Assistant',
       'app_subtitle': 'Mousami khatrat aur tayari ke liye wazahti AI',

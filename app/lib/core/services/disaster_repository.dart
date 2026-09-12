@@ -1,3 +1,4 @@
+﻿import 'package:flutter/foundation.dart' show kIsWeb;
 import '../models/weather_data.dart';
 import '../models/household_risk.dart';
 import '../models/official_alert.dart';
@@ -43,8 +44,9 @@ class DisasterRepository {
       return HouseholdRisk.fromJson(response);
     }
 
-    // Offline computation via hazard_grid.sqlite
-    try {
+    // Offline SQLite — mobile only (not available on web)
+    if (!kIsWeb) {
+      try {
       final db = await LocalDb.hazardDb;
       final latitude = lat ?? 35.85; // Chitral center default
       final longitude = lng ?? 71.78;
@@ -90,31 +92,34 @@ class DisasterRepository {
     } catch (_) {
       // Local DB not yet copied or error, fallback safely
     }
+    } // end if (!kIsWeb)
 
     return HouseholdRisk.defaultModerate;
   }
 
   /// Fetches latest priority warning
   Future<OfficialAlert> getLatestWarning() async {
-    final response = await ApiService.get('/api/alerts/latest');
+    final response = await ApiService.get('/alerts?limit=1&active_only=true');
     if (response != null && response is Map<String, dynamic>) {
-      return OfficialAlert.fromJson(response);
+      final alerts = response['alerts'] as List?;
+      if (alerts != null && alerts.isNotEmpty) {
+        return OfficialAlert.fromJson(alerts.first as Map<String, dynamic>);
+      }
     }
     return OfficialAlert.warningFromPMD;
   }
 
-  /// Fetches all active alerts
   Future<List<OfficialAlert>> getAllAlerts() async {
-    final response = await ApiService.get('/api/alerts');
-    if (response != null && response is List) {
-      return response
-          .map((item) => OfficialAlert.fromJson(item as Map<String, dynamic>))
-          .toList();
+    final response = await ApiService.get('/alerts?active_only=true&limit=50');
+    if (response != null && response is Map<String, dynamic>) {
+      final alerts = response['alerts'] as List?;
+      if (alerts != null) {
+        return alerts
+            .map((item) => OfficialAlert.fromJson(item as Map<String, dynamic>))
+            .toList();
+      }
     }
-    return [
-      OfficialAlert.warningFromPMD,
-      OfficialAlert.watchFromNDMA,
-    ];
+    return [OfficialAlert.warningFromPMD, OfficialAlert.watchFromNDMA];
   }
 
   /// Fetches community crowd-sourced reports
@@ -128,13 +133,28 @@ class DisasterRepository {
     return CommunityReport.sampleReports;
   }
 
-  /// AI Contextual Recommendation text
-  Future<String> getAiRecommendation() async {
-    final response = await ApiService.get('/api/ai/recommendation');
-    if (response != null && response['recommendation'] != null) {
-      return response['recommendation'] as String;
+  /// AI Contextual Recommendation — calls the real /rag/query endpoint
+  Future<String> getAiRecommendation({String language = 'en'}) async {
+    // Call the actual RAG endpoint on the backend
+    final response = await ApiService.post('/rag/query', {
+      'question': 'What should I do to prepare for floods and landslides in Chitral?',
+      'language': language,
+      'top_k': 3,
+    });
+
+    if (response != null && response is Map<String, dynamic>) {
+      final answer = response['answer']?.toString() ?? '';
+      final confidence = response['confidence']?.toString() ?? '';
+      // Only show if evidence was sufficient
+      if (confidence != 'insufficient' && answer.isNotEmpty &&
+          !answer.contains('INSUFFICIENT EVIDENCE')) {
+        return answer;
+      }
     }
-    return 'Rainfall is increasing while your household is near a steep slope. Review your evacuation route and keep essential documents ready.';
+    // Offline / insufficient evidence fallback
+    return 'Rainfall is increasing while your household is near a steep slope. '
+        'Review your evacuation route and keep your emergency kit — water, documents, torch — ready. '
+        'Monitor PDMA KP helpline: 1700. Source: NDMA preparedness guidelines.';
   }
 
   /// Submits a community hazard report to the backend (or offline no-op)

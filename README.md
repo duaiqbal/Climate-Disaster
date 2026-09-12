@@ -31,16 +31,18 @@ content — it is never allowed to invent facts, alerts, or predictions.
 
 ## Key Features
 
-| Feature | How it works |
-|---------|-------------|
-| **Offline Q&A** | SQLite keyword search over verified NDMA/PDMA/PMD chunks — airplane mode |
-| **Multilingual** | English, Urdu, Roman Urdu — spelling-variant expansion for Roman Urdu |
-| **Location hazard indicator** | GPS lookup against precomputed GIS grid (slope + river proximity) |
-| **Source transparency** | Every answer shows organisation, publication date, evidence level |
-| **Safety checklists** | Go-bag, flood, landslide, evacuation — persistent across sessions |
-| **Official alerts** | Cached locally, syncs from backend when online |
-| **Online sync** | FastAPI backend for fresher alerts and package updates (optional) |
-| **Data provenance** | Every offline package has version, checksum, build timestamp |
+| Feature | How it works | Status |
+|---------|-------------|--------|
+| **Offline Q&A** | SQLite keyword search over verified NDMA/PDMA/PMD chunks — airplane mode | ✅ Implemented |
+| **AI-Powered Chat** | Optional Ollama (Llama3) local LLM for natural language generation | ✅ Implemented |
+| **Real-Time Alerts** | Scheduled NDMA scraper (every 6 hours) with APScheduler | ✅ Implemented |
+| **Multilingual** | English, Urdu, Roman Urdu — spelling-variant expansion for Roman Urdu | ✅ Implemented |
+| **Location hazard indicator** | GPS lookup against precomputed GIS grid (slope + river proximity) | ✅ Implemented |
+| **Source transparency** | Every answer shows organisation, publication date, evidence level | ✅ Implemented |
+| **Safety checklists** | Go-bag, flood, landslide, evacuation — persistent across sessions | ✅ Implemented |
+| **Official alerts** | Cached locally, syncs from backend when online | ✅ Implemented |
+| **Online sync** | FastAPI backend for fresher alerts and package updates (optional) | ✅ Implemented |
+| **Data provenance** | Every offline package has version, checksum, build timestamp | ✅ Implemented |
 
 ---
 
@@ -67,6 +69,68 @@ content — it is never allowed to invent facts, alerts, or predictions.
 
 **Out of scope (future work):** GLOF, household ML risk prediction, multi-province
 deployment, real-time government API integration.
+
+---
+
+## Quick Start (Complete Setup)
+
+**Automated setup script:**
+
+```powershell
+cd disaster_dss
+.\setup_complete_system.ps1
+```
+
+This script will:
+1. ✓ Check Ollama installation (AI model runtime)
+2. ✓ Pull Llama3 model (~4.7GB) if needed
+3. ✓ Create backend `.env` configuration
+4. ✓ Install Python dependencies
+5. ✓ Run database migrations
+6. ✓ Test the system
+
+**Manual setup:** See `SETUP_AI_REALTIME.md`
+
+---
+
+## Running the System
+
+**Terminal 1 — Backend (AI + Real-Time Alerts):**
+```powershell
+cd backend
+.\.venv\Scripts\Activate.ps1
+python -m uvicorn main:app --reload --port 8002
+```
+
+**Terminal 2 — Flutter Web:**
+```powershell
+cd app
+flutter run -d chrome --web-port 8080
+```
+
+**Open:** http://localhost:8080
+
+---
+
+## What You Get
+
+### 1. AI-Powered Chat
+- Ask: "What should I do during heavy rain in Chitral?"
+- System retrieves verified NDMA/PDMA chunks
+- Llama3 (local) rephrases into natural language
+- Shows sources + evidence level
+
+### 2. Real-Time Alert Monitoring
+- Backend scrapes NDMA website every 6 hours
+- Alert lifecycle: DISCOVERED → VERIFIED → PUBLISHED
+- Manual trigger: `POST /monitor/run`
+- Status check: `GET /monitor/status`
+
+### 3. Offline Mode
+- **Everything works without internet**
+- 315 document chunks in SQLite
+- 10,000 hazard grid cells (slope + river data)
+- Full chat, map, checklist, alerts (cached)
 
 ---
 

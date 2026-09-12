@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -41,23 +41,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   String get _displayName {
     if (_userName != null && _userName!.isNotEmpty) return _userName!;
-    return LanguageService.instance.isUrdu ? 'حفصہ احمد' : 'Hafsa Ahmad';
+    return LanguageService.instance.isUrdu ? 'مہمان' : 'Guest';
   }
 
   String get _displayEmail {
     if (_userEmail != null && _userEmail!.isNotEmpty) return _userEmail!;
-    return LanguageService.instance.isUrdu ? 'حفصہ@ایگزامپل.کام' : 'hafsa@example.com';
+    return '';
   }
 
   String get _displayInitials {
     final name = _displayName.trim();
+    if (name == 'Guest' || name == 'مہمان') return '?';
     final parts = name.split(RegExp(r'\s+'));
     if (parts.length >= 2 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
       return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     } else if (name.isNotEmpty) {
       return name.substring(0, name.length >= 2 ? 2 : 1).toUpperCase();
     }
-    return 'HA';
+    return '?';
   }
 
   @override

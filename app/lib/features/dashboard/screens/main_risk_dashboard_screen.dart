@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -42,6 +42,7 @@ class _MainRiskDashboardScreenState extends State<MainRiskDashboardScreen> {
   bool _isLoading = true;
   String? _errorMessage;
   String? _userInitials;
+  String _userName = '';  // actual name from SharedPreferences
 
   CurrentConditions _conditions = CurrentConditions.defaultChitral;
   HouseholdRisk _risk = HouseholdRisk.defaultModerate;
@@ -62,8 +63,8 @@ class _MainRiskDashboardScreenState extends State<MainRiskDashboardScreen> {
 
   Future<void> _loadUserInitials() async {
     final prefs = await SharedPreferences.getInstance();
-    final name = prefs.getString('user_name');
-    if (name != null && name.trim().isNotEmpty) {
+    final name = prefs.getString('user_name') ?? '';
+    if (name.trim().isNotEmpty) {
       final parts = name.trim().split(RegExp(r'\s+'));
       String initials;
       if (parts.length >= 2 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
@@ -72,7 +73,10 @@ class _MainRiskDashboardScreenState extends State<MainRiskDashboardScreen> {
         initials = name.substring(0, name.length >= 2 ? 2 : 1).toUpperCase();
       }
       if (mounted) {
-        setState(() => _userInitials = initials);
+        setState(() {
+          _userInitials = initials;
+          _userName = parts[0]; // first name only for greeting
+        });
       }
     }
   }
@@ -233,6 +237,30 @@ class _MainRiskDashboardScreenState extends State<MainRiskDashboardScreen> {
     );
   }
 
+  String _buildGreeting() {
+    // Time-based greeting
+    final hour = DateTime.now().hour;
+    final String timeGreeting;
+    if (LanguageService.instance.isUrdu) {
+      if (hour < 12) timeGreeting = 'صبح بخیر';
+      else if (hour < 17) timeGreeting = 'دوپہر بخیر';
+      else timeGreeting = 'شب بخیر';
+    } else if (LanguageService.instance.isRomanUrdu) {
+      if (hour < 12) timeGreeting = 'Subh-ba-khair';
+      else if (hour < 17) timeGreeting = 'Dopahar-ba-khair';
+      else timeGreeting = 'Shab-ba-khair';
+    } else {
+      if (hour < 12) timeGreeting = 'Good morning';
+      else if (hour < 17) timeGreeting = 'Good afternoon';
+      else timeGreeting = 'Good evening';
+    }
+
+    if (_userName.isNotEmpty) {
+      return '$timeGreeting, $_userName';
+    }
+    return timeGreeting;
+  }
+
   Widget _buildHeader() {
     return Row(
       children: [
@@ -241,7 +269,7 @@ class _MainRiskDashboardScreenState extends State<MainRiskDashboardScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                Tr.t('greeting'),
+                _buildGreeting(),
                 style: AppTextStyles.screenHeader,
               ),
               const SizedBox(height: 4),
@@ -288,7 +316,7 @@ class _MainRiskDashboardScreenState extends State<MainRiskDashboardScreen> {
             ),
             alignment: Alignment.center,
             child: Text(
-              _userInitials ?? (LanguageService.instance.isUrdu ? 'ح ا' : 'HA'),
+              _userInitials ?? '',
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w700,

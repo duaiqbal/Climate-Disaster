@@ -20,9 +20,9 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.core.config import settings
-from backend.database import get_db
-from backend.models.db_models import (
+from core.config import settings
+from database import get_db
+from models.db_models import (
     AlertCreate,
     AlertDetailResponse,
     AlertHistoryORM,
@@ -131,7 +131,7 @@ async def get_alert(alert_id: str, db: AsyncSession = Depends(get_db)):
     history_rows = hist_result.scalars().all()
 
     # Build response dict manually to avoid lazy-load outside session
-    from backend.models.db_models import AlertHistoryEntry
+    from models.db_models import AlertHistoryEntry
     alert_dict = {c.key: getattr(alert, c.key) for c in alert.__table__.columns}
     history_list = [
         AlertHistoryEntry.model_validate(

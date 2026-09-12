@@ -20,9 +20,9 @@ from fastapi.security import APIKeyHeader
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.core.config import settings
-from backend.database import get_db
-from backend.models.db_models import PackageUpdateORM, PackageUpdateResponse
+from core.config import settings
+from database import get_db
+from models.db_models import PackageUpdateORM, PackageUpdateResponse
 
 router = APIRouter(prefix="/sync", tags=["Sync"])
 

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/localization/app_translations.dart';
 import '../../core/theme/app_colors.dart';
@@ -18,7 +18,7 @@ class EmergencyContactsScreen extends StatelessWidget {
     _EmergencyContact(
       name: Tr.t('emergency_rescue_title'),
       description: Tr.t('emergency_rescue_sub'),
-      number: '112',
+      number: '1122',  // Pakistan Rescue Service (Punjab/KP)
     ),
     _EmergencyContact(
       name: Tr.t('emergency_police_title'),

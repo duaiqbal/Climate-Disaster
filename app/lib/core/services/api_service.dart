@@ -1,15 +1,18 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 
-/// Service connecting to the FastAPI backend with timeout, error recovery,
-/// and offline tolerance.
+/// HTTP wrapper connecting to the FastAPI backend.
+/// URL is resolved from AppConfig so it works on Web (localhost) and Android emulator (10.0.2.2).
 class ApiService {
-  // 10.0.2.2 is Android emulator's loopback to host localhost:8000.
-  // Can be configured for local testing or physical devices via LAN IP.
-  static String baseUrl = 'http://10.0.2.2:8000';
+  // Use web-safe URL on web, emulator loopback on Android
+  static String get baseUrl {
+    if (kIsWeb) return 'http://localhost:8002';
+    return 'http://10.0.2.2:8002';
+  }
 
-  static const Duration timeoutDuration = Duration(seconds: 4);
+  static const Duration timeoutDuration = Duration(seconds: 6);
 
   /// Helper to perform safe GET requests
   static Future<dynamic> get(String endpoint) async {

@@ -17,8 +17,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.core.config import settings
-from backend.core.security import (
+from core.config import settings
+from core.security import (
     _DUMMY_HASH,
     create_access_token,
     generate_refresh_token,
@@ -27,8 +27,8 @@ from backend.core.security import (
     hash_refresh_token,
     verify_password,
 )
-from backend.database import get_db
-from backend.models.db_models import (
+from database import get_db
+from models.db_models import (
     LoginRequest,
     RefreshRequest,
     RefreshTokenORM,

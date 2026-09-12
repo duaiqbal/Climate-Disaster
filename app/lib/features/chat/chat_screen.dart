@@ -1,3 +1,4 @@
+﻿import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import '../../core/retrieval/retrieval_engine.dart';
 import '../../core/rules_engine/rules_engine.dart';
@@ -67,27 +68,32 @@ class _ChatScreenState extends State<ChatScreen> {
     List<String> sources = [];
     String? evidenceLabel;
 
-    final apiResponse = await ApiService.post('/api/query', {'query': query});
-    if (apiResponse != null && apiResponse['answer'] != null) {
+    final apiResponse = await ApiService.post('/rag/query', {'question': query, 'language': 'en', 'top_k': 5});
+    if (apiResponse != null && apiResponse['answer'] != null &&
+        apiResponse['confidence'] != 'insufficient') {
       _isOnline = true;
       answerText = apiResponse['answer'] as String;
-      if (apiResponse['recommended_steps'] is List) {
-        steps = List<String>.from(apiResponse['recommended_steps'] as List);
-      }
       if (apiResponse['sources'] is List) {
         sources = List<String>.from(
-          (apiResponse['sources'] as List).map((s) => s.toString()),
+          (apiResponse['sources'] as List).map((s) =>
+            '${s['source_org'] ?? ''}: ${s['doc_title'] ?? ''}'),
         );
+      }
+      evidenceLabel = Tr.t('evidence_high');
       }
     } else {
       _isOnline = false;
-      final chunks = await RetrievalEngine.search(query);
-      final response = RulesEngine.buildResponse(query, chunks, offline: true);
-      answerText = response.answerText;
-      evidenceLabel = _evidenceLabel(response.evidenceLevel);
-      sources = response.sources
-          .map((s) => '${s.sourceOrg}: ${s.sourceTitle}')
-          .toList();
+      if (!kIsWeb) {
+        final chunks = await RetrievalEngine.search(query);
+        final response = RulesEngine.buildResponse(query, chunks, offline: true);
+        answerText = response.answerText;
+        evidenceLabel = _evidenceLabel(response.evidenceLevel);
+        sources = response.sources.map((s) => '${s.sourceOrg}: ${s.sourceTitle}').toList();
+      } else {
+        answerText = 'Offline knowledge search is available on the mobile app. '
+            'Please connect to the backend or use the Android app for offline queries.';
+        evidenceLabel = Tr.t('evidence_limited');
+      }
       if (steps.isEmpty) {
         steps = [
           Tr.t('offline_step_1'),
