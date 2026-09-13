@@ -48,6 +48,19 @@ class AppColors {
   static const Color onlineGreen = Color(0xFF10B981);
   static const Color weatherPillBg = Color(0xFFF9FAFB);
   static const Color progressTrack = Color(0xFFE5E7EB);
+
+  // ── Auth / Onboarding redesign tokens (splash, login, signup, language) ─────
+  // These are reusable stops for the gradient + glow treatment used across the
+  // new animated auth screens. All derived from `primary` so the palette stays
+  // single-sourced — update `primary` above and these follow automatically.
+  static Color get primaryGradientStart => primary;
+  static Color get primaryGradientEnd => primary.withValues(alpha: 0.85);
+  static Color get primaryGlowSoft => primary.withValues(alpha: 0.12);
+  static Color get primaryGlowMedium => primary.withValues(alpha: 0.28);
+  static Color get primaryGlowStrong => primary.withValues(alpha: 0.4);
+  static Color get primaryWash => primary.withValues(alpha: 0.07);
+  static Color get cardShadow => Colors.black.withValues(alpha: 0.06);
+
   // ── Legacy aliases (keep existing code compiling after redesign) ─────────────
   static const Color hazardHigh    = riskHigh;
   static const Color hazardMedium  = riskModerate;

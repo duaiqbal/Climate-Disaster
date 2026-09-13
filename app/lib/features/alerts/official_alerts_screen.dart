@@ -5,6 +5,7 @@ import '../../core/models/official_alert.dart';
 import '../../core/services/disaster_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/theme/app_animations.dart';
 import 'alert_details_screen.dart';
 import '../screen_entrance.dart';
 
@@ -92,26 +93,31 @@ class _OfficialAlertsScreenState extends State<OfficialAlertsScreen> {
                   final selected = _selectedCategory == cat;
                   return Padding(
                     padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text(_getCategoryLabel(cat)),
-                      selected: selected,
-                      selectedColor: AppColors.primary,
-                      backgroundColor: AppColors.surface,
-                      labelStyle: TextStyle(
-                        color:
-                            selected ? Colors.white : AppColors.textSecondary,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        side: BorderSide(
+                    child: AnimatedScale(
+                      scale: selected ? 1.03 : 1.0,
+                      duration: AppAnimations.buttonStateChange,
+                      curve: AppAnimations.entranceCurve,
+                      child: ChoiceChip(
+                        label: Text(_getCategoryLabel(cat)),
+                        selected: selected,
+                        selectedColor: AppColors.primary,
+                        backgroundColor: AppColors.surface,
+                        labelStyle: TextStyle(
                           color:
-                              selected ? AppColors.primary : AppColors.border,
+                              selected ? Colors.white : AppColors.textSecondary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
                         ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          side: BorderSide(
+                            color:
+                                selected ? AppColors.primary : AppColors.border,
+                          ),
+                        ),
+                        onSelected: (_) =>
+                            setState(() => _selectedCategory = cat),
                       ),
-                      onSelected: (_) =>
-                          setState(() => _selectedCategory = cat),
                     ),
                   );
                 }).toList(),
@@ -126,31 +132,53 @@ class _OfficialAlertsScreenState extends State<OfficialAlertsScreen> {
                   : RefreshIndicator(
                       onRefresh: _loadAlerts,
                       color: AppColors.primary,
-                      child: _filteredAlerts.isEmpty
-                          ? Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.filter_list_off,
-                                      size: 48, color: AppColors.textMuted),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    Tr.t('no_alerts_filter'),
-                                    style: AppTextStyles.body,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
-                            )
-                          : ListView.builder(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 8),
-                              itemCount: _filteredAlerts.length,
-                              itemBuilder: (context, index) {
-                                final alert = _filteredAlerts[index];
-                                return _buildAlertCard(alert);
-                              },
+                      child: AnimatedSwitcher(
+                        duration: AppAnimations.cardStateChange,
+                        switchInCurve: AppAnimations.entranceCurve,
+                        switchOutCurve: AppAnimations.entranceCurve,
+                        transitionBuilder: (child, animation) {
+                          return FadeTransition(
+                            opacity: animation,
+                            child: SlideTransition(
+                              position: Tween<Offset>(
+                                begin: AppAnimations.slideUpSmall,
+                                end: Offset.zero,
+                              ).animate(animation),
+                              child: child,
                             ),
+                          );
+                        },
+                        child: _filteredAlerts.isEmpty
+                            ? Center(
+                                key: const ValueKey('empty'),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.filter_list_off,
+                                        size: 48, color: AppColors.textMuted),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      Tr.t('no_alerts_filter'),
+                                      style: AppTextStyles.body,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : ListView.builder(
+                                key: ValueKey(_selectedCategory),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 8),
+                                itemCount: _filteredAlerts.length,
+                                itemBuilder: (context, index) {
+                                  final alert = _filteredAlerts[index];
+                                  return _StaggeredAlertCard(
+                                    index: index,
+                                    child: _buildAlertCard(alert),
+                                  );
+                                },
+                              ),
+                      ),
                     ),
             ),
           ],
@@ -393,6 +421,63 @@ class _OfficialAlertsScreenState extends State<OfficialAlertsScreen> {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Wraps each alert card in a staggered fade+slide entrance, delayed
+/// slightly per index so cards appear in sequence rather than all at once.
+class _StaggeredAlertCard extends StatefulWidget {
+  final int index;
+  final Widget child;
+  const _StaggeredAlertCard({required this.index, required this.child});
+
+  @override
+  State<_StaggeredAlertCard> createState() => _StaggeredAlertCardState();
+}
+
+class _StaggeredAlertCardState extends State<_StaggeredAlertCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _fade;
+  late final Animation<Offset> _slide;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: AppAnimations.screenEntrance,
+    );
+    _fade = CurvedAnimation(
+      parent: _controller,
+      curve: AppAnimations.entranceCurve,
+    );
+    _slide = Tween<Offset>(
+      begin: AppAnimations.slideUpMedium,
+      end: Offset.zero,
+    ).animate(_fade);
+
+    final delay = Duration(milliseconds: 60 * widget.index.clamp(0, 6));
+    Future.delayed(delay, () {
+      if (mounted) _controller.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fade,
+      child: SlideTransition(
+        position: _slide,
+        child: widget.child,
       ),
     );
   }

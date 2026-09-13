@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/models/official_alert.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/theme/app_animations.dart';
 import '../../core/localization/app_translations.dart';
 import '../../core/localization/language_service.dart';
 import '../chat/chat_screen.dart';
@@ -325,29 +326,38 @@ class _XaiAccordionCard extends StatelessWidget {
                       style: AppTextStyles.cardTitle,
                     ),
                   ),
-                  Icon(
-                    expanded
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    color: AppColors.textMuted,
+                  AnimatedRotation(
+                    turns: expanded ? 0.5 : 0.0,
+                    duration: AppAnimations.buttonStateChange,
+                    curve: AppAnimations.entranceCurve,
+                    child: const Icon(
+                      Icons.keyboard_arrow_down,
+                      color: AppColors.textMuted,
+                    ),
                   ),
                 ],
               ),
             ),
           ),
-          if (expanded)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
-              child: Text(
-                LanguageService.instance.isUrdu
-                    ? 'یہ تجویز کردہ اقدامات ضلع چترال کے لیے سرکاری NDMA اور PMD کی ہنگامی ہدایات سے لیے گئے ہیں۔ یہ آپ کے محل وقوع، الرٹ لیول اور گھریلو خطرے کے کوائف سے مماثل ہیں۔ AI کا نظام نیا مشورہ پیدا نہیں کرتا بلکہ تصدیق شدہ سرکاری رہنمائی کو تلاش اور پیش کرتا ہے۔'
-                    : 'These recommended actions are derived from official NDMA and PMD emergency guidelines for Chitral District. They are matched to your location, the current alert level, and your household risk profile. The AI system does not generate new advice — it retrieves and ranks verified official guidance.',
-                style: AppTextStyles.body.copyWith(
-                  color: AppColors.textSecondary,
-                  height: 1.6,
-                ),
-              ),
-            ),
+          AnimatedSize(
+            duration: AppAnimations.errorBannerResize,
+            curve: AppAnimations.entranceCurve,
+            alignment: Alignment.topCenter,
+            child: expanded
+                ? Padding(
+                    padding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
+                    child: Text(
+                      LanguageService.instance.isUrdu
+                          ? 'یہ تجویز کردہ اقدامات ضلع چترال کے لیے سرکاری NDMA اور PMD کی ہنگامی ہدایات سے لیے گئے ہیں۔ یہ آپ کے محل وقوع، الرٹ لیول اور گھریلو خطرے کے کوائف سے مماثل ہیں۔ AI کا نظام نیا مشورہ پیدا نہیں کرتا بلکہ تصدیق شدہ سرکاری رہنمائی کو تلاش اور پیش کرتا ہے۔'
+                          : 'These recommended actions are derived from official NDMA and PMD emergency guidelines for Chitral District. They are matched to your location, the current alert level, and your household risk profile. The AI system does not generate new advice — it retrieves and ranks verified official guidance.',
+                      style: AppTextStyles.body.copyWith(
+                        color: AppColors.textSecondary,
+                        height: 1.6,
+                      ),
+                    ),
+                  )
+                : const SizedBox(width: double.infinity),
+          ),
         ],
       ),
     );
