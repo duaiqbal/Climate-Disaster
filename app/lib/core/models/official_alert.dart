@@ -1,13 +1,16 @@
 class OfficialAlert {
-  final String id;
-  final String title;
-  final String sourceOrg;
-  final String severity; // High, Moderate, Low
-  final String area;
-  final String description;
-  final String issuedAgo;
+  final String  id;
+  final String  title;
+  final String  sourceOrg;
+  final String  severity;   // High, Moderate, Low
+  final String  area;       // district or province
+  final String  province;   // province field (Phase 2.3)
+  final String  description;
+  final String  issuedAgo;
   final String? aiRiskAssessment;
   final List<String> whatToDo;
+  // Phase 2.3: "coordinate"|"district_name"|"province_only"|"national"|null
+  final String? locationMatchType;
 
   const OfficialAlert({
     required this.id,
@@ -15,10 +18,12 @@ class OfficialAlert {
     required this.sourceOrg,
     required this.severity,
     required this.area,
+    this.province = '',
     required this.description,
     required this.issuedAgo,
     this.aiRiskAssessment,
     this.whatToDo = const [],
+    this.locationMatchType,
   });
 
   String get source => sourceOrg;
@@ -85,12 +90,14 @@ class OfficialAlert {
                     ?? 'National Disaster Management Authority (NDMA)',
       severity    : severity,
       area        : area,
+      province    : json['province'] as String? ?? '',
       description : description,
       issuedAgo   : issuedAgo,
       aiRiskAssessment: aiRisk,
       whatToDo    : (json['what_to_do'] as List<dynamic>?)
                       ?.map((e) => e.toString()).toList()
                     ?? _defaultWhatToDo(hazardType),
+      locationMatchType: json['location_match_type'] as String?,
     );
   }
 
@@ -149,6 +156,7 @@ class OfficialAlert {
     sourceOrg: 'Pakistan Meteorological Department',
     severity: 'High',
     area: 'Chitral District',
+    province: 'Khyber Pakhtunkhwa',
     description:
         'Heavy rainfall may increase flash-flood and landslide risk. Strong monsoon currents are expected to penetrate in upper parts of the country.',
     issuedAgo: 'Issued 2 hours ago',
@@ -161,6 +169,7 @@ class OfficialAlert {
       'Keep an evacuation route available.',
       'Move livestock to a safer location if advised.',
     ],
+    locationMatchType: 'district_name',
   );
 
   static const OfficialAlert watchFromNDMA = OfficialAlert(
@@ -169,6 +178,7 @@ class OfficialAlert {
     sourceOrg: 'National Disaster Management Authority (NDMA)',
     severity: 'Moderate',
     area: 'Lowlying areas of Chitral',
+    province: 'Khyber Pakhtunkhwa',
     description: 'Risk of flash flooding in local nullahs and streams due to expected rainfall.',
     issuedAgo: 'Issued 5 hours ago',
     aiRiskAssessment:
@@ -178,5 +188,6 @@ class OfficialAlert {
       'Prepare emergency go-bag.',
       'Identify nearest high ground shelter.',
     ],
+    locationMatchType: 'district_name',
   );
 }

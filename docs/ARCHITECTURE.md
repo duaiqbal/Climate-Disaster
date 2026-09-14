@@ -1,292 +1,137 @@
-# Disaster DSS — Architecture
+# ChitralSafe — Architecture Document
 
-## System Overview
-
-Disaster DSS is an **offline-first, multilingual disaster decision-support system** for Chitral, KP.  
-It is explicitly **not** a real-time prediction model and **not** an official emergency alert system.  
-It is a decision-support layer that makes existing verified official guidance accessible, location-aware, and understandable with zero internet or electricity.
+**Version:** 2.1.0 (Phase 2 — Multi-source alerts + location filtering)  
+**Updated:** 2026-09-14
 
 ---
 
-## Core Design Principle
+## 1. Project Scope
 
-> **Generation is optional. Verified retrieval and deterministic rules are mandatory.**
+ChitralSafe is an **offline-first disaster decision-support system** focused on
+**Chitral, Khyber Pakhtunkhwa, Pakistan**.
 
-The core system operates with:
-- Zero internet
-- Zero cloud LLM
-- Zero local LLM
-- Zero paid APIs
+The alert feed is national (all of Pakistan) so users see alerts from Punjab,
+Sindh, NDMA, and PMD — but:
 
-AI generation is an optional post-processing layer that can only rephrase already-retrieved, verified content. It is never allowed to generate new facts, alerts, or predictions.
+- The **default view filters alerts to the user's location** (GPS or KP province).
+- The **hazard grid, knowledge base, and preparedness guidance** remain
+  Chitral/KP-specific and are not diluted by national data.
+- Users can switch to "Show all Pakistan" to see the national picture.
 
----
-
-## Component Map
-
-```
-disaster_dss/
-├── app/                        Flutter mobile application
-│   ├── lib/core/
-│   │   ├── local_db/           DatabaseHelper — SQLite access layer
-│   │   ├── retrieval/          KeywordRetriever + RomanUrduNormalizer
-│   │   ├── rules_engine/       HazardRules — deterministic classifier
-│   │   ├── localization/       AppLocalizations (en / ur / ru)
-│   │   ├── providers/          LanguageProvider, AppStateProvider
-│   │   └── theme/              AppTheme (light + dark)
-│   ├── lib/features/
-│   │   ├── onboarding/         3-page first-run flow
-│   │   ├── auth/               Login, Signup (local credential store)
-│   │   ├── dashboard/          Bottom-nav shell + home tab
-│   │   ├── chat/               Offline Q&A — retrieval + source display
-│   │   ├── map/                GPS hazard lookup + indicator display
-│   │   ├── alerts/             Local alert cache + optional sync
-│   │   ├── safety/             4-tab safety checklist (persistent)
-│   │   ├── profile/            Language selector, package meta, logout
-│   │   └── simulator/          Demo scenario runner (3 scenarios)
-│   └── assets/offline_package/ knowledge.sqlite + hazard_grid.sqlite
-│
-├── backend/                    FastAPI — optional online sync
-│   ├── main.py                 App factory, lifespan, CORS
-│   ├── database.py             Async SQLAlchemy + aiosqlite
-│   ├── models/db_models.py     ORM models + Pydantic schemas
-│   └── routers/
-│       ├── alerts.py           CRUD endpoints for official alerts
-│       ├── auth.py             Register / Login / token
-│       ├── knowledge.py        Read-only chunk browser + search
-│       └── sync.py             Package version sync
-│
-├── pipeline/                   Laptop-side data processing
-│   ├── rag/extract.py          PDF → JSON (PyMuPDF)
-│   ├── rag/chunk.py            JSON → overlapping text chunks
-│   ├── rag/embed.py            Chunks → embeddings (multilingual MiniLM)
-│   ├── package_builder/
-│   │   └── build_sqlite.py     Chunks + alerts → knowledge.sqlite
-│   ├── gis/
-│   │   └── compute_hazard_grid.py  DEM + OSM → hazard_grid.sqlite
-│   └── run_pipeline.py         End-to-end runner
-│
-├── fetchers/                   Data ingestion helpers
-│   ├── pdma_kp_fetcher.py      Manual advisory ingestor (validated)
-│   └── ndma_scraper.py         Web scraper (review gate before ingest)
-│
-├── evaluation/
-│   ├── retrieval_eval.py       P@K, R@K, MRR, F1 per language + hazard type
-│   └── eval_summary.json       Latest evaluation output
-│
-├── data/
-│   ├── raw/                    Official PDFs (gitignored)
-│   ├── extracted/              Per-doc JSON (gitignored)
-│   ├── chunks/                 Chunk JSON files (gitignored)
-│   ├── embeddings/             FAISS index + numpy arrays (gitignored)
-│   ├── raw_advisories.json     Ingested advisories (versioned)
-│   └── ground_truth_eval.json  Evaluation ground truth (versioned)
-│
-├── offline_package/
-│   ├── knowledge.sqlite        Built knowledge DB (gitignored)
-│   ├── hazard_grid.sqlite      Built GIS grid (gitignored)
-│   └── manifest.json           Version + checksum record
-│
-└── docs/
-    ├── ARCHITECTURE.md         This file
-    └── MANUAL_CRITERIA_GUIDE.md  Source evaluation criteria
-```
+This is consistent with the original project brief: Chitral-first design,
+national alert coverage as an available broader view, not the default framing.
 
 ---
 
-## Data Flow
+## 2. Official Alert Source Integration
 
-### Offline Query (primary path — zero internet required)
+### 2.1 Integrated Sources (verified reachable 2026-09-14)
 
+| Source ID | Authority | Province/Scope | Page URL | Notes |
+|---|---|---|---|---|
+| `ndma_advisories` | NDMA | Pakistan (national) | `ndma.gov.pk/advisories/` | PDF links under `/storage/advisories/` |
+| `ndma_sitreps` | NDMA | Pakistan (national) | `ndma.gov.pk/situation-reports/` | Monsoon situation reports |
+| `ndma_guidelines` | NDMA | Pakistan (national) | `ndma.gov.pk/guidelines/` | DRM guidelines and plans |
+| `pdma_kp` | PDMA KP | Khyber Pakhtunkhwa | `pdma.gov.pk/alerts-and-warnings/` | Primary KP source; covers Chitral directly |
+| `pdma_punjab` | PDMA Punjab | Punjab | `pdma.punjab.gov.pk/weather-alerts/advisories` | PDF advisories under `/system/files/` |
+| `pmd_ffd` | PMD Flood Forecasting Division | Pakistan (national) | `ffd.pmd.gov.pk/bulletins` | Real flood bulletins, `/bulletin/N/download` pattern |
+
+All sources use the same ingestion pipeline:
 ```
-User types query
-      │
-      ▼
-KeywordRetriever.retrieve()
-      │  ├─ Roman Urdu? → RomanUrduNormalizer.expandQuery()
-      │  └─ LIKE search over chunks table (SQLite)
-      │
-      ▼
-List<RetrievalResult>
-      │  Each result carries: chunk_text, source_org, pub_date, evidence_level
-      │
-      ▼
-ChatScreen renders results with source badges
-      │  No generation. No inference. Verified text only.
-      ▼
-User sees answer + source attribution
+Fetch listing page → parse PDF links → download → extract text →
+classify hazard/severity → dedupe → POST /alerts with province field
 ```
 
-### Location Hazard Check (offline — GPS only)
+Each source runs **independently** — one failure does not abort others.
 
-```
-User opens Hazard Map
-      │
-      ▼
-Geolocator.getCurrentPosition()
-      │
-      ▼
-DatabaseHelper.getHazardCell(lat, lon)
-      │  SELECT from hazard_grid.sqlite WHERE lat BETWEEN … AND lon BETWEEN …
-      │
-      ▼
-HazardRules.classify(slopeDeg, riverDistKm, elevationM)
-      │  Deterministic threshold rules — same logic in Dart and Python
-      │
-      ▼
-HazardAssessment (HIGH / MEDIUM / LOW)
-      │  + contributing factors + ALWAYS shown with indicator disclaimer
-      ▼
-HazardMapScreen displays result
-```
+### 2.2 Not Currently Integrated
 
-### Optional Online Sync
-
-```
-AppStateProvider detects connectivity
-      │
-      ▼
-AlertsScreen.syncAlerts() → HTTP GET /alerts (FastAPI backend)
-      │
-      ▼
-DatabaseHelper.upsertAlert() → writes to local SQLite
-      │
-      ▼
-App continues using local SQLite — connection can be lost at any point
-```
+| Authority | Reason | What to do if needed |
+|---|---|---|
+| **PDMA Sindh** | `pdma.sindh.gov.pk` exists but has no stable public PDF listings page — content is JS-rendered or behind login. | Monitor for a public alerts RSS or PDF listing page in future versions. |
+| **PDMA Balochistan** | No verifiable official `pdma.balochistan.gov.pk` domain found. A `government-of-balochis.vercel.app` mock exists but is not authoritative. | Wait for an official domain to be established. |
+| **GB-DMA** (Gilgit-Baltistan) | No dedicated GB-DMA public website. GB alerts are covered by NDMA national advisories (which are already integrated). | NDMA already covers GB explicitly (verified in NDMA advisory PDFs). |
+| **AJK-SDMA** (Azad Kashmir) | No public-facing SDMA website with a scrapable alerts page. AJK alerts are covered by NDMA national advisories. | Same as GB-DMA — NDMA national source covers AJK. |
+| **ICT** (Islamabad Capital Territory) | No separate ICT-DMA website. ICT is covered by NDMA national alerts. | NDMA national source covers ICT. |
+| **PMD main site** (`weather.gov.pk`) | New PMD domain uses a JS-rendered SPA with no stable static PDF listing. | Integrate PMD FFD (`ffd.pmd.gov.pk`) instead — already done above. |
 
 ---
 
-## Offline Package Build Pipeline
+## 3. Location Filtering (Phase 2.3)
+
+`GET /alerts` supports three filter modes, all optional and combinable:
 
 ```
-data/raw/*.pdf
-      │
-      ▼  pipeline/rag/extract.py (PyMuPDF)
-data/extracted/*.json
-      │
-      ▼  pipeline/rag/chunk.py (paragraph split + overlap)
-data/chunks/*.json
-      │
-      ├─▶ pipeline/rag/embed.py (multilingual MiniLM → FAISS)
-      │   data/embeddings/  [backend-only, not shipped to app]
-      │
-      ▼  pipeline/package_builder/build_sqlite.py
-offline_package/knowledge.sqlite
-      │
-      ▼  Copy to app/assets/offline_package/
-
-data/raw/chitral_dem.tif  +  data/raw/chitral_rivers.gpkg
-      │                       [Copernicus DEM + OSM — or synthetic fallback]
-      ▼  pipeline/gis/compute_hazard_grid.py
-offline_package/hazard_grid.sqlite
-      │
-      ▼  Copy to app/assets/offline_package/
+?district=Chitral               → ILIKE string match (original behaviour)
+?province=Khyber+Pakhtunkhwa    → exact province match (new)
+?lat=35.85&lon=71.78&radius_km=100  → Haversine radius filter (new)
 ```
+
+### Response field `location_match_type`
+
+Every alert in `GET /alerts` now includes `location_match_type`:
+
+| Value | Meaning |
+|---|---|
+| `"coordinate"` | Alert has lat/lon and is within the requested radius |
+| `"district_name"` | Alert matched via district ILIKE (no exact coordinates) |
+| `"province_only"` | Alert matched via province only |
+| `"national"` | Alert has no location data (district="Pakistan") — shown for all queries |
+
+**Alerts without lat/lon** fall back to province/district string matching rather
+than being silently excluded. The `location_match_type` field makes this fallback
+visible in the UI so precision is never overstated.
+
+### Flutter default behaviour (Phase 2.3)
+
+- Default: passes `?province=Khyber Pakhtunkhwa` (or GPS radius if available).
+- User can toggle "Show all Pakistan" → no location filter → all active alerts shown.
+- Alert cards show a small location precision label based on `location_match_type`.
 
 ---
 
-## SQLite Schema (knowledge.sqlite)
+## 4. Offline Package
 
-```sql
-CREATE TABLE chunks (
-    chunk_id       TEXT PRIMARY KEY,
-    source_org     TEXT NOT NULL,      -- NDMA / PDMA KP / PMD
-    doc_title      TEXT NOT NULL,
-    pub_date       TEXT,
-    language       TEXT NOT NULL,      -- en / ur / ru
-    page_num       INTEGER,
-    chunk_index    INTEGER,
-    chunk_text     TEXT NOT NULL,
-    keywords       TEXT,               -- comma-separated disaster keywords
-    evidence_level TEXT,               -- official_national / official_provincial / …
-    char_count     INTEGER
-);
+| File | Contents | Size |
+|---|---|---|
+| `knowledge.sqlite` | 315 text chunks from 13 NDMA/PDMA PDFs + 1 synthetic demo | 216 KB |
+| `hazard_grid.sqlite` | 10,000 hazard cells covering Chitral (100×100 at 0.01°) | — |
 
-CREATE TABLE alerts (
-    alert_id    TEXT PRIMARY KEY,
-    title       TEXT NOT NULL,
-    body        TEXT NOT NULL,
-    hazard_type TEXT,                  -- flood / flash_flood / landslide
-    severity    TEXT,                  -- LOW / MEDIUM / HIGH / EXTREME
-    issued_at   TEXT,
-    source_org  TEXT,
-    district    TEXT
-);
+Both files are bundled inside the Flutter app binary and work with **zero internet**.
 
-CREATE TABLE package_meta (
-    key   TEXT PRIMARY KEY,
-    value TEXT
-);
-```
+### Knowledge base scope
 
-## SQLite Schema (hazard_grid.sqlite)
-
-```sql
-CREATE TABLE hazard_grid (
-    cell_id              TEXT PRIMARY KEY,
-    lat                  REAL NOT NULL,
-    lon                  REAL NOT NULL,
-    elevation_m          REAL,
-    slope_deg            REAL,
-    river_dist_km        REAL,
-    hazard_level         TEXT NOT NULL,   -- HIGH / MEDIUM / LOW
-    contributing_factors TEXT             -- JSON array of factor strings
-);
-```
+All 315 chunks are **English only** (Phase 3 adds Urdu translations).
+Urdu and Roman Urdu queries fall back to English retrieval via `RomanUrduNormalizer`.
 
 ---
 
-## Hazard Classification Rules
+## 5. Backend Port
 
-These rules are identical in `pipeline/gis/compute_hazard_grid.py` (Python) and `app/lib/core/rules_engine/hazard_rules.dart` (Dart). Any change must be applied to both.
+Default: **8002**  
+Configured via `.env` `BACKEND_URL=http://127.0.0.1:8002`  
+All callers (scheduler, monitor router, Flutter app, alert service) use 8002.
+
+---
+
+## 6. Alert Lifecycle
 
 ```
-Flood HIGH   : river_dist_km < 0.5  AND elevation_m < 2000
-Flood MEDIUM : river_dist_km < 1.5
-Flood LOW    : otherwise
-
-Landslide HIGH   : slope_deg > 30°
-Landslide MEDIUM : slope_deg > 15°
-Landslide LOW    : otherwise
-
-Overall = worst-case combination (HIGH beats MEDIUM beats LOW)
+DISCOVERED → FETCHED → VALIDATED → OFFICIAL-VERIFIED → PUBLISHED → EXPIRED
 ```
 
-All outputs are labeled **"indicator, not prediction"** — explicitly in the UI and in the manifest.
+- Fetcher-sourced alerts enter at **DISCOVERED**.
+- Advancing beyond DISCOVERED requires a separate verification step (admin API).
+- EXPIRED alerts are deactivated (`is_active=False`).
+- Every transition appends an immutable row to `alert_history`.
 
 ---
 
-## Retrieval Strategy
+## 7. Phase Roadmap
 
-| Language | Strategy |
-|----------|----------|
-| English | Tokenise → LIKE search on `chunk_text` + `keywords` |
-| Urdu | Same — Urdu tokens match directly against Urdu chunks |
-| Roman Urdu | `RomanUrduNormalizer.expandQuery()` expands each token to all known spelling variants, then LIKE search; falls back to English if no results |
-
-No vector/semantic search is used on-device. FAISS embeddings exist only on the laptop/backend for optional semantic ranking.
-
----
-
-## Technology Rationale
-
-| Decision | Reason |
-|----------|--------|
-| SQLite not FTS5 | FTS5 availability varies across Android SQLite builds; LIKE is universally available |
-| Keyword not vector retrieval on-device | Reliable across all Android versions; no native library dependencies; deterministic |
-| Multilingual MiniLM for embeddings | Free, open-source, supports en/ur/Roman Urdu; ~118 MB; CPU-viable |
-| Flutter not React Native | Single codebase; first-class SQLite support; good offline story |
-| FastAPI not Django | Lightweight; matches small endpoint surface; async-native |
-| Synthetic terrain fallback | Makes the system runnable without Copernicus DEM download; clearly labeled |
-
----
-
-## Security Notes
-
-- All write endpoints on the backend require `X-Admin-Key` header
-- Passwords hashed with PBKDF2-HMAC-SHA256, 200,000 iterations
-- Tokens signed with HMAC-SHA256; TTL = 24h
-- No PII is stored on-device beyond local SharedPreferences (name, email)
-- The app does not transmit location data to any server
-- `ADMIN_API_KEY` and `SECRET_KEY` must be set via environment variables in production (never hardcoded)
+| Phase | Status | Key deliverables |
+|---|---|---|
+| Phase 1 | ✅ Complete | Port bug, broken SQL, schema drift, payload gaps — 20/20 tests |
+| Phase 2 | ✅ Complete | Multi-source alerts (6 integrated), per-source health, radius filter |
+| Phase 3 | 🔄 In progress | Retrieval-first RAG, disaster_type/phase metadata, FAISS, Urdu KB |
+| Phase 4 | 🔄 In progress | Grounded LLM generation, caching, adversarial testing |

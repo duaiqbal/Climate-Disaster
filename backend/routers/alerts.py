@@ -2,13 +2,30 @@
 backend/routers/alerts.py
 ==========================
 Disaster alert CRUD with full provenance (hard constraint 4),
-alert lifecycle transitions, and audit history.
+alert lifecycle transitions, audit history, and location-aware filtering.
+
+Location filtering (Phase 2.3):
+  GET /alerts supports two filter modes, both optional and combinable:
+    ?district=Chitral          — ILIKE string match (existing, unchanged)
+    ?province=Khyber+Pakhtunkhwa — exact province match (new)
+    ?lat=35.85&lon=71.78&radius_km=50  — radius filter on lat/lon columns
+
+  Radius filter semantics:
+    - Uses Haversine distance approximation (accurate enough at these scales).
+    - Alerts WITH lat/lon: included if within radius_km.
+    - Alerts WITHOUT lat/lon: fall back to province/district string match.
+    - Response includes `location_match_type` per alert:
+        "coordinate"    — alert has lat/lon and was matched by radius
+        "district_name" — alert matched via district ILIKE
+        "province_only" — alert matched only via province
+        "national"      — alert has no location data, shown for all queries
+      This field lets the Flutter UI label precision honestly.
 
 Every state change appends a row to AlertHistoryORM (append-only).
-Alert creation persists source_id and ingestion_run_id FK links.
 """
 
 import hashlib
+import math
 import os
 import uuid
 from datetime import datetime, timezone
@@ -45,6 +62,20 @@ async def require_admin(key: Optional[str] = Security(_api_key_header)) -> None:
         )
 
 
+# ── Haversine distance (km) ───────────────────────────────────────────────────
+
+def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Approximate great-circle distance in km. Accurate to ~0.3% at these scales."""
+    R = 6371.0
+    dlat = math.radians(lat2 - lat1)
+    dlon = math.radians(lon2 - lon1)
+    a = (math.sin(dlat / 2) ** 2
+         + math.cos(math.radians(lat1))
+         * math.cos(math.radians(lat2))
+         * math.sin(dlon / 2) ** 2)
+    return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+
 def _append_history(
     db_session,
     alert: AlertORM,
@@ -79,22 +110,46 @@ _TRANSITIONS: dict[str, str] = {
 # ── List alerts ───────────────────────────────────────────────────────────────
 @router.get("", response_model=AlertListResponse)
 async def list_alerts(
-    district:     Optional[str] = Query(None),
-    hazard_type:  Optional[str] = Query(None),
-    severity:     Optional[str] = Query(None),
-    language:     Optional[str] = Query(None),
-    verification_status: Optional[str] = Query(None),
-    active_only:  bool           = Query(True),
-    limit:        int            = Query(50, ge=1, le=200),
-    offset:       int            = Query(0, ge=0),
+    # Existing filters (unchanged — no breaking change)
+    district:            Optional[str]   = Query(None),
+    hazard_type:         Optional[str]   = Query(None),
+    severity:            Optional[str]   = Query(None),
+    language:            Optional[str]   = Query(None),
+    verification_status: Optional[str]   = Query(None),
+    active_only:         bool            = Query(True),
+    limit:               int             = Query(50, ge=1, le=200),
+    offset:              int             = Query(0, ge=0),
+    # New location filters (Phase 2.3)
+    province:            Optional[str]   = Query(None, description="Exact province name match"),
+    lat:                 Optional[float] = Query(None, description="Latitude for radius filter"),
+    lon:                 Optional[float] = Query(None, description="Longitude for radius filter"),
+    radius_km:           Optional[float] = Query(None, ge=1, le=1000,
+                                                  description="Radius in km; requires lat+lon"),
     db: AsyncSession = Depends(get_db),
-):
+) -> AlertListResponse:
+    """
+    List active alerts with optional location filtering.
+
+    Location filter modes (all optional, combinable):
+      - `district` — ILIKE text match on district field
+      - `province` — exact text match on province field
+      - `lat`+`lon`+`radius_km` — radius filter; alerts without coordinates
+        fall back to province/district string match
+
+    Each alert in the response now includes `location_match_type`:
+      "coordinate"    — matched by lat/lon radius
+      "district_name" — matched by district ILIKE
+      "province_only" — matched by province only
+      "national"      — alert has no location data (shown for all queries)
+    """
     stmt = select(AlertORM).order_by(AlertORM.issued_at.desc())
 
     if active_only:
         stmt = stmt.where(AlertORM.is_active == True)  # noqa: E712
     if district:
         stmt = stmt.where(AlertORM.district.ilike(f"%{district}%"))
+    if province:
+        stmt = stmt.where(AlertORM.province.ilike(f"%{province}%"))
     if hazard_type:
         stmt = stmt.where(AlertORM.hazard_type == hazard_type.lower())
     if severity:
@@ -102,13 +157,66 @@ async def list_alerts(
     if language:
         stmt = stmt.where(AlertORM.language == language.lower())
     if verification_status:
-        stmt = stmt.where(AlertORM.verification_status == verification_status.upper())
+        stmt = stmt.where(
+            AlertORM.verification_status == verification_status.upper()
+        )
 
     all_rows = (await db.execute(stmt)).scalars().all()
-    paginated = all_rows[offset: offset + limit]
+
+    # ── Location post-filter (radius) ────────────────────────────────────────
+    use_radius = lat is not None and lon is not None and radius_km is not None
+
+    def _location_match_type(alert: AlertORM) -> str:
+        if use_radius:
+            if alert.latitude is not None and alert.longitude is not None:
+                d = _haversine_km(lat, lon, alert.latitude, alert.longitude)  # type: ignore[arg-type]
+                if d <= radius_km:  # type: ignore[operator]
+                    return "coordinate"
+                # Has coords but outside radius — excluded below
+                return "_exclude"
+            # No coords — fall back to province/district string match
+            if province and alert.province and province.lower() in alert.province.lower():
+                return "province_only"
+            if district and alert.district and district.lower() in alert.district.lower():
+                return "district_name"
+            # National-scoped alert (district="Pakistan") — show always
+            if not alert.district or alert.district.lower() in ("pakistan", ""):
+                return "national"
+            return "_exclude"
+        # No radius filter — all passed rows are included
+        if alert.latitude is not None and alert.longitude is not None:
+            return "coordinate"
+        if alert.district and alert.district.lower() not in ("pakistan", ""):
+            return "district_name"
+        if alert.province and alert.province.lower() not in ("pakistan", ""):
+            return "province_only"
+        return "national"
+
+    if use_radius:
+        filtered = [
+            (a, _location_match_type(a))
+            for a in all_rows
+            if _location_match_type(a) != "_exclude"
+        ]
+    else:
+        filtered = [(a, _location_match_type(a)) for a in all_rows]
+
+    paginated = filtered[offset: offset + limit]
+
+    # Build responses with location_match_type injected
+    alert_responses = []
+    for (a, match_type) in paginated:
+        resp = AlertResponse.model_validate(a)
+        resp_dict = resp.model_dump()
+        resp_dict["location_match_type"] = match_type
+        alert_responses.append(AlertResponse(**{
+            k: v for k, v in resp_dict.items()
+            if k in AlertResponse.model_fields
+        }))
+
     return AlertListResponse(
-        total=len(all_rows),
-        alerts=[AlertResponse.model_validate(a) for a in paginated],
+        total=len(filtered),
+        alerts=alert_responses,
     )
 
 

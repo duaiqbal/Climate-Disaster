@@ -471,6 +471,10 @@ class AlertResponse(BaseModel):
     language:            str
     is_active:           bool
     created_at:          datetime
+    # Phase 2.3: added to let Flutter UI label location precision honestly.
+    # Values: "coordinate" | "district_name" | "province_only" | "national"
+    # Defaults to None when the response is not produced by a location query.
+    location_match_type: Optional[str] = None
     model_config = {"from_attributes": True}
 
 
