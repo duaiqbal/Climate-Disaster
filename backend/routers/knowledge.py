@@ -77,6 +77,7 @@ def _do_search(db_path: Path, q: str, language: str, limit: int) -> list[dict]:
         sql = f"""
             SELECT chunk_id, source_org, doc_title, pub_date, language,
                    page_num, chunk_text, keywords, evidence_level, char_count,
+                   COALESCE(source_url, '') AS source_url,
                    ({score_expr}) AS score
             FROM chunks
             WHERE language = ? AND ({like_clauses})
@@ -125,6 +126,7 @@ class ChunkResponse(BaseModel):
     keywords:       Optional[str]
     evidence_level: Optional[str]
     char_count:     Optional[int]
+    source_url:     Optional[str] = ""  # direct URL to official document
 
 
 class SearchResponse(BaseModel):

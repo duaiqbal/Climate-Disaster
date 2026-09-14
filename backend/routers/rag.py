@@ -34,6 +34,7 @@ class SourceRef(BaseModel):
     pub_date: str
     evidence_level: str
     chunk_id: str
+    source_url: str = ""  # direct URL to the official document
 
 
 class RAGQueryResponse(BaseModel):
@@ -73,6 +74,7 @@ async def rag_query(payload: RAGQueryRequest):
     result: RAGResponse = query_rag(
         question=payload.question,
         retrieved_chunks=rows,
+        language=payload.language,
     )
 
     return RAGQueryResponse(

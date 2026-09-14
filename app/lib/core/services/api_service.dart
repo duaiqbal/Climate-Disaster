@@ -12,7 +12,7 @@ class ApiService {
     return 'http://10.0.2.2:8002';
   }
 
-  static const Duration timeoutDuration = Duration(seconds: 6);
+  static const Duration timeoutDuration = Duration(seconds: 8);
 
   /// Helper to perform safe GET requests
   static Future<dynamic> get(String endpoint) async {

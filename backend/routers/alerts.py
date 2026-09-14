@@ -187,6 +187,15 @@ async def create_alert(payload: AlertCreate, db: AsyncSession = Depends(get_db))
     )
     await db.flush()
     await db.refresh(alert)
+
+    # ── Broadcast new alert to all WebSocket clients instantly ────────────────
+    try:
+        from core.ws_manager import ws_manager
+        if ws_manager.client_count > 0:
+            alert_dict = AlertResponse.model_validate(alert).model_dump(mode="json")
+            await ws_manager.broadcast_alert(alert_dict)
+    except Exception:
+        pass  # WS broadcast is best-effort — never fail the HTTP response
     return AlertResponse.model_validate(alert)
 
 

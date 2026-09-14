@@ -110,15 +110,18 @@ class DisasterRepository {
   }
 
   Future<List<OfficialAlert>> getAllAlerts() async {
-    final response = await ApiService.get('/alerts?active_only=true&limit=50');
+    final response =
+        await ApiService.get('/alerts?active_only=true&limit=50');
     if (response != null && response is Map<String, dynamic>) {
       final alerts = response['alerts'] as List?;
-      if (alerts != null) {
+      if (alerts != null && alerts.isNotEmpty) {
         return alerts
-            .map((item) => OfficialAlert.fromJson(item as Map<String, dynamic>))
+            .map((item) =>
+                OfficialAlert.fromJson(item as Map<String, dynamic>))
             .toList();
       }
     }
+    // Offline fallback — always show at least 2 seed alerts
     return [OfficialAlert.warningFromPMD, OfficialAlert.watchFromNDMA];
   }
 

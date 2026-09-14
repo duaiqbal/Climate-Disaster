@@ -34,8 +34,11 @@ last_run_result: dict = {}
 
 
 async def _run_monitor_job() -> None:
-    """Async job: spawns the monitor script as a subprocess."""
+    """Async job: spawns the monitor script as a subprocess, then broadcasts results."""
     global last_run_result
+
+    # Import here to avoid circular import at module load time
+    from core.ws_manager import ws_manager
 
     if not _FETCHER.exists():
         last_run_result = {
@@ -45,7 +48,7 @@ async def _run_monitor_job() -> None:
         }
         return
 
-    backend_url = os.getenv("BACKEND_URL", "http://127.0.0.1:8001")
+    backend_url = os.getenv("BACKEND_URL", "http://127.0.0.1:8002")
     admin_key   = os.getenv("ADMIN_API_KEY", "disaster-dss-dev-key-change-in-prod")
 
     try:
@@ -53,7 +56,7 @@ async def _run_monitor_job() -> None:
             [sys.executable, str(_FETCHER)],
             capture_output=True,
             text=True,
-            timeout=300,  # 5-minute hard timeout per run
+            timeout=300,
             cwd=str(_ROOT),
             env={
                 **os.environ,
@@ -61,25 +64,64 @@ async def _run_monitor_job() -> None:
                 "ADMIN_API_KEY": admin_key,
             },
         )
+        stdout = result.stdout or ""
+        # Parse how many new alerts the fetcher posted
+        new_count = 0
+        for line in stdout.splitlines():
+            if "new alert" in line.lower() or "posted" in line.lower():
+                # fetcher prints "Posted N new alerts" or similar
+                import re
+                m = re.search(r'(\d+)', line)
+                if m:
+                    new_count = int(m.group(1))
+
         last_run_result = {
-            "status":   "ok" if result.returncode == 0 else "error",
-            "run_at":   datetime.now(timezone.utc).isoformat(),
+            "status":     "ok" if result.returncode == 0 else "error",
+            "run_at":     datetime.now(timezone.utc).isoformat(),
             "returncode": result.returncode,
-            "stdout_tail": result.stdout[-500:] if result.stdout else "",
+            "new_alerts": new_count,
+            "stdout_tail": stdout[-500:] if stdout else "",
             "stderr_tail": result.stderr[-300:] if result.stderr else "",
         }
+
+        # ── Broadcast to all connected WebSocket clients ──────────────────────
+        if ws_manager.client_count > 0:
+            await ws_manager.broadcast_monitor_done(new_count)
+
+            # If new alerts found, fetch them from DB and push each one
+            if new_count > 0:
+                await _push_latest_alerts(ws_manager, admin_key, backend_url)
+
     except subprocess.TimeoutExpired:
         last_run_result = {
-            "status": "timeout",
-            "run_at": datetime.now(timezone.utc).isoformat(),
+            "status":  "timeout",
+            "run_at":  datetime.now(timezone.utc).isoformat(),
             "message": "Monitor run timed out after 300s",
         }
     except Exception as e:
         last_run_result = {
-            "status": "exception",
-            "run_at": datetime.now(timezone.utc).isoformat(),
+            "status":  "exception",
+            "run_at":  datetime.now(timezone.utc).isoformat(),
             "message": str(e),
         }
+
+
+async def _push_latest_alerts(ws_manager, admin_key: str, backend_url: str) -> None:
+    """Fetch the latest alerts from our own API and broadcast each one."""
+    try:
+        import httpx
+        async with httpx.AsyncClient(timeout=5) as client:
+            resp = await client.get(
+                f"{backend_url}/alerts",
+                params={"active_only": "true", "limit": "5"},
+                headers={"X-Admin-Key": admin_key},
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                for alert in data.get("alerts", []):
+                    await ws_manager.broadcast_alert(alert)
+    except Exception:
+        pass  # silent — WebSocket broadcast is best-effort
 
 
 def start_scheduler() -> None:

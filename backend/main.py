@@ -32,6 +32,7 @@ from database import init_db
 from models.db_models import HealthResponse
 from routers import alerts, auth, knowledge, monitor, sync
 from routers import rag as rag_router
+from routers import ws as ws_router
 
 APP_VERSION = "2.0.0"
 limiter = None  # Rate limiting handled at infrastructure level in production
@@ -42,6 +43,17 @@ limiter = None  # Rate limiting handled at infrastructure level in production
 async def lifespan(app: FastAPI):
     await init_db()
     start_scheduler()   # starts alert monitor background job
+    # Start WebSocket heartbeat ping every 30s
+    import asyncio
+    async def _ws_ping_loop():
+        from core.ws_manager import ws_manager
+        while True:
+            await asyncio.sleep(30)
+            try:
+                await ws_manager.broadcast_ping()
+            except Exception:
+                pass
+    asyncio.create_task(_ws_ping_loop())
     yield
     stop_scheduler()
 
@@ -78,6 +90,7 @@ app.include_router(knowledge.router)
 app.include_router(rag_router.router)
 app.include_router(sync.router)
 app.include_router(monitor.router)
+app.include_router(ws_router.router)   # real-time WebSocket /ws/alerts
 
 
 # ── Health ─────────────────────────────────────────────────────────────────────

@@ -45,6 +45,9 @@ dependencies:
   # URL launcher
   url_launcher: ^6.2.4
 
+  # Real-time WebSocket alerts
+  web_socket_channel: ^3.0.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
