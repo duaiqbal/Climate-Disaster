@@ -36,7 +36,7 @@
 
 ## 🎯 Project Overview
 
-ChitralSafe is a **Final Year Project (FYP)** built for disaster risk management in Chitral, Khyber Pakhtunkhwa, Pakistan. The region faces frequent floods, GLOFs (Glacial Lake Outburst Floods), landslides, and earthquakes.
+ChitralSafe is a Project built for disaster risk management in Chitral, Khyber Pakhtunkhwa, Pakistan. The region faces frequent floods, GLOFs (Glacial Lake Outburst Floods), landslides, and earthquakes.
 
 ### Problem
 - No offline-capable disaster information system exists for Chitral
@@ -592,17 +592,16 @@ python -m pytest tests/ -v
 
 ## 👥 Team & Contribution
 
-**Project:** Final Year Project — Disaster Decision Support System  
-**University:** [Your University Name]  
-**Supervisor:** [Supervisor Name]
+**Project:**  
+**Supervisor:** Muhammad Huzaifah 
 
 ### Team Members
 | Name | Role |
 |------|------|
 | Dua Iqbal | Lead Developer — Backend, RAG, Alerts |
-| [Member 2] | Flutter App Development |
-| [Member 3] | Data Pipeline, Knowledge Base |
-| [Member 4] | UI/UX, Testing |
+| Tooba  | Flutter App Development |
+| [Tooba and Simrah ] | Data Pipeline, Knowledge Base |
+| [Hafsa and Manahil] | UI/UX,  |Kiran: Testing 
 
 ### Contributing
 1. Fork the repo
