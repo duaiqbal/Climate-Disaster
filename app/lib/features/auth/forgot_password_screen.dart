@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import '../../core/localization/app_translations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/theme/app_animations.dart';
 import 'login_screen.dart';
+import '../screen_entrance.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -24,7 +26,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: AppAnimations.screenEntranceLong,
     )..forward();
   }
 
@@ -49,81 +51,102 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
 
   @override
   Widget build(BuildContext context) {
-    final fade = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
+    final fade = CurvedAnimation(
+      parent: _controller,
+      curve: AppAnimations.entranceCurve,
+    );
     final slide = Tween<Offset>(
-      begin: const Offset(0, 0.04),
+      begin: AppAnimations.slideUpSmall,
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    ).animate(CurvedAnimation(parent: _controller, curve: AppAnimations.entranceCurve));
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              InkWell(
-                borderRadius: BorderRadius.circular(24),
-                onTap: () => Navigator.of(context).maybePop(),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.arrow_back,
-                          size: 18, color: AppColors.textPrimary),
-                      const SizedBox(width: 6),
-                      Text(Tr.t('back_to_login'),
-                          style: AppTextStyles.body
-                              .copyWith(color: AppColors.textPrimary)),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              FadeTransition(
-                opacity: fade,
-                child: SlideTransition(
-                  position: slide,
-                  child: Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.border),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Column(
+    return ScreenEntrance(
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                InkWell(
+                  borderRadius: BorderRadius.circular(24),
+                  onTap: () => Navigator.of(context).maybePop(),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Row(
                       children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryContainer,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(Icons.shield_outlined,
-                              color: AppColors.primary),
-                        ),
-                        const SizedBox(height: 16),
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 300),
-                          child: _sent
-                              ? _buildSentState(context)
-                              : _buildFormState(context),
-                        ),
+                        const Icon(Icons.arrow_back,
+                            size: 18, color: AppColors.textPrimary),
+                        const SizedBox(width: 6),
+                        Text(Tr.t('back_to_login'),
+                            style: AppTextStyles.body
+                                .copyWith(color: AppColors.textPrimary)),
                       ],
                     ),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 24),
+                FadeTransition(
+                  opacity: fade,
+                  child: SlideTransition(
+                    position: slide,
+                    child: Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: AppColors.border),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.cardShadow,
+                            blurRadius: 24,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 56,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  AppColors.primaryGradientStart,
+                                  AppColors.primaryGradientEnd,
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primaryGlowMedium,
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(Icons.shield_outlined,
+                                color: Colors.white, size: 26),
+                          ),
+                          const SizedBox(height: 16),
+                          AnimatedSwitcher(
+                            duration: AppAnimations.cardStateChange,
+                            switchInCurve: AppAnimations.entranceCurve,
+                            switchOutCurve: AppAnimations.entranceCurve,
+                            child: _sent
+                                ? _buildSentState(context)
+                                : _buildFormState(context),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -165,17 +188,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
               prefixIcon: const Icon(Icons.mail_outline,
                   color: AppColors.textMuted, size: 20),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: AppColors.border),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: AppColors.border),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
                 borderSide:
-                    const BorderSide(color: AppColors.primary, width: 1.5),
+                    const BorderSide(color: AppColors.primary, width: 1.6),
               ),
             ),
             validator: (v) {
@@ -188,27 +211,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
               return null;
             },
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 22),
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
+            child: _AnimatedSendButton(
+              isLoading: _isLoading,
               onPressed: _isLoading ? null : _handleSendResetLink,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                elevation: 0,
-              ),
-              child: _isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white),
-                    )
-                  : Text(Tr.t('send_reset_link'), style: AppTextStyles.button),
+              label: Tr.t('send_reset_link'),
             ),
           ),
           const SizedBox(height: 14),
@@ -239,8 +248,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
       children: [
         TweenAnimationBuilder<double>(
           tween: Tween(begin: 0, end: 1),
-          duration: const Duration(milliseconds: 400),
-          curve: Curves.easeOutBack,
+          duration: AppAnimations.checkmarkPop,
+          curve: AppAnimations.checkmarkCurve,
           builder: (context, value, child) =>
               Transform.scale(scale: value, child: child),
           child: Container(
@@ -249,6 +258,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
             decoration: BoxDecoration(
               color: AppColors.primaryContainer,
               shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primaryGlowSoft,
+                  blurRadius: 12,
+                ),
+              ],
             ),
             child: const Icon(Icons.check_circle,
                 color: AppColors.primary, size: 32),
@@ -286,7 +301,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                  borderRadius: BorderRadius.circular(12)),
               side: const BorderSide(color: AppColors.primary),
             ),
             child: Text(
@@ -296,6 +311,87 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
           ),
         ),
       ],
+    );
+  }
+}
+
+class _AnimatedSendButton extends StatefulWidget {
+  final bool isLoading;
+  final VoidCallback? onPressed;
+  final String label;
+
+  const _AnimatedSendButton({
+    required this.isLoading,
+    required this.onPressed,
+    required this.label,
+  });
+
+  @override
+  State<_AnimatedSendButton> createState() => _AnimatedSendButtonState();
+}
+
+class _AnimatedSendButtonState extends State<_AnimatedSendButton> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final disabled = widget.onPressed == null;
+    return GestureDetector(
+      onTapDown: disabled ? null : (_) => setState(() => _pressed = true),
+      onTapUp: disabled ? null : (_) => setState(() => _pressed = false),
+      onTapCancel: disabled ? null : () => setState(() => _pressed = false),
+      onTap: widget.onPressed,
+      child: AnimatedScale(
+        scale: _pressed ? AppAnimations.pressedScale : 1.0,
+        duration: AppAnimations.buttonPress,
+        curve: AppAnimations.pressCurve,
+        child: AnimatedContainer(
+          duration: AppAnimations.buttonStateChange,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: disabled
+                  ? [
+                      AppColors.primary.withValues(alpha: 0.5),
+                      AppColors.primary.withValues(alpha: 0.4),
+                    ]
+                  : [
+                      AppColors.primaryGradientStart,
+                      AppColors.primaryGradientEnd,
+                    ],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: disabled
+                ? []
+                : [
+                    BoxShadow(
+                      color: _pressed
+                          ? AppColors.primaryGlowSoft
+                          : AppColors.primaryGlowMedium,
+                      blurRadius: _pressed ? 8 : 16,
+                      offset: Offset(0, _pressed ? 2 : 6),
+                    ),
+                  ],
+          ),
+          child: Center(
+            child: widget.isLoading
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : Text(
+                    widget.label,
+                    style: AppTextStyles.button.copyWith(color: Colors.white),
+                  ),
+          ),
+        ),
+      ),
     );
   }
 }

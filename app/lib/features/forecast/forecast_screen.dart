@@ -6,6 +6,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/localization/app_translations.dart';
 import '../../core/localization/language_service.dart';
 import '../simulator/decision_simulator_screen.dart';
+import '../screen_entrance.dart';
 
 class ForecastScreen extends StatefulWidget {
   const ForecastScreen({super.key});
@@ -17,7 +18,6 @@ class _ForecastScreenState extends State<ForecastScreen> {
   CurrentConditions? _current;
   List<DailyForecast> _forecast = [];
   bool _loading = true;
-
 
   bool _hasError = false;
 
@@ -57,96 +57,99 @@ class _ForecastScreenState extends State<ForecastScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        title: Row(
-          children: [
-            const Icon(Icons.location_on_outlined,
-                color: AppColors.primary, size: 16),
-            const SizedBox(width: 4),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(Tr.t('location_chitral_pk'),
-                    style: AppTextStyles.cardTitle.copyWith(fontSize: 15)),
-                Text(Tr.t('forecast_label'),
-                    style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textMuted, fontSize: 11)),
-              ],
+    return ScreenEntrance(
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          backgroundColor: AppColors.surface,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          title: Row(
+            children: [
+              const Icon(Icons.location_on_outlined,
+                  color: AppColors.primary, size: 16),
+              const SizedBox(width: 4),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(Tr.t('location_chitral_pk'),
+                      style: AppTextStyles.cardTitle.copyWith(fontSize: 15)),
+                  Text(Tr.t('forecast_label'),
+                      style: AppTextStyles.caption
+                          .copyWith(color: AppColors.textMuted, fontSize: 11)),
+                ],
+              ),
+            ],
+          ),
+          actions: const [
+            Padding(
+              padding: EdgeInsets.only(right: 16),
+              child: Icon(Icons.search, color: AppColors.textSecondary),
             ),
           ],
         ),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: Icon(Icons.search, color: AppColors.textSecondary),
+        floatingActionButton: FloatingActionButton(
+          heroTag: 'fab_forecast',
+          backgroundColor: AppColors.primary,
+          mini: true,
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const DecisionSimulatorScreen()),
           ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'fab_forecast',
-        backgroundColor: AppColors.primary,
-        mini: true,
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const DecisionSimulatorScreen()),
+          child: const Icon(Icons.smart_toy_outlined,
+              color: Colors.white, size: 20),
         ),
-        child: const Icon(Icons.smart_toy_outlined, color: Colors.white, size: 20),
-      ),
-      body: _loading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary))
-          : _hasError
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.cloud_off_outlined,
-                            size: 48, color: AppColors.textMuted),
-                        const SizedBox(height: 12),
-                        Text(
-                          Tr.t('forecast_load_error'),
-                          style: AppTextStyles.body,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
+        body: _loading
+            ? const Center(
+                child: CircularProgressIndicator(color: AppColors.primary))
+            : _hasError
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.cloud_off_outlined,
+                              size: 48, color: AppColors.textMuted),
+                          const SizedBox(height: 12),
+                          Text(
+                            Tr.t('forecast_load_error'),
+                            style: AppTextStyles.body,
+                            textAlign: TextAlign.center,
                           ),
-                          onPressed: _load,
-                          child: Text(Tr.t('retry')),
-                        ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                            ),
+                            onPressed: _load,
+                            child: Text(Tr.t('retry')),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: _load,
+                    color: AppColors.primary,
+                    child: ListView(
+                      padding: const EdgeInsets.all(16),
+                      children: [
+                        _CurrentConditionsCard(current: _current!),
+                        const SizedBox(height: 16),
+                        _HourlyForecastCard(),
+                        const SizedBox(height: 16),
+                        _RiskRelevantCard(),
+                        const SizedBox(height: 16),
+                        _DecisionSimCard(),
+                        const SizedBox(height: 16),
+                        _SevenDayCard(forecast: _forecast),
+                        const SizedBox(height: 80),
                       ],
                     ),
                   ),
-                )
-              : RefreshIndicator(
-                  onRefresh: _load,
-                  color: AppColors.primary,
-                  child: ListView(
-                    padding: const EdgeInsets.all(16),
-                    children: [
-                      _CurrentConditionsCard(current: _current!),
-                      const SizedBox(height: 16),
-                      _HourlyForecastCard(),
-                      const SizedBox(height: 16),
-                      _RiskRelevantCard(),
-                      const SizedBox(height: 16),
-                      _DecisionSimCard(),
-                      const SizedBox(height: 16),
-                      _SevenDayCard(forecast: _forecast),
-                      const SizedBox(height: 80),
-                    ],
-                  ),
-                ),
+      ),
     );
   }
 }
@@ -177,11 +180,12 @@ class _CurrentConditionsCard extends StatelessWidget {
                   Text('${current.tempC.toStringAsFixed(0)}°C',
                       style: AppTextStyles.screenHeader.copyWith(fontSize: 36)),
                   Text(current.condition,
-                      style: AppTextStyles.body.copyWith(
-                          color: AppColors.textSecondary)),
-                  Text('${Tr.t('feels_like')} ${(current.tempC + 1).toStringAsFixed(0)}°C',
-                      style: AppTextStyles.caption.copyWith(
-                          color: AppColors.textMuted)),
+                      style: AppTextStyles.body
+                          .copyWith(color: AppColors.textSecondary)),
+                  Text(
+                      '${Tr.t('feels_like')} ${(current.tempC + 1).toStringAsFixed(0)}°C',
+                      style: AppTextStyles.caption
+                          .copyWith(color: AppColors.textMuted)),
                 ],
               ),
             ],
@@ -190,9 +194,11 @@ class _CurrentConditionsCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _ConditionPill('💧', '${current.humidityPercent}%', Tr.t('humidity')),
+              _ConditionPill(
+                  '💧', '${current.humidityPercent}%', Tr.t('humidity')),
               _ConditionPill('💨', '${current.windKph}km/h', Tr.t('wind')),
-              _ConditionPill('🌧', '${current.rainProbabilityPercent}%', Tr.t('rain')),
+              _ConditionPill(
+                  '🌧', '${current.rainProbabilityPercent}%', Tr.t('rain')),
               _ConditionPill('☀️', Tr.t('uv_low'), Tr.t('uv')),
             ],
           ),
@@ -213,11 +219,10 @@ class _ConditionPill extends StatelessWidget {
       children: [
         Text(icon, style: const TextStyle(fontSize: 22)),
         const SizedBox(height: 4),
-        Text(value,
-            style: AppTextStyles.cardTitle.copyWith(fontSize: 14)),
+        Text(value, style: AppTextStyles.cardTitle.copyWith(fontSize: 14)),
         Text(label,
-            style: AppTextStyles.caption.copyWith(
-                color: AppColors.textMuted, fontSize: 11)),
+            style: AppTextStyles.caption
+                .copyWith(color: AppColors.textMuted, fontSize: 11)),
       ],
     );
   }
@@ -235,6 +240,7 @@ class _HourlyForecastCard extends StatelessWidget {
       final hour = h > 12 ? h - 12 : (h == 0 ? 12 : h);
       return '$hour $ampm';
     }
+
     return [
       (Tr.t('now_label'), '🌤', '24°'),
       (formatHour(now.add(const Duration(hours: 1))), '🌥', '22°'),
@@ -269,10 +275,12 @@ class _HourlyForecastCard extends StatelessWidget {
                 final isNow = time == nowLabel;
                 return Container(
                   margin: const EdgeInsets.only(right: 12),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
-                    color: isNow ? AppColors.primaryContainer : AppColors.background,
+                    color: isNow
+                        ? AppColors.primaryContainer
+                        : AppColors.background,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: isNow ? AppColors.primary : AppColors.border,
@@ -282,14 +290,18 @@ class _HourlyForecastCard extends StatelessWidget {
                     children: [
                       Text(time,
                           style: AppTextStyles.caption.copyWith(
-                              color: isNow ? AppColors.primary : AppColors.textMuted,
-                              fontWeight: isNow ? FontWeight.w600 : FontWeight.normal,
+                              color: isNow
+                                  ? AppColors.primary
+                                  : AppColors.textMuted,
+                              fontWeight:
+                                  isNow ? FontWeight.w600 : FontWeight.normal,
                               fontSize: 12)),
                       const SizedBox(height: 8),
                       Text(icon, style: const TextStyle(fontSize: 22)),
                       const SizedBox(height: 8),
                       Text(temp,
-                          style: AppTextStyles.cardTitle.copyWith(fontSize: 15)),
+                          style:
+                              AppTextStyles.cardTitle.copyWith(fontSize: 15)),
                     ],
                   ),
                 );
@@ -322,8 +334,8 @@ class _RiskRelevantCard extends StatelessWidget {
                   color: AppColors.primary, size: 18),
               const SizedBox(width: 8),
               Text(Tr.t('risk_relevant_weather'),
-                  style: AppTextStyles.cardTitle.copyWith(
-                      color: AppColors.primary, fontSize: 14)),
+                  style: AppTextStyles.cardTitle
+                      .copyWith(color: AppColors.primary, fontSize: 14)),
             ],
           ),
           const SizedBox(height: 10),
@@ -371,13 +383,15 @@ class _ChainNode extends StatelessWidget {
               color: highlighted ? AppColors.riskHigh : AppColors.border,
             ),
           ),
-          child: Center(child: Text(emoji, style: const TextStyle(fontSize: 22))),
+          child:
+              Center(child: Text(emoji, style: const TextStyle(fontSize: 22))),
         ),
         const SizedBox(height: 6),
         Text(label,
             textAlign: TextAlign.center,
             style: AppTextStyles.caption.copyWith(
-                color: highlighted ? AppColors.riskHigh : AppColors.textSecondary,
+                color:
+                    highlighted ? AppColors.riskHigh : AppColors.textSecondary,
                 fontSize: 11,
                 fontWeight: highlighted ? FontWeight.w600 : FontWeight.normal)),
       ],
@@ -418,8 +432,8 @@ class _DecisionSimCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   Tr.t('explore_options_sub'),
-                  style: AppTextStyles.caption.copyWith(
-                      color: AppColors.textSecondary, height: 1.4),
+                  style: AppTextStyles.caption
+                      .copyWith(color: AppColors.textSecondary, height: 1.4),
                 ),
                 const SizedBox(height: 10),
                 SizedBox(
@@ -485,7 +499,8 @@ class _SevenDayCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(Tr.t('seven_day_forecast_label'), style: AppTextStyles.sectionLabel),
+          Text(Tr.t('seven_day_forecast_label'),
+              style: AppTextStyles.sectionLabel),
           const SizedBox(height: 14),
           ...forecast.asMap().entries.map((e) {
             final i = e.key;
@@ -512,9 +527,8 @@ class _SevenDayCard extends StatelessWidget {
                         color: isHighRain
                             ? AppColors.primary
                             : AppColors.textMuted,
-                        fontWeight: isHighRain
-                            ? FontWeight.w700
-                            : FontWeight.normal,
+                        fontWeight:
+                            isHighRain ? FontWeight.w700 : FontWeight.normal,
                         fontSize: 14),
                   ),
                   const Spacer(),
@@ -524,8 +538,8 @@ class _SevenDayCard extends StatelessWidget {
                   SizedBox(
                     width: 32,
                     child: Text('${day.lowTempC.toStringAsFixed(0)}°',
-                        style: AppTextStyles.body.copyWith(
-                            color: AppColors.textMuted, fontSize: 14),
+                        style: AppTextStyles.body
+                            .copyWith(color: AppColors.textMuted, fontSize: 14),
                         textAlign: TextAlign.right),
                   ),
                 ],

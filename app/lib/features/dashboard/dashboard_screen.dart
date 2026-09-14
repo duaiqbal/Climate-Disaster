@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/providers/app_state_provider.dart';
@@ -10,6 +10,7 @@ import '../map/map_screen.dart';
 import '../safety/safety_hub_screen.dart';
 import '../profile/profile_screen.dart';
 import '../go_bag/go_bag_screen.dart';
+import '../screen_entrance.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -39,45 +40,47 @@ class _DashboardScreenState extends State<DashboardScreen> {
     // Watch connectivity so the NavBar chip updates automatically
     context.watch<AppStateProvider>();
 
-    return Scaffold(
-      body: _screens[_selectedIndex],
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: _setTab,
-        backgroundColor: Colors.white,
-        indicatorColor: AppColors.primaryLight.withValues(alpha: 0.3),
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.home_outlined),
-            selectedIcon: const Icon(Icons.home_rounded),
-            label: loc.dashboard,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.chat_bubble_outline_rounded),
-            selectedIcon: const Icon(Icons.chat_bubble_rounded),
-            label: loc.chat,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.notifications_outlined),
-            selectedIcon: const Icon(Icons.notifications_rounded),
-            label: loc.alerts,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.map_outlined),
-            selectedIcon: const Icon(Icons.map_rounded),
-            label: loc.hazardMap,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.checklist_outlined),
-            selectedIcon: const Icon(Icons.checklist_rounded),
-            label: loc.safetyChecklist,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.backpack_outlined),
-            selectedIcon: const Icon(Icons.backpack_rounded),
-            label: 'Go Bag',
-          ),
-        ],
+    return ScreenEntrance(
+      child: Scaffold(
+        body: _screens[_selectedIndex],
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: _selectedIndex,
+          onDestinationSelected: _setTab,
+          backgroundColor: Colors.white,
+          indicatorColor: AppColors.primaryLight.withValues(alpha: 0.3),
+          destinations: [
+            NavigationDestination(
+              icon: const Icon(Icons.home_outlined),
+              selectedIcon: const Icon(Icons.home_rounded),
+              label: loc.dashboard,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.chat_bubble_outline_rounded),
+              selectedIcon: const Icon(Icons.chat_bubble_rounded),
+              label: loc.chat,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.notifications_outlined),
+              selectedIcon: const Icon(Icons.notifications_rounded),
+              label: loc.alerts,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.map_outlined),
+              selectedIcon: const Icon(Icons.map_rounded),
+              label: loc.hazardMap,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.checklist_outlined),
+              selectedIcon: const Icon(Icons.checklist_rounded),
+              label: loc.safetyChecklist,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.backpack_outlined),
+              selectedIcon: const Icon(Icons.backpack_rounded),
+              label: 'Go Bag',
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -321,9 +324,7 @@ class _QuickActionCard extends StatelessWidget {
               Text(
                 label,
                 style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: color),
+                    fontSize: 13, fontWeight: FontWeight.w600, color: color),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -341,9 +342,9 @@ class _HazardCoverageRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = [
-      (Icons.water_rounded,      loc.flood,      AppColors.primary),
+      (Icons.water_rounded, loc.flood, AppColors.primary),
       (Icons.thunderstorm_rounded, loc.flashFlood, AppColors.hazardMedium),
-      (Icons.landslide_rounded,  loc.landslide,  AppColors.hazardHigh),
+      (Icons.landslide_rounded, loc.landslide, AppColors.hazardHigh),
     ];
     return SizedBox(
       height: 80,
@@ -369,9 +370,7 @@ class _HazardCoverageRow extends StatelessWidget {
                 Text(
                   label,
                   style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: color),
+                      fontSize: 12, fontWeight: FontWeight.w600, color: color),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -403,13 +402,12 @@ class _LanguageSelectorRow extends StatelessWidget {
             onTap: () => provider.setLanguage(lang['code']!),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
                 color: isSelected ? AppColors.primary : Colors.white,
                 borderRadius: BorderRadius.circular(22),
-                border: Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.4)),
+                border:
+                    Border.all(color: AppColors.primary.withValues(alpha: 0.4)),
               ),
               child: Text(
                 lang['label']!,

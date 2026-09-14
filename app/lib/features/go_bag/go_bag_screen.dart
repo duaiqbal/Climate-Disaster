@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import '../screen_entrance.dart';
 
 // ---------- Models ----------
 class SafeBagItem {
@@ -214,106 +215,113 @@ class _GoBagScreenState extends State<GoBagScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Go Bag Planner'),
-        backgroundColor: const Color(0xFF00695C),
-        foregroundColor: Colors.white,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Info banner
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFF8E1),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFFFA000).withValues(alpha: 0.4)),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.info_outline, color: Color(0xFFFFA000), size: 18),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Items ranked by priority then confidence. '
-                      'Sources: NDMA, PDMA KP, WHO.',
-                      style: TextStyle(fontSize: 12, color: Color(0xFF5D4037)),
+    return ScreenEntrance(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Go Bag Planner'),
+          backgroundColor: const Color(0xFF00695C),
+          foregroundColor: Colors.white,
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Info banner
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF8E1),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                      color: const Color(0xFFFFA000).withValues(alpha: 0.4)),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.info_outline,
+                        color: Color(0xFFFFA000), size: 18),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Items ranked by priority then confidence. '
+                        'Sources: NDMA, PDMA KP, WHO.',
+                        style:
+                            TextStyle(fontSize: 12, color: Color(0xFF5D4037)),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Budget input
-            const Text(
-              'Enter your total budget for disaster preparedness (PKR):',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _budgetController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Budget (PKR)',
-                prefixIcon: const Icon(Icons.currency_exchange),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-              onChanged: (_) => _recomputePlan(),
-            ),
-            const SizedBox(height: 16),
-
-            Text(
-              'Recommended items (${_plan.selectedItems.length} of ${PreparednessItems.all.length}):',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-
-            if (_plan.selectedItems.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Text(
-                  'No items fit within this budget. Try increasing your budget.',
-                  style: TextStyle(color: Colors.red),
-                ),
-              )
-            else
-              Expanded(
-                child: ListView.builder(
-                  itemCount: _plan.selectedItems.length,
-                  itemBuilder: (context, index) {
-                    return _ItemCard(item: _plan.selectedItems[index]);
-                  },
+                  ],
                 ),
               ),
+              const SizedBox(height: 16),
 
-            const Divider(),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE8F5E9),
-                borderRadius: BorderRadius.circular(8),
+              // Budget input
+              const Text(
+                'Enter your total budget for disaster preparedness (PKR):',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Total cost: ${_plan.totalCost.toStringAsFixed(0)} PKR',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w700, fontSize: 15),
-                  ),
-                  Text(
-                    'Remaining budget: ${_plan.remainingBudget.toStringAsFixed(0)} PKR',
-                    style: const TextStyle(fontSize: 13, color: Color(0xFF388E3C)),
-                  ),
-                ],
+              const SizedBox(height: 8),
+              TextField(
+                controller: _budgetController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Budget (PKR)',
+                  prefixIcon: const Icon(Icons.currency_exchange),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                ),
+                onChanged: (_) => _recomputePlan(),
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+
+              Text(
+                'Recommended items (${_plan.selectedItems.length} of ${PreparednessItems.all.length}):',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+
+              if (_plan.selectedItems.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Text(
+                    'No items fit within this budget. Try increasing your budget.',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                )
+              else
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _plan.selectedItems.length,
+                    itemBuilder: (context, index) {
+                      return _ItemCard(item: _plan.selectedItems[index]);
+                    },
+                  ),
+                ),
+
+              const Divider(),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE8F5E9),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Total cost: ${_plan.totalCost.toStringAsFixed(0)} PKR',
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w700, fontSize: 15),
+                    ),
+                    Text(
+                      'Remaining budget: ${_plan.remainingBudget.toStringAsFixed(0)} PKR',
+                      style: const TextStyle(
+                          fontSize: 13, color: Color(0xFF388E3C)),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -358,7 +366,8 @@ class _ItemCard extends StatelessWidget {
                 Row(
                   children: [
                     const Text('Confidence: ',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 13)),
                     LinearProgressIndicator(
                       value: item.confidence,
                       minHeight: 8,
@@ -400,8 +409,7 @@ class _Row extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label,
-            style: const TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 13)),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
         const SizedBox(height: 3),
         Text(value, style: const TextStyle(fontSize: 13, height: 1.4)),
       ],

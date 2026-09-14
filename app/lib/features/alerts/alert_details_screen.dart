@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import '../../core/models/official_alert.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/theme/app_animations.dart';
 import '../../core/localization/app_translations.dart';
 import '../../core/localization/language_service.dart';
 import '../chat/chat_screen.dart';
 import '../safety/safety_hub_screen.dart';
 import '../profile/emergency_contacts_screen.dart';
+import '../screen_entrance.dart';
 
 class AlertDetailsScreen extends StatefulWidget {
   final OfficialAlert alert;
@@ -38,49 +40,51 @@ class _AlertDetailsScreenState extends State<AlertDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final alert = widget.alert;
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          Tr.t('alert_details_title'),
-          style: AppTextStyles.cardTitle.copyWith(color: AppColors.primary),
+    return ScreenEntrance(
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          backgroundColor: AppColors.surface,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          centerTitle: true,
+          title: Text(
+            Tr.t('alert_details_title'),
+            style: AppTextStyles.cardTitle.copyWith(color: AppColors.primary),
+          ),
+          leading: const BackButton(color: AppColors.textPrimary),
         ),
-        leading: const BackButton(color: AppColors.textPrimary),
-      ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'fab_alert_details',
-        backgroundColor: AppColors.primary,
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const ChatScreen()),
+        floatingActionButton: FloatingActionButton(
+          heroTag: 'fab_alert_details',
+          backgroundColor: AppColors.primary,
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ChatScreen()),
+          ),
+          child: const Icon(Icons.smart_toy_outlined, color: Colors.white),
         ),
-        child: const Icon(Icons.smart_toy_outlined, color: Colors.white),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _AlertHeaderCard(alert: alert),
-            const SizedBox(height: 12),
-            _InfoCard(
-              title: Tr.t('what_is_happening'),
-              body: _getDescription(alert.description),
-            ),
-            const SizedBox(height: 12),
-            _WhatToDoCard(actions: _getActions(alert.whatToDo)),
-            const SizedBox(height: 12),
-            _XaiAccordionCard(
-              expanded: _xaiExpanded,
-              onToggle: () => setState(() => _xaiExpanded = !_xaiExpanded),
-            ),
-            const SizedBox(height: 20),
-            _ActionButtons(alert: alert),
-            const SizedBox(height: 80),
-          ],
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              _AlertHeaderCard(alert: alert),
+              const SizedBox(height: 12),
+              _InfoCard(
+                title: Tr.t('what_is_happening'),
+                body: _getDescription(alert.description),
+              ),
+              const SizedBox(height: 12),
+              _WhatToDoCard(actions: _getActions(alert.whatToDo)),
+              const SizedBox(height: 12),
+              _XaiAccordionCard(
+                expanded: _xaiExpanded,
+                onToggle: () => setState(() => _xaiExpanded = !_xaiExpanded),
+              ),
+              const SizedBox(height: 20),
+              _ActionButtons(alert: alert),
+              const SizedBox(height: 80),
+            ],
+          ),
         ),
       ),
     );
@@ -150,16 +154,19 @@ class _AlertHeaderCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          Text(_getTitle(alert.title), style: AppTextStyles.screenHeader.copyWith(fontSize: 22)),
+          Text(_getTitle(alert.title),
+              style: AppTextStyles.screenHeader.copyWith(fontSize: 22)),
           const SizedBox(height: 6),
           Text(
             _getSource(alert.source),
             style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: 10),
-          _MetaRow(icon: Icons.location_on_outlined, text: _getArea(alert.area)),
+          _MetaRow(
+              icon: Icons.location_on_outlined, text: _getArea(alert.area)),
           const SizedBox(height: 6),
-          _MetaRow(icon: Icons.access_time_outlined, text: Tr.t('issued_label')),
+          _MetaRow(
+              icon: Icons.access_time_outlined, text: Tr.t('issued_label')),
         ],
       ),
     );
@@ -251,8 +258,8 @@ class _WhatToDoCard extends StatelessWidget {
                         height: 22,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(
-                              color: AppColors.primary, width: 1.5),
+                          border:
+                              Border.all(color: AppColors.primary, width: 1.5),
                         ),
                         child: Icon(Icons.check,
                             size: 13, color: AppColors.primary),
@@ -279,7 +286,8 @@ class _WhatToDoCard extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 Tr.t('safety_validated'),
-                style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+                style:
+                    AppTextStyles.caption.copyWith(color: AppColors.textMuted),
               ),
             ],
           ),
@@ -318,27 +326,38 @@ class _XaiAccordionCard extends StatelessWidget {
                       style: AppTextStyles.cardTitle,
                     ),
                   ),
-                  Icon(
-                    expanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                    color: AppColors.textMuted,
+                  AnimatedRotation(
+                    turns: expanded ? 0.5 : 0.0,
+                    duration: AppAnimations.buttonStateChange,
+                    curve: AppAnimations.entranceCurve,
+                    child: const Icon(
+                      Icons.keyboard_arrow_down,
+                      color: AppColors.textMuted,
+                    ),
                   ),
                 ],
               ),
             ),
           ),
-          if (expanded)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
-              child: Text(
-                LanguageService.instance.isUrdu
-                    ? 'یہ تجویز کردہ اقدامات ضلع چترال کے لیے سرکاری NDMA اور PMD کی ہنگامی ہدایات سے لیے گئے ہیں۔ یہ آپ کے محل وقوع، الرٹ لیول اور گھریلو خطرے کے کوائف سے مماثل ہیں۔ AI کا نظام نیا مشورہ پیدا نہیں کرتا بلکہ تصدیق شدہ سرکاری رہنمائی کو تلاش اور پیش کرتا ہے۔'
-                    : 'These recommended actions are derived from official NDMA and PMD emergency guidelines for Chitral District. They are matched to your location, the current alert level, and your household risk profile. The AI system does not generate new advice — it retrieves and ranks verified official guidance.',
-                style: AppTextStyles.body.copyWith(
-                  color: AppColors.textSecondary,
-                  height: 1.6,
-                ),
-              ),
-            ),
+          AnimatedSize(
+            duration: AppAnimations.errorBannerResize,
+            curve: AppAnimations.entranceCurve,
+            alignment: Alignment.topCenter,
+            child: expanded
+                ? Padding(
+                    padding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
+                    child: Text(
+                      LanguageService.instance.isUrdu
+                          ? 'یہ تجویز کردہ اقدامات ضلع چترال کے لیے سرکاری NDMA اور PMD کی ہنگامی ہدایات سے لیے گئے ہیں۔ یہ آپ کے محل وقوع، الرٹ لیول اور گھریلو خطرے کے کوائف سے مماثل ہیں۔ AI کا نظام نیا مشورہ پیدا نہیں کرتا بلکہ تصدیق شدہ سرکاری رہنمائی کو تلاش اور پیش کرتا ہے۔'
+                          : 'These recommended actions are derived from official NDMA and PMD emergency guidelines for Chitral District. They are matched to your location, the current alert level, and your household risk profile. The AI system does not generate new advice — it retrieves and ranks verified official guidance.',
+                      style: AppTextStyles.body.copyWith(
+                        color: AppColors.textSecondary,
+                        height: 1.6,
+                      ),
+                    ),
+                  )
+                : const SizedBox(width: double.infinity),
+          ),
         ],
       ),
     );
@@ -388,8 +407,7 @@ class _ActionButtons extends StatelessWidget {
                 ),
                 onPressed: () => Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (_) => const SafetyHubScreen()),
+                  MaterialPageRoute(builder: (_) => const SafetyHubScreen()),
                 ),
                 child: Text(Tr.t('safety_guide')),
               ),

@@ -8,10 +8,15 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-  late final Animation<double> _fade;
-  late final Animation<double> _scale;
+  late final Animation<double> _logoFade;
+  late final Animation<double> _logoScale;
+  late final Animation<double> _titleFade;
+  late final Animation<Offset> _titleSlide;
+  late final Animation<double> _subtitleFade;
+  late final Animation<double> _loaderFade;
   bool _hasNavigated = false;
 
   @override
@@ -19,12 +24,39 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: const Duration(milliseconds: 1200),
     );
-    _fade = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
-    _scale = Tween<double>(begin: 0.88, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
+
+    _logoFade = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.0, 0.4, curve: Curves.easeIn),
     );
+    _logoScale = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.55, curve: Curves.easeOutBack),
+      ),
+    );
+
+    _titleFade = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.35, 0.7, curve: Curves.easeOut),
+    );
+    _titleSlide = Tween<Offset>(
+      begin: const Offset(0, 0.15),
+      end: Offset.zero,
+    ).animate(_titleFade);
+
+    _subtitleFade = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.5, 0.85, curve: Curves.easeOut),
+    );
+
+    _loaderFade = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.7, 1.0, curve: Curves.easeOut),
+    );
+
     _controller.forward();
 
     // 3.5s splash display duration gives user time to see the screen and animation
@@ -57,132 +89,170 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       onTap: _navigateToNext,
       child: Scaffold(
         backgroundColor: const Color(0xFFF6F8FA),
-        body: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                  child: IntrinsicHeight(
-                    child: Column(
-                      children: [
-                        const Spacer(flex: 3),
-                        FadeTransition(
-                          opacity: _fade,
-                          child: ScaleTransition(
-                            scale: _scale,
-                            child: Container(
-                              width: 104,
-                              height: 104,
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(26),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.06),
-                                    blurRadius: 24,
-                                    offset: const Offset(0, 8),
-                                    spreadRadius: 2,
-                                  ),
-                                ],
-                              ),
-                              child: Center(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    CustomPaint(
-                                      size: const Size(34, 42),
-                                      painter: _ContourPinPainter(),
+        body: DecoratedBox(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFFEFF6F7),
+                Color(0xFFF6F8FA),
+                Color(0xFFF6F8FA),
+              ],
+              stops: [0.0, 0.4, 1.0],
+            ),
+          ),
+          child: SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                    child: IntrinsicHeight(
+                      child: Column(
+                        children: [
+                          const Spacer(flex: 3),
+                          FadeTransition(
+                            opacity: _logoFade,
+                            child: ScaleTransition(
+                              scale: _logoScale,
+                              child: Container(
+                                width: 108,
+                                height: 108,
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(28),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFF007A87)
+                                          .withValues(alpha: 0.12),
+                                      blurRadius: 32,
+                                      offset: const Offset(0, 10),
+                                      spreadRadius: 2,
                                     ),
-                                    const SizedBox(width: 5),
-                                    Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: const [
-                                        Text(
-                                          'Climate',
-                                          style: TextStyle(
-                                            fontSize: 9,
-                                            fontWeight: FontWeight.w800,
-                                            color: Color(0xFF007A87),
-                                            height: 1.1,
-                                          ),
-                                        ),
-                                        Text(
-                                          'Risk',
-                                          style: TextStyle(
-                                            fontSize: 9,
-                                            fontWeight: FontWeight.w800,
-                                            color: Color(0xFF007A87),
-                                            height: 1.1,
-                                          ),
-                                        ),
-                                        Text(
-                                          'Assistant',
-                                          style: TextStyle(
-                                            fontSize: 8,
-                                            fontWeight: FontWeight.w700,
-                                            color: Color(0xFF007A87),
-                                            height: 1.1,
-                                          ),
-                                        ),
-                                      ],
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.04),
+                                      blurRadius: 16,
+                                      offset: const Offset(0, 4),
                                     ),
                                   ],
+                                ),
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      CustomPaint(
+                                        size: const Size(34, 42),
+                                        painter: _ContourPinPainter(),
+                                      ),
+                                      const SizedBox(width: 5),
+                                      Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: const [
+                                          Text(
+                                            'Climate',
+                                            style: TextStyle(
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.w800,
+                                              color: Color(0xFF007A87),
+                                              height: 1.1,
+                                            ),
+                                          ),
+                                          Text(
+                                            'Risk',
+                                            style: TextStyle(
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.w800,
+                                              color: Color(0xFF007A87),
+                                              height: 1.1,
+                                            ),
+                                          ),
+                                          Text(
+                                            'Assistant',
+                                            style: TextStyle(
+                                              fontSize: 8,
+                                              fontWeight: FontWeight.w700,
+                                              color: Color(0xFF007A87),
+                                              height: 1.1,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 28),
-                        FadeTransition(
-                          opacity: _fade,
-                          child: const Text(
-                            'Climate Risk Assistant',
-                            style: TextStyle(
-                              fontSize: 26,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF0F172A),
-                              letterSpacing: -0.5,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        FadeTransition(
-                          opacity: _fade,
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 40),
-                            child: Text(
-                              'Explainable AI for climate hazard risk and preparedness',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Color(0xFF64748B),
-                                fontSize: 15,
-                                height: 1.4,
+                          const SizedBox(height: 32),
+                          FadeTransition(
+                            opacity: _titleFade,
+                            child: SlideTransition(
+                              position: _titleSlide,
+                              child: ShaderMask(
+                                shaderCallback: (bounds) => const LinearGradient(
+                                  colors: [
+                                    Color(0xFF007A87),
+                                    Color(0xFF0AA5B5),
+                                  ],
+                                ).createShader(bounds),
+                                child: const Text(
+                                  'Climate Risk Assistant',
+                                  style: TextStyle(
+                                    fontSize: 27,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        const Spacer(flex: 4),
-                        const _PulsingLoadingBar(),
-                        const SizedBox(height: 14),
-                        const Text(
-                          'LOADING ENVIRONMENT DATA',
-                          style: TextStyle(
-                            fontSize: 11,
-                            letterSpacing: 1.5,
-                            color: Color(0xFF64748B),
-                            fontWeight: FontWeight.w600,
+                          const SizedBox(height: 12),
+                          FadeTransition(
+                            opacity: _subtitleFade,
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 40),
+                              child: Text(
+                                'Explainable AI for climate hazard risk and preparedness',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Color(0xFF64748B),
+                                  fontSize: 15,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 48),
-                      ],
+                          const Spacer(flex: 4),
+                          FadeTransition(
+                            opacity: _loaderFade,
+                            child: const _PulsingLoadingBar(),
+                          ),
+                          const SizedBox(height: 14),
+                          FadeTransition(
+                            opacity: _loaderFade,
+                            child: const Text(
+                              'LOADING ENVIRONMENT DATA',
+                              style: TextStyle(
+                                fontSize: 11,
+                                letterSpacing: 1.5,
+                                color: Color(0xFF64748B),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 48),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -206,7 +276,6 @@ class _ContourPinPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height * 0.38);
     final r = size.width * 0.44;
 
-    // Outer pin outline
     final path = Path();
     path.moveTo(center.dx - r, center.dy);
     path.arcTo(
@@ -228,19 +297,16 @@ class _ContourPinPainter extends CustomPainter {
     path.close();
     canvas.drawPath(path, strokePaint);
 
-    // Inner contour 1
     final innerPath1 = Path();
     final r1 = r * 0.65;
     innerPath1.addOval(Rect.fromCenter(center: center, width: r1 * 2, height: r1 * 2.2));
     canvas.drawPath(innerPath1, strokePaint..strokeWidth = 1.2);
 
-    // Inner contour 2
     final innerPath2 = Path();
     final r2 = r * 0.35;
     innerPath2.addOval(Rect.fromCenter(center: center, width: r2 * 2, height: r2 * 2));
     canvas.drawPath(innerPath2, strokePaint..strokeWidth = 1.0);
 
-    // Center star point
     canvas.drawCircle(center, 2.0, fillPaint);
   }
 
@@ -278,7 +344,7 @@ class _PulsingLoadingBarState extends State<_PulsingLoadingBar>
   Widget build(BuildContext context) {
     return SizedBox(
       width: 140,
-      height: 3,
+      height: 4,
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, child) {
@@ -291,7 +357,23 @@ class _PulsingLoadingBarState extends State<_PulsingLoadingBar>
                   alignment: Alignment(-1 + 2 * _controller.value, 0),
                   child: FractionallySizedBox(
                     widthFactor: 0.4,
-                    child: Container(color: Colors.teal[700]),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            const Color(0xFF007A87).withValues(alpha: 0.3),
+                            const Color(0xFF007A87),
+                            const Color(0xFF007A87).withValues(alpha: 0.3),
+                          ],
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF007A87).withValues(alpha: 0.4),
+                            blurRadius: 6,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],
