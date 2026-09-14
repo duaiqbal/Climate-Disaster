@@ -592,16 +592,17 @@ python -m pytest tests/ -v
 
 ## 👥 Team & Contribution
 
-**Project:**  
+**Project:** Disaster DSS AI 
 **Supervisor:** Muhammad Huzaifah 
 
 ### Team Members
 | Name | Role |
 |------|------|
-| Dua Iqbal | Lead Developer — Backend, RAG, Alerts |
+| Tooba Iqbal | Lead Developer — Backend, RAG, Alerts |
 | Tooba  | Flutter App Development |
 | [Tooba and Simrah ] | Data Pipeline, Knowledge Base |
-| [Hafsa and Manahil] | UI/UX,  |Kiran: Testing 
+| [Hafsa and Manahil] | UI/UX,  
+Kiran and Tooba : Testing 
 
 ### Contributing
 1. Fork the repo
