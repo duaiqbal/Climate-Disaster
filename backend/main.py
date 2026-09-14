@@ -4,7 +4,7 @@ backend/main.py
 Disaster DSS — FastAPI application entry point.
 
 Run from project root:
-    python -m uvicorn backend.main:app --host 127.0.0.1 --port 8001 --reload
+    python -m uvicorn backend.main:app --host 127.0.0.1 --port 8002 --reload
 
 Environment variables (see backend/core/config.py):
     ENV              — development (default) | production

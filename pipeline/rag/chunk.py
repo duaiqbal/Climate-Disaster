@@ -124,6 +124,8 @@ def chunk_document(doc: dict) -> list[dict]:
     doc_title = doc["doc_title"]
     pub_date = doc["pub_date"]
     language = doc["language"]
+    # Propagate source_url from extract step (empty string for docs not in manifest)
+    source_url = doc.get("source_url", "")
 
     # Determine evidence level from source
     evidence_map = {
@@ -159,18 +161,19 @@ def chunk_document(doc: dict) -> list[dict]:
                 keywords = _extract_keywords(sub, language)
 
                 all_chunks.append({
-                    "chunk_id": chunk_id,
-                    "source_file": source_file,
-                    "source_org": source_org,
-                    "doc_title": doc_title,
-                    "pub_date": pub_date,
-                    "language": language,
-                    "page_num": page_num,
-                    "chunk_index": global_idx,
-                    "chunk_text": sub,
-                    "keywords": keywords,
+                    "chunk_id":      chunk_id,
+                    "source_file":   source_file,
+                    "source_org":    source_org,
+                    "doc_title":     doc_title,
+                    "pub_date":      pub_date,
+                    "language":      language,
+                    "page_num":      page_num,
+                    "chunk_index":   global_idx,
+                    "chunk_text":    sub,
+                    "keywords":      keywords,
                     "evidence_level": evidence_level,
-                    "char_count": len(sub),
+                    "char_count":    len(sub),
+                    "source_url":    source_url,   # ← new field
                 })
 
     return all_chunks

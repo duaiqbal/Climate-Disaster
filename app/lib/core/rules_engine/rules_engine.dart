@@ -1,7 +1,14 @@
-// UNVERIFIED DRAFT — not run/tested against a real Flutter build.
 // Deterministic rules: maps retrieved evidence + hazard level to a
 // structured, explainable response. This is the safety-critical layer —
 // no LLM involved.
+//
+// RetrievedChunk fields used here:
+//   .text          — chunk_text from knowledge.sqlite
+//   .sourceOrg     — source_org
+//   .sourceTitle   — doc_title
+//   .publicationDate — pub_date
+//   .sourceUrl     — source_url
+//   .evidenceLevel — evidence_level
 
 import '../retrieval/retrieval_engine.dart';
 

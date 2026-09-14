@@ -39,6 +39,25 @@ RAW_DIR = ROOT / "data" / "raw"
 OUT_DIR = ROOT / "data" / "extracted"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
+# ── Download manifest: stem → source_url ──────────────────────────────────────
+# data/raw/download_manifest.json is produced by the downloader and records
+# the official URL each PDF was fetched from.  We load it once here so every
+# extracted document carries its source_url through to chunks and SQLite.
+_MANIFEST_PATH = RAW_DIR / "download_manifest.json"
+
+def _load_source_url_map() -> dict[str, str]:
+    """Return {pdf_stem: source_url} from download_manifest.json."""
+    if not _MANIFEST_PATH.exists():
+        return {}
+    try:
+        with open(_MANIFEST_PATH, encoding="utf-8") as f:
+            entries = json.load(f)
+        return {e["id"]: e.get("source_url", "") for e in entries if "id" in e}
+    except Exception:
+        return {}
+
+_SOURCE_URL_MAP: dict[str, str] = _load_source_url_map()
+
 # ── Source metadata registry ───────────────────────────────────────────────────
 # Maps filename stem patterns to metadata — update when new PDFs are added.
 SOURCE_REGISTRY = [
@@ -130,13 +149,19 @@ def extract_pdf(pdf_path: Path) -> dict:
 
     pub_date = _extract_pub_date(full_text_head)
 
+    # Look up canonical source URL from download_manifest.json.
+    # Falls back to "" for documents not in the manifest (e.g. PDMA KP files
+    # downloaded separately or the synthetic demo document).
+    source_url = _SOURCE_URL_MAP.get(pdf_path.stem, "")
+
     return {
         "source_file": pdf_path.name,
-        "source_org": meta["source_org"],
-        "doc_title": meta["doc_title"],
-        "pub_date": pub_date,
-        "language": meta["language"],
-        "pages": pages,
+        "source_org":  meta["source_org"],
+        "doc_title":   meta["doc_title"],
+        "pub_date":    pub_date,
+        "language":    meta["language"],
+        "source_url":  source_url,   # ← new field; "" when not in manifest
+        "pages":       pages,
     }
 
 

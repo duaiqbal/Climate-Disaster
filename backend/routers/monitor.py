@@ -104,7 +104,9 @@ def _run_fetcher(dry_run: bool) -> MonitorRunResponse:
             cwd=str(_ROOT),
             env={
                 **os.environ,
-                "BACKEND_URL":   os.getenv("BACKEND_URL", "http://127.0.0.1:8001"),
+                # Read from the same env var that scheduler.py uses — prevents
+                # port mismatch if the backend port ever changes (audit fix #1).
+                "BACKEND_URL":   os.getenv("BACKEND_URL", "http://127.0.0.1:8002"),
                 "ADMIN_API_KEY": settings.admin_api_key,
             },
         )

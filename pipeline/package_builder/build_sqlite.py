@@ -18,7 +18,8 @@ Schema:
       chunk_text     TEXT NOT NULL,
       keywords       TEXT,
       evidence_level TEXT,
-      char_count     INTEGER
+      char_count     INTEGER,
+      source_url     TEXT          -- nullable; "" for docs not in manifest
   );
 
   CREATE TABLE alerts (
@@ -159,7 +160,8 @@ def create_schema(conn: sqlite3.Connection) -> None:
             chunk_text     TEXT NOT NULL,
             keywords       TEXT,
             evidence_level TEXT,
-            char_count     INTEGER
+            char_count     INTEGER,
+            source_url     TEXT          -- nullable; "" for docs not in manifest
         );
 
         CREATE TABLE alerts (
@@ -198,12 +200,16 @@ def insert_chunks(conn: sqlite3.Connection, chunks: list[dict]) -> None:
         """
         INSERT OR REPLACE INTO chunks
           (chunk_id, source_org, doc_title, pub_date, language,
-           page_num, chunk_index, chunk_text, keywords, evidence_level, char_count)
+           page_num, chunk_index, chunk_text, keywords, evidence_level,
+           char_count, source_url)
         VALUES
           (:chunk_id, :source_org, :doc_title, :pub_date, :language,
-           :page_num, :chunk_index, :chunk_text, :keywords, :evidence_level, :char_count)
+           :page_num, :chunk_index, :chunk_text, :keywords, :evidence_level,
+           :char_count, :source_url)
         """,
-        chunks,
+        # Ensure source_url key exists even for old chunk JSON files that
+        # pre-date this fix — default to empty string if missing.
+        [{**c, "source_url": c.get("source_url", "")} for c in chunks],
     )
 
 

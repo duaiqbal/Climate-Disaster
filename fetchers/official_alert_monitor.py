@@ -12,7 +12,10 @@ Strategy:
   5. Extract alert text from each new PDF
   6. Insert verified alerts into backend via POST /alerts (with admin key)
   7. Every alert carries: source_org, source_url, fetch_timestamp,
-     verification_status="official-verified"  — constraint 4 honoured.
+     verification_status — constraint 4 honoured.
+     New alerts enter at verification_status="DISCOVERED" so the backend
+     lifecycle (DISCOVERED→FETCHED→VALIDATED→OFFICIAL-VERIFIED→PUBLISHED)
+     can be advanced via a separate verification step.
 
 Run:  python fetchers/official_alert_monitor.py
 Schedule: cron / Windows Task Scheduler every 6 hours
@@ -49,7 +52,7 @@ STAGING_DIR = ROOT / "data" / "raw" / "alert_staging"
 STAGING_DIR.mkdir(parents=True, exist_ok=True)
 
 # ── Backend config ─────────────────────────────────────────────────────────────
-BACKEND_URL  = os.getenv("BACKEND_URL",  "http://127.0.0.1:8001")
+BACKEND_URL  = os.getenv("BACKEND_URL",  "http://127.0.0.1:8002")
 ADMIN_API_KEY = os.getenv("ADMIN_API_KEY", "disaster-dss-dev-key-change-in-prod")
 
 HEADERS = {
@@ -290,29 +293,39 @@ def run_monitor(dry_run: bool = False) -> dict:
                 seen_urls.add(url)
                 continue
 
-            # Build alert payload — constraint 4: all provenance fields mandatory
+            # ── Build alert payload ────────────────────────────────────────────
+            # Constraint 4: all provenance fields must be structured top-level
+            # fields — not just buried in the body text.
+            #
+            # verification_status rationale: fetcher-sourced alerts enter at
+            # DISCOVERED.  The backend's DISCOVERED→FETCHED→VALIDATED→
+            # OFFICIAL-VERIFIED→PUBLISHED lifecycle means a human (or a separate
+            # verification step) must advance the status before it is surfaced as
+            # PUBLISHED.  Setting it to OFFICIAL-VERIFIED here would falsely claim
+            # a verification step that hasn't happened — so we use DISCOVERED.
             alert_body = text[:800].strip()
             alert = {
-                "title": link["title"][:255] or "Advisory",
-                "body": alert_body,
-                "hazard_type": _classify_hazard(text, link["title"]),
-                "severity": _classify_severity(text, link["title"]),
-                "issued_at": run_ts,
-                "source_org": source["source_org"],
-                "district": source["district"],
-                "language": "en",
-                # Extra provenance stored in title prefix (constraint 4)
-                # Full source_url and verification_status go in body prefix
+                "title":               (link["title"][:255] or "Advisory"),
+                "body":                alert_body,   # provenance prefix added below
+                "hazard_type":         _classify_hazard(text, link["title"]),
+                "severity":            _classify_severity(text, link["title"]),
+                "issued_at":           run_ts,
+                "source_org":          source["source_org"],
+                "source_url":          url,          # ← structured field (Fix 4)
+                "verification_status": "DISCOVERED", # ← structured field (Fix 4)
+                "district":            source["district"],
+                "language":            "en",
             }
 
-            # Prepend provenance to body so it's always visible in UI
+            # Prepend provenance to body text as well — keeps it human-readable
+            # in the UI and preserves the existing audit trail format.
             provenance = (
                 f"[SOURCE: {source['source_org']} | "
                 f"URL: {url} | "
                 f"FETCHED: {run_ts} | "
-                f"STATUS: official-verified]\n\n"
+                f"STATUS: DISCOVERED]\n\n"
             )
-            alert["body"] = provenance + alert_body
+            alert["body"]  = provenance + alert_body
             alert["title"] = f"[{source['source_org']}] {alert['title']}"
 
             print(f"    Hazard: {alert['hazard_type']}  Severity: {alert['severity']}")
