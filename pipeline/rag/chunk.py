@@ -6,13 +6,7 @@ Step 2: Split extracted pages into smaller, retrieval-friendly chunks.
 Input:  data/extracted/*.json
 Output: data/chunks/*.json  (one JSON file per source, list of chunk dicts)
 
-Chunking strategy:
-  - Split on double-newline (paragraph boundaries) first.
-  - If a paragraph exceeds MAX_CHARS, split further on sentence boundaries.
-  - Maintain a sliding overlap of OVERLAP_CHARS to avoid cutting context.
-  - Each chunk carries full provenance metadata.
-
-Each chunk dict:
+Each chunk dict (Phase 3.2 adds disaster_type and phase):
 {
     "chunk_id":      "ndma_flood_advisory_2023_c001",
     "source_file":   "ndma_flood_advisory_2023.pdf",
@@ -25,7 +19,10 @@ Each chunk dict:
     "chunk_text":    "...",
     "keywords":      "flood,evacuation,higher ground,...",
     "evidence_level":"official",
-    "char_count":    312
+    "char_count":    312,
+    "source_url":    "https://ndma.gov.pk/...",
+    "disaster_type": "flood",       ← NEW Phase 3.2
+    "phase":         "during"       ← NEW Phase 3.2 (before/during/after/general)
 }
 """
 
@@ -44,6 +41,84 @@ ROOT = Path(__file__).resolve().parents[2]
 EXTRACTED_DIR = ROOT / "data" / "extracted"
 CHUNKS_DIR = ROOT / "data" / "chunks"
 CHUNKS_DIR.mkdir(parents=True, exist_ok=True)
+
+# ── Disaster-type keywords ─────────────────────────────────────────────────────
+_DISASTER_KEYWORDS: dict[str, list[str]] = {
+    "flash_flood": ["flash flood", "flash-flood", "glof", "glacial lake outburst",
+                    "nullah", "nullahs", "cloudburst", "sudden flooding"],
+    "flood":       ["flood", "flooding", "river", "inundation", "monsoon flood",
+                    "riverine", "flood plain"],
+    "landslide":   ["landslide", "land slide", "mudslide", "rockslide",
+                    "debris flow", "slope failure", "slope stability", "cracks in ground",
+                    "tilting trees", "زمین خسکنا"],
+    "earthquake":  ["earthquake", "tremor", "seismic", "aftershock", "fault line",
+                    "drop cover hold", "zalzala"],
+    "glof":        ["glof", "glacial lake", "glacial outburst", "glacier melt",
+                    "ice melt", "glacial flood"],
+}
+
+_PHASE_KEYWORDS: dict[str, list[str]] = {
+    "before": [
+        "before", "prepare", "preparedness", "prevention", "precaution",
+        "before the flood", "advance", "planning", "go-bag", "go bag",
+        "emergency kit", "stock", "stockpile", "evacuation plan", "evacuation route",
+        "register", "identify safe", "prior to",
+        "پہلے", "تیاری", "احتیاط",
+    ],
+    "during": [
+        "during", "when the flood", "immediate", "immediately",
+        "do not walk", "do not cross", "move to higher ground", "evacuate now",
+        "turn off electricity", "drop cover hold",
+        "if trapped", "rescue", "while it is",
+        "دوران", "فوری",
+    ],
+    "after": [
+        "after", "following the", "once the flood", "post-flood", "post flood",
+        "return home", "re-enter", "clean up", "boil water", "document damage",
+        "relief", "recovery", "assess damage", "register for relief",
+        "بعد", "واپسی",
+    ],
+}
+
+
+def _classify_disaster_type(text: str, title: str, source_file: str) -> str:
+    """
+    Rule-based disaster type classification.
+    Returns: flash_flood | flood | landslide | earthquake | glof | general
+    Order matters — more specific types checked first.
+    """
+    combined = (text[:1500] + " " + title + " " + source_file).lower()
+
+    # GLOF before flood (GLOF implies a specific flood type)
+    if any(kw in combined for kw in _DISASTER_KEYWORDS["glof"]):
+        return "glof"
+    if any(kw in combined for kw in _DISASTER_KEYWORDS["flash_flood"]):
+        return "flash_flood"
+    if any(kw in combined for kw in _DISASTER_KEYWORDS["landslide"]):
+        return "landslide"
+    if any(kw in combined for kw in _DISASTER_KEYWORDS["earthquake"]):
+        return "earthquake"
+    if any(kw in combined for kw in _DISASTER_KEYWORDS["flood"]):
+        return "flood"
+    return "general"
+
+
+def _classify_phase(text: str) -> str:
+    """
+    Rule-based phase classification: before | during | after | general.
+    Scores each phase by keyword matches; returns highest-scoring phase.
+    If no phase has >=2 keyword hits, returns 'general'.
+    """
+    text_lower = text.lower()
+    scores: dict[str, int] = {p: 0 for p in ("before", "during", "after")}
+    for phase, kws in _PHASE_KEYWORDS.items():
+        for kw in kws:
+            if kw in text_lower:
+                scores[phase] += 1
+
+    best_phase = max(scores, key=lambda p: scores[p])
+    return best_phase if scores[best_phase] >= 2 else "general"
+
 
 # ── Disaster keyword list for indexing ─────────────────────────────────────────
 KEYWORD_SEEDS = {
@@ -160,6 +235,10 @@ def chunk_document(doc: dict) -> list[dict]:
                 chunk_id = f"{stem}_c{global_idx:04d}"
                 keywords = _extract_keywords(sub, language)
 
+                # Phase 3.2: classify disaster_type and phase per chunk
+                disaster_type = _classify_disaster_type(sub, doc_title, source_file)
+                phase         = _classify_phase(sub)
+
                 all_chunks.append({
                     "chunk_id":      chunk_id,
                     "source_file":   source_file,
@@ -173,7 +252,9 @@ def chunk_document(doc: dict) -> list[dict]:
                     "keywords":      keywords,
                     "evidence_level": evidence_level,
                     "char_count":    len(sub),
-                    "source_url":    source_url,   # ← new field
+                    "source_url":    source_url,   # ← Fix 3
+                    "disaster_type": disaster_type, # ← Phase 3.2
+                    "phase":         phase,         # ← Phase 3.2
                 })
 
     return all_chunks

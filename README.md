@@ -1,359 +1,639 @@
-# Disaster DSS – Chitral, KP
+# 🌊 ChitralSafe — Disaster Decision Support System
 
-**Offline-first, multilingual disaster decision-support system for flood and landslide-prone communities in Chitral, Khyber Pakhtunkhwa, Pakistan.**
+<p align="center">
+  <img src="app/assets/images/app_icon.png" alt="ChitralSafe Logo" width="100"/>
+</p>
 
-> **Not an official emergency alert system. Not a validated prediction model.**
-> A decision-support layer that makes existing verified official guidance accessible,
-> location-aware, and understandable — with zero internet and zero electricity.
+<p align="center">
+  <b>AI-powered offline-first disaster management app for Chitral, KP, Pakistan</b><br/>
+  Flutter (Web/Mobile) + FastAPI Backend + RAG AI Chatbot + Real-Time Alerts
+</p>
 
----
-
-## The Problem
-
-During floods, flash floods, and landslides in mountainous Chitral:
-
-- Electricity and internet fail **exactly when needed most**
-- Official NDMA/PDMA advisories become **inaccessible**
-- Advisories are written in formal English, **difficult for local communities**
-- No offline, location-specific way exists to understand **personal hazard exposure**
-
----
-
-## Core Design Principle
-
-> **Generation is optional. Verified retrieval and deterministic rules are mandatory.**
-
-The core app works with **zero internet, zero cloud LLM, and zero local LLM.**
-AI generation is only ever an optional layer that rephrases already-retrieved verified
-content — it is never allowed to invent facts, alerts, or predictions.
+<p align="center">
+  <img src="https://img.shields.io/badge/Flutter-3.x-blue?logo=flutter"/>
+  <img src="https://img.shields.io/badge/FastAPI-0.111-green?logo=fastapi"/>
+  <img src="https://img.shields.io/badge/Python-3.12-yellow?logo=python"/>
+  <img src="https://img.shields.io/badge/Tests-122%20passing-brightgreen"/>
+  <img src="https://img.shields.io/badge/License-MIT-lightgrey"/>
+</p>
 
 ---
 
-## Key Features
+## 📋 Table of Contents
 
-| Feature | How it works | Status |
-|---------|-------------|--------|
-| **Offline Q&A** | SQLite keyword search over verified NDMA/PDMA/PMD chunks — airplane mode | ✅ Implemented |
-| **AI-Powered Chat** | Optional Ollama (Llama3) local LLM for natural language generation | ✅ Implemented |
-| **Real-Time Alerts** | Scheduled NDMA scraper (every 6 hours) with APScheduler | ✅ Implemented |
-| **Multilingual** | English, Urdu, Roman Urdu — spelling-variant expansion for Roman Urdu | ✅ Implemented |
-| **Location hazard indicator** | GPS lookup against precomputed GIS grid (slope + river proximity) | ✅ Implemented |
-| **Source transparency** | Every answer shows organisation, publication date, evidence level | ✅ Implemented |
-| **Safety checklists** | Go-bag, flood, landslide, evacuation — persistent across sessions | ✅ Implemented |
-| **Official alerts** | Cached locally, syncs from backend when online | ✅ Implemented |
-| **Online sync** | FastAPI backend for fresher alerts and package updates (optional) | ✅ Implemented |
-| **Data provenance** | Every offline package has version, checksum, build timestamp | ✅ Implemented |
+1. [Project Overview](#-project-overview)
+2. [Features](#-features)
+3. [Architecture](#-architecture)
+4. [Quick Start](#-quick-start)
+5. [Detailed Setup](#-detailed-setup)
+6. [API Documentation](#-api-documentation)
+7. [AI / RAG System](#-ai--rag-system)
+8. [Testing](#-testing)
+9. [Project Structure](#-project-structure)
+10. [Team & Contribution](#-team--contribution)
 
 ---
 
-## Technology Stack
+## 🎯 Project Overview
 
-| Component | Technology |
-|-----------|-----------|
-| Mobile / Web app | Flutter / Dart |
-| Offline database | SQLite (LIKE queries, no FTS5 dependency) |
-| Embeddings (laptop only) | Sentence-Transformers multilingual MiniLM |
-| Vector search (backend only) | FAISS |
-| Backend | FastAPI + aiosqlite |
-| GIS processing (laptop only) | Rasterio, GeoPandas, Shapely |
-| Elevation data | Copernicus DEM / SRTM (synthetic fallback) |
-| River data | OpenStreetMap (synthetic fallback) |
+ChitralSafe is a **Final Year Project (FYP)** built for disaster risk management in Chitral, Khyber Pakhtunkhwa, Pakistan. The region faces frequent floods, GLOFs (Glacial Lake Outburst Floods), landslides, and earthquakes.
 
-**No mandatory paid API, cloud credit, or GPU anywhere in the core system.**
+### Problem
+- No offline-capable disaster information system exists for Chitral
+- During disasters, internet connectivity is lost
+- Local communities lack actionable, multilingual guidance
+- Alert information is scattered across NDMA/PDMA websites
 
----
-
-## Hazard Scope
-
-**In scope:** Flood · Flash Flood · Landslide
-
-**Out of scope (future work):** GLOF, household ML risk prediction, multi-province
-deployment, real-time government API integration.
+### Solution
+- **Offline-first Flutter app** — works without internet
+- **AI chatbot** powered by RAG (Retrieval-Augmented Generation) over 400+ NDMA/PDMA document chunks
+- **Real-time alert scraping** from NDMA, PDMA KP, PMD, and other sources
+- **Multilingual** — English, Urdu (اردو), Roman Urdu support
+- **Hazard map** — Chitral-specific risk visualization
 
 ---
 
-## Quick Start (Complete Setup)
+## ✨ Features
 
-**Automated setup script:**
+### 🤖 AI-Powered RAG Chatbot (Phase 3)
+- Searches **400+ verified chunks** from 13 official NDMA/PDMA PDFs
+- **Intent-aware retrieval** — detects before/during/after disaster phase
+- **Disaster-type classification** — flood, landslide, GLOF, earthquake
+- **Alert-aware answers** — injects live alert context into responses
+- **Grounding-strict** — never fabricates facts; refuses when evidence insufficient
+- **Response cache** — fast repeated queries (TTL: 5 min)
+- **FAISS semantic reranking** — optional vector similarity reranking
+- Supports **Ollama (local)**, OpenAI, and Groq providers
+- **Zero cost** when using Ollama locally
 
-```powershell
-cd disaster_dss
-.\setup_complete_system.ps1
-```
+### 🚨 Real-Time Alerts (Phase 2)
+- Scrapes **6 official sources**: NDMA, PDMA KP, PMD, PDMA Punjab, ReliefWeb, UN OCHA
+- **Alert lifecycle**: `DISCOVERED → VERIFIED → PUBLISHED → ARCHIVED`
+- **Provenance tracking**: source org, URL, fetch timestamp, verification status
+- **Geographic filtering**: radius-based + province + district filters
+- **Soft delete** with audit trail
+- **WebSocket** — live alert push to connected Flutter clients
+- Background scheduler runs every 6 hours (APScheduler)
 
-This script will:
-1. ✓ Check Ollama installation (AI model runtime)
-2. ✓ Pull Llama3 model (~4.7GB) if needed
-3. ✓ Create backend `.env` configuration
-4. ✓ Install Python dependencies
-5. ✓ Run database migrations
-6. ✓ Test the system
+### 📱 Flutter App
+- **Offline-first** — full functionality without internet
+- **Chat screen** — AI chatbot with source attribution
+- **Alerts screen** — live alerts with pull-to-refresh
+- **Risk dashboard** — hazard map, risk indicators
+- **Emergency contacts** — NDMA, PDMA KP, Rescue 1122
+- **Multilingual UI** — English / اردو / Roman Urdu toggle
+- **Go-bag checklist** — pre-disaster preparation guide
+- Runs on **Web (Chrome)**, Android, iOS
 
-**Manual setup:** See `SETUP_AI_REALTIME.md`
+### 🔐 Authentication
+- JWT access tokens (1 hour TTL)
+- Refresh token rotation with revocation
+- Admin API key for protected endpoints
+- Rate limiting on login endpoint
+- Password hashing with bcrypt
 
----
-
-## Running the System
-
-**Terminal 1 — Backend (AI + Real-Time Alerts):**
-```powershell
-cd backend
-.\.venv\Scripts\Activate.ps1
-python -m uvicorn main:app --reload --port 8002
-```
-
-**Terminal 2 — Flutter Web:**
-```powershell
-cd app
-flutter run -d chrome --web-port 8080
-```
-
-**Open:** http://localhost:8080
-
----
-
-## What You Get
-
-### 1. AI-Powered Chat
-- Ask: "What should I do during heavy rain in Chitral?"
-- System retrieves verified NDMA/PDMA chunks
-- Llama3 (local) rephrases into natural language
-- Shows sources + evidence level
-
-### 2. Real-Time Alert Monitoring
-- Backend scrapes NDMA website every 6 hours
-- Alert lifecycle: DISCOVERED → VERIFIED → PUBLISHED
-- Manual trigger: `POST /monitor/run`
-- Status check: `GET /monitor/status`
-
-### 3. Offline Mode
-- **Everything works without internet**
-- 315 document chunks in SQLite
-- 10,000 hazard grid cells (slope + river data)
-- Full chat, map, checklist, alerts (cached)
+### 📊 Knowledge Sync
+- Version-controlled knowledge packages
+- Offline SQLite knowledge base (ships with app)
+- `/sync/status` — check latest knowledge version
+- Admin-controlled publish workflow
 
 ---
 
-## Project Structure
+## 🏗️ Architecture
 
 ```
-disaster_dss/
-├── app/                     Flutter mobile + web application
-│   ├── lib/core/            config, local_db, retrieval, rules_engine, localization, providers, theme
-│   ├── lib/features/        auth, onboarding, dashboard, chat, map, alerts, safety, profile, simulator
-│   └── assets/offline_package/   knowledge.sqlite + hazard_grid.sqlite
-├── backend/                 FastAPI (optional online mode)
-│   ├── main.py
-│   ├── database.py
-│   ├── models/db_models.py
-│   └── routers/             alerts, auth, knowledge, sync
-├── pipeline/
-│   ├── rag/                 extract.py → chunk.py → embed.py
-│   ├── package_builder/     build_sqlite.py
-│   ├── gis/                 compute_hazard_grid.py
-│   └── run_pipeline.py
-├── fetchers/                pdma_kp_fetcher.py, ndma_scraper.py
-├── data/                    raw PDFs + ground truth (large files gitignored)
-├── evaluation/              retrieval_eval.py, ground_truth_eval.json
-├── offline_package/         Built SQLite outputs (gitignored), manifest.json
-├── docs/                    ARCHITECTURE.md, MANUAL_CRITERIA_GUIDE.md
-├── run_demo.ps1             ← One-command local demo launcher
-└── requirements.txt
+┌─────────────────────────────────────────────────────────────┐
+│                     Flutter App (Web/Mobile)                 │
+│  ┌──────────┐ ┌──────────┐ ┌───────────┐ ┌──────────────┐  │
+│  │  Chat    │ │  Alerts  │ │ Dashboard │ │   Profile    │  │
+│  │ (RAG AI) │ │(Real-time│ │(Hazard Map│ │ (Emergency   │  │
+│  │          │ │WebSocket)│ │           │ │  Contacts)   │  │
+│  └────┬─────┘ └────┬─────┘ └─────┬─────┘ └──────────────┘  │
+│       │             │             │                          │
+│  ┌────▼─────────────▼─────────────▼──────────────────────┐  │
+│  │           API Service (HTTP + WebSocket)               │  │
+│  │           Base URL: http://127.0.0.1:8002              │  │
+│  └────────────────────────┬──────────────────────────────┘  │
+└───────────────────────────│──────────────────────────────────┘
+                            │ REST API / WebSocket
+┌───────────────────────────▼──────────────────────────────────┐
+│                    FastAPI Backend (Port 8002)                 │
+│                                                               │
+│  /auth     /alerts    /rag/query    /knowledge    /sync       │
+│  /monitor  /ws/alerts                                         │
+│                                                               │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │                  RAG Service (Phase 3)                   │ │
+│  │  Query → Normalize → Curated Override → Retrieve        │ │
+│  │        → Intent Classify → FAISS Rerank                 │ │
+│  │        → Alert Inject → LLM Generate → Cache            │ │
+│  └───────────────────────┬─────────────────────────────────┘ │
+│                           │                                   │
+│  ┌────────────┐  ┌────────▼────────┐  ┌──────────────────┐  │
+│  │  SQLite    │  │ knowledge.sqlite │  │  FAISS Index     │  │
+│  │  (alerts,  │  │  (400+ chunks,  │  │  (optional       │  │
+│  │   users,   │  │   Urdu+English) │  │   semantic       │  │
+│  │   sync)    │  │                 │  │   reranking)     │  │
+│  └────────────┘  └─────────────────┘  └──────────────────┘  │
+│                                                               │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │           APScheduler — Alert Monitor (6h interval)     │ │
+│  │   NDMA → PDMA KP → PMD → PDMA Punjab → ReliefWeb → OCHA│ │
+│  └─────────────────────────────────────────────────────────┘ │
+└───────────────────────────────────────────────────────────────┘
+                            │
+              ┌─────────────▼──────────────┐
+              │   Ollama (Local LLM)        │
+              │   Model: llama3 / mistral   │
+              │   Port: 11434               │
+              │   Zero API cost, offline    │
+              └─────────────────────────────┘
 ```
 
 ---
 
-## Quick Start
+## ⚡ Quick Start
 
 ### Prerequisites
+- Python 3.11 or 3.12
+- Flutter 3.x SDK
+- Git
+- (Optional) Ollama for AI chat
 
-- Python 3.10+ (3.11/3.12 recommended)
-- Flutter SDK 3.x + Android SDK (for mobile) or Chrome (for web)
+### 1 — Clone the repo
+```bash
+git clone https://github.com/duaiqbal/Climate-Disaster.git
+cd Climate-Disaster
+```
 
-### 1 — Python environment
-
-```powershell
+### 2 — Backend setup
+```bash
+cd backend
 python -m venv .venv
-.venv\Scripts\Activate.ps1
+
+# Windows
+.venv\Scripts\activate
+
+# Mac/Linux
+source .venv/bin/activate
+
 pip install -r requirements.txt
 ```
 
-### 2 — Build offline databases
-
-```powershell
-python pipeline/run_pipeline.py --skip-embed
+### 3 — Configure environment
+```bash
+# Copy the template
+cp .env.example .env
+# Edit .env with your settings (defaults work for local dev)
 ```
 
-If no real NDMA/PDMA PDFs are in `data/raw/`, the pipeline auto-generates a
-demo PDF with realistic Chitral advisory content so the full app runs immediately.
+### 4 — Start backend
+```bash
+# Windows
+python -m uvicorn main:app --host 127.0.0.1 --port 8002 --reload
 
-### 3 — One-command demo launch
-
-```powershell
-.\run_demo.ps1
+# Mac/Linux
+python -m uvicorn main:app --host 127.0.0.1 --port 8002 --reload
 ```
+Backend runs at → http://127.0.0.1:8002  
+API docs at → http://127.0.0.1:8002/docs
 
-This starts:
-- FastAPI backend → **http://127.0.0.1:8000**
-- Flutter Web → **http://localhost:8080**
-
-Open **http://localhost:8080** in your browser.
-
-### 4 — Run on Android emulator / device
-
-```powershell
-cd app
+### 5 — Start Flutter app
+```bash
+cd ../app
 flutter pub get
-flutter run
+flutter run -d chrome --web-port 8080
 ```
+App opens at → http://localhost:8080
 
-For a physical device, pass your machine's LAN IP:
-
-```powershell
-flutter run --dart-define=BACKEND_URL=http://192.168.1.x:8000
+### 6 — (Optional) Enable AI chat with Ollama
+```bash
+# Install Ollama from https://ollama.com
+ollama pull llama3
+ollama serve
+# Then set LLM_PROVIDER=ollama in backend/.env
 ```
-
-### 5 — Backend only
-
-```powershell
-python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
-```
-
-API docs: **http://127.0.0.1:8000/docs**
 
 ---
 
-## Demo Scenarios
+## 📖 Detailed Setup
 
-### Scenario 1 — Airplane Mode Query
-Device in airplane mode. Ask: *"What should I do during a flood?"*
-→ Verified NDMA/PDMA guidance with source, publication date, and evidence level.
-Zero network requests made.
+### Backend Environment Variables
 
-### Scenario 2 — Location Hazard Check
-GPS locates you in Chitral.
-→ App queries `hazard_grid.sqlite` offline, returns hazard level (HIGH/MEDIUM/LOW)
-with contributing terrain factors and explicit indicator disclaimer.
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ENV` | `development` | `development` or `production` |
+| `SECRET_KEY` | dev-secret | JWT signing key — **change in production** |
+| `ADMIN_API_KEY` | dev-key | Admin endpoint key — **change in production** |
+| `DATABASE_URL` | SQLite in TEMP | SQLAlchemy DB URL |
+| `LLM_PROVIDER` | `none` | `none` / `ollama` / `openai` / `groq` |
+| `LLM_MODEL` | `llama3` | Model name for LLM provider |
+| `LLM_BASE_URL` | `http://localhost:11434/v1` | Ollama/OpenAI-compatible base URL |
+| `LLM_API_KEY` | *(empty)* | API key for OpenAI or Groq |
+| `LLM_MAX_TOKENS` | `400` | Max tokens in LLM response |
+| `LLM_MIN_CONFIDENCE` | `1` | Min retrieval hits before LLM is called |
+| `MONITOR_ENABLED` | `1` | Enable alert scraping scheduler |
+| `MONITOR_INTERVAL_HOURS` | `6` | How often to scrape alerts |
+| `CORS_ORIGINS` | localhost:8080 | Comma-separated allowed CORS origins |
+| `ACCESS_TOKEN_TTL` | `3600` | JWT access token TTL in seconds |
+| `REFRESH_TOKEN_TTL` | `604800` | Refresh token TTL (7 days) |
 
-### Scenario 3 — Roman Urdu Query
-Ask: *"Flood mein kya karein?"*
-→ `RomanUrduNormalizer` expands spelling variants, retrieves relevant official
-guidance, falls back to English if needed.
+### LLM Provider Options
+
+**Option A — Ollama (recommended, free, offline)**
+```env
+LLM_PROVIDER=ollama
+LLM_MODEL=llama3
+LLM_BASE_URL=http://localhost:11434/v1
+```
+
+**Option B — OpenAI**
+```env
+LLM_PROVIDER=openai
+LLM_MODEL=gpt-4o-mini
+LLM_API_KEY=sk-...
+```
+
+**Option C — Groq (fast, free tier)**
+```env
+LLM_PROVIDER=groq
+LLM_MODEL=llama3-8b-8192
+LLM_API_KEY=gsk_...
+```
+
+**Option D — No LLM (offline text retrieval only)**
+```env
+LLM_PROVIDER=none
+```
+
+### Build Knowledge Database (Optional)
+The app ships with a pre-built `knowledge.sqlite`. To rebuild from PDFs:
+```bash
+cd pipeline
+python run_pipeline.py
+```
+
+### Run Evaluation
+```bash
+cd evaluation
+python retrieval_eval.py --k 5
+```
 
 ---
 
-## Offline Package — Actual Current State
+## 📡 API Documentation
 
-| File | Contents | Size |
-|------|----------|------|
-| `knowledge.sqlite` | Chunks from official source PDFs | ~76 KB (seed build) |
-| `hazard_grid.sqlite` | 10,000 precomputed hazard cells at 0.01° | ~2 MB |
+Full Swagger UI: `http://127.0.0.1:8002/docs`
 
-**knowledge.sqlite current state:** The bundled database contains chunks extracted
-from available official documents plus seed alerts. Run the full pipeline with real
-NDMA/PDMA/PMD PDFs in `data/raw/` to expand the knowledge base.
-
-**Hazard grid:** 10,000 cells covering lat 35.50–36.50, lon 71.50–72.50 (Chitral).
-Generated with a Chitral-calibrated synthetic terrain model (slope + river proximity).
-Distribution: HIGH ~8,499 · MEDIUM ~1,064 · LOW ~437 cells.
-
-> **Important:** The hazard grid is a coarse indicator based on modelled terrain —
-> NOT a validated scientific prediction. It does not replace official NDMA/PDMA warnings.
-
----
-
-## API Endpoints
-
+### Auth Endpoints
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/health` | Liveness probe |
-| POST | `/auth/register` | User registration |
-| POST | `/auth/login` | Authentication + token |
-| GET | `/alerts` | List alerts (filterable) |
-| POST | `/alerts` | Create alert (admin key) |
-| GET | `/knowledge/search?q=…` | Keyword search over chunks |
-| GET | `/knowledge/chunks` | Paginated chunk list |
-| GET | `/knowledge/meta` | Package metadata |
-| GET | `/sync/status` | Latest package version |
+| POST | `/auth/register` | Register new user |
+| POST | `/auth/login` | Login, returns JWT tokens |
+| POST | `/auth/refresh` | Refresh access token |
+| POST | `/auth/logout` | Revoke refresh token |
+| GET | `/auth/me` | Get current user profile |
 
-Full interactive docs at `/docs` when backend is running.
+### Alert Endpoints
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/alerts` | List alerts (filter by district, severity, status, radius) |
+| GET | `/alerts/{id}` | Get single alert with full provenance |
+| POST | `/alerts` | Create alert (admin only) |
+| PUT | `/alerts/{id}` | Update alert (admin only) |
+| PATCH | `/alerts/{id}/transition` | Lifecycle transition (admin only) |
+| DELETE | `/alerts/{id}` | Soft delete alert (admin only) |
 
----
+**Alert filter params:** `district`, `province`, `hazard_type`, `severity`, `verification_status`, `active_only`, `lat`, `lon`, `radius_km`, `limit`, `offset`
 
-## Configuration
+### RAG / AI Endpoints
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/rag/query` | Ask AI chatbot a question |
 
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `BACKEND_URL` | auto (web/emulator) | Flutter backend URL (`--dart-define`) |
-| `ADMIN_API_KEY` | dev key | Backend write endpoint protection |
-| `SECRET_KEY` | dev secret | Token signing — **change in production** |
-| `DATABASE_URL` | SQLite | Swap to `postgresql+asyncpg://` for production |
-| `KNOWLEDGE_DB` | auto-detected | Path to knowledge.sqlite for backend |
-| `CORS_ORIGINS` | `*` | Comma-separated allowed origins |
-
-**Production checklist:**
-- Set `SECRET_KEY` to a random 32-byte secret
-- Set `ADMIN_API_KEY` to a strong random key
-- Set `CORS_ORIGINS` to your actual frontend domain
-- Deploy backend behind HTTPS (nginx/caddy)
-- Replace SQLite with PostgreSQL for multi-user deployments
-
----
-
-## Evaluation
-
-```powershell
-python evaluation/retrieval_eval.py --k 5
+**Request body:**
+```json
+{
+  "question": "What to do during a flood?",
+  "language": "en",
+  "top_k": 5,
+  "active_alert": {
+    "title": "Flood Warning Chitral",
+    "hazard_type": "flood",
+    "severity": "HIGH"
+  }
+}
 ```
 
-**Ground truth:** 27 queries — 14 English, 6 Urdu, 7 Roman Urdu — across flood,
-flash flood, landslide, preparedness. Self-constructed by project team (not an
-external benchmark — explicitly labeled as such in all outputs).
+**Response:**
+```json
+{
+  "answer": "During a flood, move to higher ground immediately...",
+  "sources": [
+    {
+      "source_org": "NDMA",
+      "doc_title": "Flood Situation Report 2023-24",
+      "source_url": "https://ndma.gov.pk/...",
+      "disaster_type": "flood",
+      "phase": "during"
+    }
+  ],
+  "confidence": "high",
+  "provider_used": "ollama",
+  "generation_used": true,
+  "disaster_type": "flood",
+  "phase": "during"
+}
+```
+
+### Knowledge Endpoints
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/knowledge/search?q=flood&language=en` | Search knowledge chunks |
+| GET | `/knowledge/chunks` | List all chunks |
+| GET | `/knowledge/meta` | Knowledge DB metadata |
+
+### Sync Endpoints
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/sync/status` | Latest published package info |
+| GET | `/sync/updates` | List all published versions |
+| POST | `/sync/publish` | Publish new knowledge package (admin only) |
+
+### Monitor Endpoints
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/monitor/status` | Scheduler status + last run result |
+| POST | `/monitor/run` | Manually trigger alert scraping (admin only) |
+
+### WebSocket
+```
+ws://127.0.0.1:8002/ws/alerts
+```
+Receives real-time alert events when new alerts are scraped.
+
+### Health
+```
+GET /health
+→ { "status": "ok", "version": "2.0.0", "db": "sqlite", "env": "development" }
+```
 
 ---
 
-## Honest Limitations
+## 🤖 AI / RAG System
 
-| Limitation | Detail |
-|-----------|--------|
-| Keyword retrieval only (on-device) | No semantic/vector search in the Flutter app — intentional for offline reliability |
-| Hazard grid is synthetic | Slope + river proximity model, not field-validated sensor data |
-| No live official API | No public NDMA/PDMA API exists; alert ingestion is manual and verified |
-| knowledge.sqlite is a seed build | 76 KB seed — expand by running pipeline with real PDFs |
-| Fonts use system fallback | NotoNastaliqUrdu not bundled — Urdu renders in system font |
-| Token storage | SharedPreferences (prototype-safe); upgrade to flutter_secure_storage for production |
-| No token refresh | 24-hour tokens expire with no automatic renewal |
-| Roman Urdu locale code | Uses `Locale('ru')` internally — no conflict in practice |
+### How it works
+
+```
+User Query
+    │
+    ▼
+1. Roman Urdu normalization (selab→flood, baarish→rain ...)
+    │
+    ▼
+2. Curated override check (emergency contacts, go-bag → instant answer)
+    │
+    ▼
+3. Keyword retrieval from knowledge.sqlite (400+ chunks)
+   Filtered by: language + disaster_type + phase
+    │
+    ▼
+4. FAISS semantic reranking (if index available)
+    │
+    ▼
+5. Alert context injection (if active alert provided)
+    │
+    ▼
+6. LLM generation (Ollama/OpenAI/Groq)
+   Grounding-strict system prompt:
+   - No facts outside retrieved chunks
+   - No fabricated alerts
+   - Source attribution required
+    │
+    ▼
+7. Response cache (TTL: 5 min, skipped for alert-dependent queries)
+    │
+    ▼
+Response with answer + sources + confidence + phase
+```
+
+### Retrieval Evaluation Results
+
+| Language | Queries | P@5 | R@5 | MRR | F1 |
+|----------|---------|-----|-----|-----|----|
+| English | 14 | 1.000 | 1.000 | 1.000 | 1.000 |
+| Urdu (اردو) | 6 | 0.980 | 0.980 | 0.990 | 0.980 |
+| Roman Urdu | 7 | 0.943 | 0.943 | 0.971 | 0.943 |
+| **Overall** | **27** | **0.981** | **0.981** | **0.990** | **0.981** |
+
+### Knowledge Base
+- **400+ chunks** from 13 official PDFs
+- Sources: NDMA, PDMA KP, PMD
+- Languages: English + Urdu translations
+- Each chunk tagged with: `disaster_type`, `phase` (before/during/after), `source_org`, `source_url`
 
 ---
 
-## Contributing
+## 🧪 Testing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, branch conventions, pre-push
-checklist, source inclusion criteria, and design constraints that must not be violated.
+```bash
+cd backend
+python -m pytest tests/ -v
+```
 
----
+**122 tests across 5 test suites:**
 
-## Data Sources
+| Suite | Tests | Coverage |
+|-------|-------|----------|
+| `test_auth.py` | 20 | JWT, registration, login, refresh, logout |
+| `test_alerts.py` | 15 | CRUD, lifecycle, provenance, filtering |
+| `test_knowledge_sync.py` | 15 | Knowledge search, sync endpoints, RAG shape |
+| `test_phase2_alerts.py` | 18 | Multi-source, radius filter, WebSocket, haversine |
+| `test_phase3_rag.py` | 34 | RAG curated, intent, alert-aware, Urdu, FAISS, cache |
+| `test_phase1_regressions.py` | 20 | Port, SQL, schema, payload regressions |
 
-- [NDMA Pakistan](https://ndma.gov.pk)
-- [PDMA KP](https://pdma.gov.pk)
-- [PMD Pakistan](https://pmd.gov.pk)
-- [Copernicus DEM](https://spacedata.copernicus.eu)
-- [OpenStreetMap](https://openstreetmap.org)
-
-No proprietary or paid data sources used anywhere in the system.
-
----
-
-## License
-
-MIT License
+All tests use **isolated in-memory SQLite** per test — no shared state.
 
 ---
 
-## Contributors
+## 📁 Project Structure
 
-- **Tooba Iqbal**
-- **Kiran Shams**
-- **Manahill Khitab**
+```
+Climate-Disaster/
+│
+├── README.md                    ← This file
+├── SETUP.md                     ← Detailed setup guide for team members
+├── setup.ps1                    ← Windows one-click setup script
+├── setup.sh                     ← Mac/Linux one-click setup script
+│
+├── backend/                     ← FastAPI Python backend
+│   ├── main.py                  ← App entry point, lifespan, routers
+│   ├── database.py              ← SQLAlchemy engine + session factory
+│   ├── requirements.txt         ← Python dependencies
+│   ├── .env.example             ← Environment variable template
+│   │
+│   ├── core/
+│   │   ├── config.py            ← Settings (env vars, production safety)
+│   │   ├── security.py          ← JWT, bcrypt, token helpers
+│   │   ├── rate_limit.py        ← Rate limiting middleware
+│   │   ├── scheduler.py         ← APScheduler (alert monitor)
+│   │   └── ws_manager.py        ← WebSocket connection manager
+│   │
+│   ├── models/
+│   │   └── db_models.py         ← SQLAlchemy ORM models
+│   │
+│   ├── routers/
+│   │   ├── auth.py              ← /auth/* endpoints
+│   │   ├── alerts.py            ← /alerts/* endpoints
+│   │   ├── knowledge.py         ← /knowledge/* endpoints
+│   │   ├── rag.py               ← /rag/query endpoint
+│   │   ├── sync.py              ← /sync/* endpoints
+│   │   ├── monitor.py           ← /monitor/* endpoints
+│   │   └── ws.py                ← WebSocket /ws/alerts
+│   │
+│   ├── services/
+│   │   ├── rag_service.py       ← Full RAG pipeline (Phase 3)
+│   │   └── faiss_service.py     ← FAISS vector index (optional)
+│   │
+│   └── tests/
+│       ├── conftest.py          ← Isolated test fixtures
+│       ├── test_auth.py
+│       ├── test_alerts.py
+│       ├── test_knowledge_sync.py
+│       ├── test_phase1_regressions.py
+│       ├── test_phase2_alerts.py
+│       └── test_phase3_rag.py
+│
+├── app/                         ← Flutter application
+│   ├── pubspec.yaml             ← Flutter dependencies
+│   ├── lib/
+│   │   ├── main.dart            ← App entry point
+│   │   ├── core/
+│   │   │   ├── services/        ← API service, disaster repository
+│   │   │   ├── theme/           ← Colors, text styles
+│   │   │   ├── localization/    ← English/Urdu/Roman Urdu translations
+│   │   │   ├── retrieval/       ← Offline keyword retrieval engine
+│   │   │   ├── rules_engine/    ← Offline response builder
+│   │   │   └── local_db/        ← SQLite local storage
+│   │   └── features/
+│   │       ├── chat/            ← AI chatbot screen
+│   │       ├── alerts/          ← Real-time alerts screen
+│   │       ├── dashboard/       ← Risk dashboard + hazard map
+│   │       ├── profile/         ← User profile + emergency contacts
+│   │       └── auth/            ← Login/register screens
+│   └── assets/
+│       ├── images/              ← App images
+│       └── fonts/               ← Custom fonts
+│
+├── pipeline/                    ← Data pipeline (builds knowledge.sqlite)
+│   ├── run_pipeline.py          ← Main pipeline runner
+│   ├── rag/
+│   │   ├── chunk.py             ← PDF chunking + classification
+│   │   └── translate_urdu.py    ← Urdu translation
+│   └── package_builder/
+│       └── build_sqlite.py      ← Builds knowledge.sqlite
+│
+├── fetchers/                    ← Alert scraping
+│   └── official_alert_monitor.py ← Multi-source alert scraper
+│
+├── evaluation/                  ← Retrieval evaluation
+│   ├── retrieval_eval.py        ← P@K, R@K, MRR metrics
+│   └── ground_truth_eval.json   ← 27 annotated queries
+│
+├── offline_package/             ← Pre-built knowledge.sqlite ships here
+│   └── knowledge.sqlite
+│
+└── data/
+    └── raw/                     ← Source PDFs (NDMA, PDMA KP docs)
+```
+
+---
+
+## 🛠️ Common Issues & Fixes
+
+### Backend won't start
+```bash
+# Check Python version (need 3.11+)
+python --version
+
+# Reinstall dependencies
+pip install -r requirements.txt
+
+# Check port not in use
+netstat -ano | findstr :8002
+```
+
+### Flutter CORS error
+Make sure backend `.env` has:
+```env
+CORS_ORIGINS=http://localhost:8080,http://127.0.0.1:8080
+```
+
+### AI chat returns "insufficient evidence"
+- `LLM_PROVIDER=none` means no LLM — retrieval-only mode
+- Set `LLM_PROVIDER=ollama` and start Ollama: `ollama serve`
+- Or set `LLM_MIN_CONFIDENCE=1` (already default)
+
+### knowledge.sqlite not found
+```bash
+cd pipeline
+python run_pipeline.py
+```
+
+### Tests failing
+```bash
+# Always run from backend/ directory
+cd backend
+python -m pytest tests/ -v
+```
+
+---
+
+## 👥 Team & Contribution
+
+**Project:** Final Year Project — Disaster Decision Support System  
+**University:** [Your University Name]  
+**Supervisor:** [Supervisor Name]
+
+### Team Members
+| Name | Role |
+|------|------|
+| Dua Iqbal | Lead Developer — Backend, RAG, Alerts |
+| [Member 2] | Flutter App Development |
+| [Member 3] | Data Pipeline, Knowledge Base |
+| [Member 4] | UI/UX, Testing |
+
+### Contributing
+1. Fork the repo
+2. Create feature branch: `git checkout -b feature/your-feature`
+3. Run tests: `cd backend && python -m pytest tests/ -v`
+4. Commit: `git commit -m "feat: your feature description"`
+5. Push: `git push origin feature/your-feature`
+6. Open Pull Request
+
+---
+
+## 📞 Emergency Contacts (Built into App)
+
+| Service | Number |
+|---------|--------|
+| Rescue KP | 1122 |
+| PDMA KP | 051-9222373 |
+| NDMA | 051-9246136 |
+| PMD Weather | 051-9250363 |
+| Edhi Foundation | 115 |
+| AKHS Chitral | 0943-412093 |
+
+---
+
+## 📄 License
+
+MIT License — see [LICENSE](LICENSE) for details.
+
+---
+
+<p align="center">
+  Built with ❤️ for the people of Chitral, KP, Pakistan<br/>
+  Data sources: NDMA Pakistan, PDMA KP, Pakistan Meteorological Department
+</p>

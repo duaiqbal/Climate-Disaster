@@ -23,9 +23,10 @@ router = APIRouter(prefix="/rag", tags=["RAG"])
 
 
 class RAGQueryRequest(BaseModel):
-    question: str
-    language: str = "en"
-    top_k: int = 5
+    question:          str
+    language:          str = "en"
+    top_k:             int = 5
+    location_province: str = "Khyber Pakhtunkhwa"  # Phase 3.4: alert-awareness
 
 
 class SourceRef(BaseModel):
@@ -69,12 +70,21 @@ async def rag_query(payload: RAGQueryRequest):
         _do_search, db_path, payload.question, payload.language, payload.top_k
     )
 
+    # Phase 3.6: FAISS semantic re-ranking (graceful fallback if unavailable)
+    try:
+        from services.faiss_service import rerank_chunks, is_available
+        if is_available():
+            rows = rerank_chunks(rows, payload.question)
+    except Exception:
+        pass
+
     # RAG service applies constraint 5 (refuse if low confidence) and
     # constraint 6 (provider dispatch via env var)
     result: RAGResponse = query_rag(
         question=payload.question,
         retrieved_chunks=rows,
         language=payload.language,
+        location_province=payload.location_province,
     )
 
     return RAGQueryResponse(

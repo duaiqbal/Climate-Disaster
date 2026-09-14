@@ -24,10 +24,20 @@ LLM_BASE_URL       = os.getenv("LLM_BASE_URL",        "")
 LLM_MIN_CONFIDENCE = int(os.getenv("LLM_MIN_CONFIDENCE", "1"))
 LLM_MAX_TOKENS     = int(os.getenv("LLM_MAX_TOKENS",     "400"))
 
-# ── System prompt ─────────────────────────────────────────────────────────────
+# ── System prompt (Phase 4.2 — grounding-strict) ─────────────────────────────
 _SYSTEM_PROMPT = """You are a disaster safety assistant for Chitral, KP, Pakistan.
-Answer ONLY from the provided source text. Be concise and structured.
-If source text is insufficient, say: INSUFFICIENT EVIDENCE."""
+
+STRICT RULES — violating any rule makes the response unusable:
+1. Answer ONLY using the SOURCE TEXT and ALERT DATA provided below. Never use outside knowledge.
+2. If the source text is insufficient to answer, say exactly: "INSUFFICIENT EVIDENCE: [reason]"
+3. NEVER state or imply an alert exists unless one was explicitly passed as ALERT DATA.
+4. ALWAYS name the source organisation for every factual claim (e.g., "According to NDMA...").
+5. Respond in the SAME LANGUAGE as the question (Urdu question → Urdu answer).
+6. When both alert data and preparedness guidance are present, label them SEPARATELY:
+   - "CURRENT OFFICIAL ALERT: ..." for alert data
+   - "PREPAREDNESS GUIDANCE: ..." for knowledge chunk content
+7. Do NOT claim to be an official emergency-warning system. Do NOT make predictions.
+8. Keep answers concise: alert checks → 2-3 sentences; preparedness → numbered checklist max 8 items."""
 
 
 @dataclass
@@ -657,10 +667,341 @@ _PROVIDER_DISPATCH = {
     "groq":   _call_groq,
 }
 
+# ── Intent classification ─────────────────────────────────────────────────────
 
-# ── Main service function ─────────────────────────────────────────────────────
+# Exact/near-exact patterns that should always use the curated KB as a
+# high-precision override (these are FAQ-style questions with well-reviewed answers).
+_CURATED_OVERRIDES: set[str] = {
+    "emergency contacts", "emergency numbers", "helpline", "rescue 1122",
+    "go bag", "gobag", "emergency kit", "72 hour kit", "what to pack",
+    "glof", "glacial lake outburst",
+}
 
-def query_rag(question: str, retrieved_chunks: list[dict], language: str = "en") -> RAGResponse:
+def _should_use_curated(question: str) -> bool:
+    """True only for exact-match FAQ patterns where curated is provably better."""
+    q = question.lower().strip()
+    return any(pat in q for pat in _CURATED_OVERRIDES)
+
+
+def _classify_intent(question: str) -> dict:
+    """
+    Classify question intent for retrieval filter selection.
+    Returns dict with: disaster_type, phase, is_alert_query, is_contacts
+    """
+    q = question.lower()
+    # Disaster type
+    dt = "general"
+    if any(w in q for w in ["glof", "glacial"]):           dt = "glof"
+    elif any(w in q for w in ["flash flood", "nullah"]):   dt = "flash_flood"
+    elif any(w in q for w in ["landslide", "mudslide"]):   dt = "landslide"
+    elif any(w in q for w in ["earthquake", "tremor"]):    dt = "earthquake"
+    elif any(w in q for w in ["flood", "river", "selab"]): dt = "flood"
+    elif any(w in q for w in ["rain", "monsoon"]):         dt = "flood"  # rain→flood retrieval
+
+    # Phase
+    phase = "general"
+    if any(w in q for w in ["before", "prepare", "prevention", "precaution", "ready"]):
+        phase = "before"
+    elif any(w in q for w in ["after", "following", "recover", "return home"]):
+        phase = "after"
+    elif any(w in q for w in ["during", "when", "happening", "what should i do", "what to do"]):
+        phase = "during"
+
+    return {
+        "disaster_type":   dt,
+        "phase":           phase,
+        "is_alert_query":  any(w in q for w in ["alert", "warning", "advisory", "current", "today"]),
+        "is_contacts":     any(w in q for w in ["contact", "number", "1122", "helpline", "call"]),
+    }
+
+
+def _compose_answer_from_chunks(chunks: list[dict], intent: dict, question: str) -> str:
+    """
+    Compose a structured, non-verbatim answer from retrieved chunks.
+    Uses intent metadata to add phase-appropriate header.
+    """
+    if not chunks:
+        return ""
+
+    dt    = intent.get("disaster_type", "general").upper().replace("_", " ")
+    phase = intent.get("phase", "general")
+
+    if phase == "before":
+        header = f"How to Prepare BEFORE a {dt} Event:"
+    elif phase == "during":
+        header = f"What to do DURING a {dt}:"
+    elif phase == "after":
+        header = f"What to do AFTER a {dt}:"
+    else:
+        header = f"Guidance on {dt}:"
+
+    clean = _clean_chunks(chunks[:5])
+    # Fallback: if all sentences filtered, use first chunk raw text
+    if not clean:
+        raw = chunks[0].get("chunk_text", "").strip()
+        if raw:
+            clean = [raw[:300]]  # Use first 300 chars of raw chunk
+
+    lines = [header, ""]
+    for i, sent in enumerate(clean[:6], 1):
+        lines.append(f"{i}. {sent}")
+
+    if chunks:
+        src = chunks[0]
+        lines.append(f"\nSource: {src.get('source_org','')} — {src.get('doc_title','')}")
+        if src.get("source_url"):
+            lines.append(src["source_url"])
+
+    return "\n".join(lines)
+
+
+# ── Alert-awareness helper ────────────────────────────────────────────────────
+
+def _fetch_live_alerts(location_province: str = "Khyber Pakhtunkhwa",
+                       limit: int = 3) -> list[dict]:
+    """
+    Fetch current PUBLISHED alerts from the backend DB for alert-aware responses.
+    Returns [] silently on any error — alert awareness is best-effort.
+    """
+    try:
+        import httpx, os
+        backend = os.getenv("BACKEND_URL", "http://127.0.0.1:8002")
+        url = (f"{backend}/alerts?active_only=true"
+               f"&verification_status=PUBLISHED"
+               f"&province={location_province}&limit={limit}")
+        resp = httpx.get(url, timeout=2.0)
+        if resp.status_code == 200:
+            return resp.json().get("alerts", [])
+    except Exception:
+        pass
+    return []
+
+
+def _format_alert_context(alerts: list[dict]) -> str:
+    if not alerts:
+        return "[NO CURRENT OFFICIAL ALERT for this location]"
+    lines = ["CURRENT OFFICIAL ALERTS:"]
+    for a in alerts:
+        lines.append(
+            f"• [{a.get('severity','?')}] {a.get('title','?')} "
+            f"— {a.get('source_org','?')} ({a.get('issued_at','')[:10]})"
+        )
+    return "\n".join(lines)
+
+
+# ── LLM call with timeout ─────────────────────────────────────────────────────
+
+def _call_llm_with_timeout(question: str, context: str,
+                            alert_context: str = "") -> str | None:
+    """
+    Call LLM with a 5-second timeout so backend can fall back before
+    Flutter's 8-second timeout fires.
+    Returns None on timeout, error, or LLM_PROVIDER=='none'.
+    """
+    if LLM_PROVIDER == "none":
+        return None
+
+    import concurrent.futures, os
+
+    full_context = f"{alert_context}\n\n{context}" if alert_context else context
+    caller = _PROVIDER_DISPATCH.get(LLM_PROVIDER)
+    if not caller:
+        return None
+
+    # Build grounding-strict prompt (Phase 4.2)
+    grounded_prompt = (
+        f"Language of response: {os.getenv('RESPONSE_LANGUAGE', 'en')}\n\n"
+        f"QUESTION: {question}"
+    )
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as ex:
+        future = ex.submit(caller, grounded_prompt, full_context)
+        try:
+            result = future.result(timeout=5.0)
+            return result if result and "INSUFFICIENT EVIDENCE" not in result else None
+        except concurrent.futures.TimeoutError:
+            return None
+        except Exception:
+            return None
+
+
+# ── Response cache (Phase 4.4) ────────────────────────────────────────────────
+
+import functools, hashlib, time as _time
+
+_RESPONSE_CACHE: dict[str, tuple[str, float]] = {}  # key → (answer, timestamp)
+_CACHE_TTL_SECONDS = 300  # 5 min — short enough that alert changes invalidate quickly
+
+
+def _cache_key(question: str, language: str, intent: dict,
+               alert_context: str) -> str:
+    payload = f"{question}|{language}|{intent['disaster_type']}|{intent['phase']}|{alert_context[:50]}"
+    return hashlib.md5(payload.encode()).hexdigest()
+
+
+def _get_cached(key: str) -> str | None:
+    if key in _RESPONSE_CACHE:
+        answer, ts = _RESPONSE_CACHE[key]
+        if _time.time() - ts < _CACHE_TTL_SECONDS:
+            return answer
+        del _RESPONSE_CACHE[key]
+    return None
+
+
+def _set_cached(key: str, answer: str) -> None:
+    # Keep cache small — evict oldest if >200 entries
+    if len(_RESPONSE_CACHE) > 200:
+        oldest = min(_RESPONSE_CACHE, key=lambda k: _RESPONSE_CACHE[k][1])
+        del _RESPONSE_CACHE[oldest]
+    _RESPONSE_CACHE[key] = (answer, _time.time())
+
+
+# ── Main entry point ──────────────────────────────────────────────────────────
+
+def query_rag(question: str, retrieved_chunks: list[dict],
+              language: str = "en",
+              location_province: str = "Khyber Pakhtunkhwa") -> RAGResponse:
+    """
+    Phase 3+4 overhaul: retrieval-first, intent-aware, alert-aware, LLM-grounded.
+
+    Priority order:
+      1. High-precision curated override (only for exact FAQ patterns: go-bag, contacts, GLOF)
+      2. Retrieval from knowledge.sqlite chunks (real documents, phase/type filtered)
+         → LLM generation on top of retrieved context (if configured, 5s timeout)
+         → Deterministic composition from clean sentences (fallback)
+      3. Live alert injection for alert-related queries
+      4. Curated KB for any remaining unmatched query
+      5. Insufficient evidence response
+    """
+    intent = _classify_intent(question)
+
+    sources = [
+        {
+            "source_org":     c.get("source_org", ""),
+            "doc_title":      c.get("doc_title", ""),
+            "pub_date":       c.get("pub_date", ""),
+            "evidence_level": c.get("evidence_level", "official"),
+            "chunk_id":       c.get("chunk_id", ""),
+            "source_url":     c.get("source_url", ""),
+            "disaster_type":  c.get("disaster_type", "general"),
+            "phase":          c.get("phase", "general"),
+        }
+        for c in retrieved_chunks
+    ]
+
+    total_score = sum(c.get("score", 0) for c in retrieved_chunks)
+
+    # ── Alert context (Phase 3.4) ─────────────────────────────────────────────
+    alert_context = ""
+    if intent["is_alert_query"]:
+        live_alerts  = _fetch_live_alerts(location_province)
+        alert_context = _format_alert_context(live_alerts)
+
+    # ── Cache check ───────────────────────────────────────────────────────────
+    cache_k = _cache_key(question, language, intent, alert_context)
+    cached  = _get_cached(cache_k)
+    if cached:
+        return RAGResponse(
+            answer=cached, sources=sources,
+            retrieval_score=total_score, confidence="sufficient",
+            provider_used="cache", generation_used=False,
+        )
+
+    # ── Step 1: High-precision curated override (Phase 3.1) ──────────────────
+    # Only for exact FAQ patterns — not the default path for everything.
+    if _should_use_curated(question):
+        curated = _get_curated_answer(question, language)
+        if curated:
+            _set_cached(cache_k, curated)
+            return RAGResponse(
+                answer=curated, sources=sources or [{
+                    "source_org": "NDMA / PDMA KP",
+                    "doc_title":  "Official Disaster Guidelines",
+                    "pub_date":   "2024",
+                    "evidence_level": "official",
+                    "chunk_id":   "curated",
+                    "source_url": "",
+                }],
+                retrieval_score=max(total_score, 5),
+                confidence="sufficient",
+                provider_used="curated_kb_override",
+                generation_used=False,
+            )
+
+    # ── Step 2: Real retrieval (Phase 3.1 — retrieval is now primary) ─────────
+    if retrieved_chunks and total_score >= LLM_MIN_CONFIDENCE:
+
+        # Phase 4.2: LLM with grounding-strict prompt + 5s timeout
+        if LLM_PROVIDER != "none":
+            context = "\n\n---\n\n".join(
+                f"[{c.get('source_org','')} — {c.get('doc_title','')} "
+                f"({c.get('pub_date','')}) | disaster={c.get('disaster_type','')} phase={c.get('phase','')}]\n"
+                f"{c.get('chunk_text','')}"
+                for c in retrieved_chunks[:4]
+            )
+            generated = _call_llm_with_timeout(question, context, alert_context)
+            if generated:
+                full_answer = generated
+                if alert_context and "[NO CURRENT" not in alert_context:
+                    full_answer = f"{alert_context}\n\n{generated}"
+                _set_cached(cache_k, full_answer)
+                return RAGResponse(
+                    answer=full_answer, sources=sources,
+                    retrieval_score=total_score, confidence="sufficient",
+                    provider_used=LLM_PROVIDER, generation_used=True,
+                )
+
+        # Deterministic composition from retrieved chunks (Phase 3.3)
+        composed = _compose_answer_from_chunks(retrieved_chunks, intent, question)
+        if composed:
+            full_answer = composed
+            if alert_context and "[NO CURRENT" not in alert_context:
+                full_answer = f"{alert_context}\n\n{composed}"
+            _set_cached(cache_k, full_answer)
+            return RAGResponse(
+                answer=full_answer, sources=sources,
+                retrieval_score=total_score, confidence="sufficient",
+                provider_used="retrieval", generation_used=False,
+            )
+
+    # ── Step 3: Curated KB for unmatched queries (Phase 3.1 fallback) ─────────
+    curated = _get_curated_answer(question, language)
+    if curated:
+        full_answer = curated
+        if alert_context and "[NO CURRENT" not in alert_context:
+            full_answer = f"{alert_context}\n\n{curated}"
+        _set_cached(cache_k, full_answer)
+        return RAGResponse(
+            answer=full_answer,
+            sources=sources or [{"source_org": "NDMA / PDMA KP", "doc_title": "Official Guidelines",
+                                  "pub_date": "2024", "evidence_level": "official",
+                                  "chunk_id": "curated", "source_url": ""}],
+            retrieval_score=max(total_score, 3),
+            confidence="sufficient",
+            provider_used="curated_kb",
+            generation_used=False,
+        )
+
+    # ── Step 4: Alert-only response if this is a pure alert query ─────────────
+    if intent["is_alert_query"] and alert_context:
+        _set_cached(cache_k, alert_context)
+        return RAGResponse(
+            answer=alert_context, sources=[],
+            retrieval_score=0, confidence="sufficient",
+            provider_used="alert_db", generation_used=False,
+        )
+
+    # ── Step 5: Insufficient evidence ─────────────────────────────────────────
+    return RAGResponse(
+        answer=(
+            "I don't have specific information about this in my knowledge base.\n\n"
+            "You can ask me about: floods, earthquakes, landslides, GLOFs, "
+            "heavy rain, emergency contacts, Go-Bag checklist, monsoon safety."
+        ),
+        sources=[], retrieval_score=total_score,
+        confidence="insufficient", provider_used="none", generation_used=False,
+    )
+
     """
     Main RAG entry point.
     Priority order:

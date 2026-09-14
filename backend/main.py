@@ -42,8 +42,14 @@ limiter = None  # Rate limiting handled at infrastructure level in production
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
-    start_scheduler()   # starts alert monitor background job
-    # Start WebSocket heartbeat ping every 30s
+    start_scheduler()
+    # Phase 3.6: Load FAISS index at startup (graceful — won't fail if absent)
+    try:
+        from services.faiss_service import load_faiss_index
+        load_faiss_index()
+    except Exception:
+        pass
+    # WebSocket heartbeat ping every 30s
     import asyncio
     async def _ws_ping_loop():
         from core.ws_manager import ws_manager

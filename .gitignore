@@ -8,6 +8,17 @@ __pycache__/
 dist/
 build/
 .pytest_cache/
+*.egg
+
+# ── Secrets — NEVER COMMIT ───────────────────────────────────────────────────
+.env
+.env.local
+.env.production
+secrets.json
+*.pem
+*.key
+*.p12
+*.pfx
 
 # ── Large data files (never commit) ──────────────────────────────────────────
 data/raw/*.pdf
@@ -20,6 +31,7 @@ data/raw/scraped/
 data/extracted/
 data/chunks/
 data/embeddings/
+data/raw/alert_staging/
 
 # ── Built SQLite databases (regenerate via pipeline) ─────────────────────────
 offline_package/knowledge.sqlite
@@ -27,8 +39,40 @@ offline_package/hazard_grid.sqlite
 app/assets/offline_package/knowledge.sqlite
 app/assets/offline_package/hazard_grid.sqlite
 
-# ── Backend runtime database ──────────────────────────────────────────────────
+# ── Backend runtime databases ─────────────────────────────────────────────────
 backend/disaster_dss_backend.sqlite
+backend/*.sqlite
+*.sqlite
+*.db
+
+# ── FAISS index (regenerate) ──────────────────────────────────────────────────
+*.faiss
+*.index
+backend/services/knowledge.index
+
+# ── Temporary fix/run scripts (not part of codebase) ────────────────────────
+CHATBOT_FIXED.txt
+EMERGENCY_FIX.txt
+FINAL_FIX_AND_RUN.ps1
+FIX_AND_RUN.txt
+GITHUB_UPDATE_SUMMARY.txt
+OPEN_IN_BROWSER.bat
+OPEN_IN_CHROME.ps1
+RUN_BACKEND_PERMANENT.bat
+RUN_NOW.ps1
+START_APP.ps1
+START_FIXED.ps1
+_add_phase3_columns.py
+_run_phase_tests.py
+_run_tests.py
+_test_pipeline_source_url.py
+_test_sql.py
+backend/ADD_TO_STARTUP.ps1
+backend/install_service.ps1
+backend/setup_autostart.ps1
+backend/start_backend.ps1
+backend/stop_backend.ps1
+app/run_web.ps1
 
 # ── Flutter / Dart ────────────────────────────────────────────────────────────
 app/.dart_tool/
@@ -56,10 +100,3 @@ app/android/app/google-services.json
 .DS_Store
 Thumbs.db
 desktop.ini
-
-# ── Secrets ───────────────────────────────────────────────────────────────────
-.env
-.env.*
-secrets.json
-*.pem
-*.key

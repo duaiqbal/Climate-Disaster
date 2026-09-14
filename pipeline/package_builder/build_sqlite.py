@@ -161,7 +161,9 @@ def create_schema(conn: sqlite3.Connection) -> None:
             keywords       TEXT,
             evidence_level TEXT,
             char_count     INTEGER,
-            source_url     TEXT          -- nullable; "" for docs not in manifest
+            source_url     TEXT,          -- nullable; "" for docs not in manifest
+            disaster_type  TEXT,          -- flood|flash_flood|landslide|earthquake|glof|general
+            phase          TEXT           -- before|during|after|general
         );
 
         CREATE TABLE alerts (
@@ -188,6 +190,12 @@ def create_indexes(conn: sqlite3.Connection) -> None:
             ON chunks(language);
         CREATE INDEX IF NOT EXISTS idx_chunks_source_org
             ON chunks(source_org);
+        CREATE INDEX IF NOT EXISTS idx_chunks_disaster_type
+            ON chunks(disaster_type);
+        CREATE INDEX IF NOT EXISTS idx_chunks_phase
+            ON chunks(phase);
+        CREATE INDEX IF NOT EXISTS idx_chunks_disaster_phase
+            ON chunks(disaster_type, phase);
         CREATE INDEX IF NOT EXISTS idx_alerts_issued_at
             ON alerts(issued_at DESC);
         CREATE INDEX IF NOT EXISTS idx_alerts_district
@@ -201,15 +209,19 @@ def insert_chunks(conn: sqlite3.Connection, chunks: list[dict]) -> None:
         INSERT OR REPLACE INTO chunks
           (chunk_id, source_org, doc_title, pub_date, language,
            page_num, chunk_index, chunk_text, keywords, evidence_level,
-           char_count, source_url)
+           char_count, source_url, disaster_type, phase)
         VALUES
           (:chunk_id, :source_org, :doc_title, :pub_date, :language,
            :page_num, :chunk_index, :chunk_text, :keywords, :evidence_level,
-           :char_count, :source_url)
+           :char_count, :source_url, :disaster_type, :phase)
         """,
-        # Ensure source_url key exists even for old chunk JSON files that
-        # pre-date this fix — default to empty string if missing.
-        [{**c, "source_url": c.get("source_url", "")} for c in chunks],
+        # Ensure all keys exist — default missing ones for backward compat
+        [{
+            **c,
+            "source_url":    c.get("source_url",    ""),
+            "disaster_type": c.get("disaster_type", "general"),
+            "phase":         c.get("phase",         "general"),
+        } for c in chunks],
     )
 
 

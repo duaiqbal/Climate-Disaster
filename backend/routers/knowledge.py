@@ -62,7 +62,9 @@ async def _run_query(func, *args):
 
 # ── Synchronous query functions (run in executor) ─────────────────────────────
 
-def _do_search(db_path: Path, q: str, language: str, limit: int) -> list[dict]:
+def _do_search(db_path: Path, q: str, language: str, limit: int,
+               disaster_type: Optional[str] = None,
+               phase: Optional[str] = None) -> list[dict]:
     tokens = [t for t in q.lower().split() if len(t) >= 2]
     if not tokens:
         return []
@@ -74,17 +76,30 @@ def _do_search(db_path: Path, q: str, language: str, limit: int) -> list[dict]:
         score_expr = " + ".join("CASE WHEN chunk_text LIKE ? THEN 1 ELSE 0 END" for _ in tokens)
         score_args = [f"%{t}%" for t in tokens]
 
+        # Optional metadata filters (Phase 3.2)
+        extra_where = ""
+        extra_args: list = []
+        if disaster_type:
+            extra_where += " AND COALESCE(disaster_type,'general') = ?"
+            extra_args.append(disaster_type)
+        if phase:
+            extra_where += " AND COALESCE(phase,'general') = ?"
+            extra_args.append(phase)
+
         sql = f"""
             SELECT chunk_id, source_org, doc_title, pub_date, language,
                    page_num, chunk_text, keywords, evidence_level, char_count,
-                   COALESCE(source_url, '') AS source_url,
+                   COALESCE(source_url, '')      AS source_url,
+                   COALESCE(disaster_type, 'general') AS disaster_type,
+                   COALESCE(phase, 'general')    AS phase,
                    ({score_expr}) AS score
             FROM chunks
-            WHERE language = ? AND ({like_clauses})
+            WHERE language = ? AND ({like_clauses}){extra_where}
             ORDER BY score DESC
             LIMIT ?
         """
-        rows = conn.execute(sql, score_args + [language] + args + [limit]).fetchall()
+        params = score_args + [language] + args + extra_args + [limit]
+        rows = conn.execute(sql, params).fetchall()
         return [dict(r) for r in rows]
     finally:
         conn.close()
@@ -126,7 +141,9 @@ class ChunkResponse(BaseModel):
     keywords:       Optional[str]
     evidence_level: Optional[str]
     char_count:     Optional[int]
-    source_url:     Optional[str] = ""  # direct URL to official document
+    source_url:     Optional[str] = ""
+    disaster_type:  Optional[str] = "general"   # Phase 3.2
+    phase:          Optional[str] = "general"   # Phase 3.2
 
 
 class SearchResponse(BaseModel):
