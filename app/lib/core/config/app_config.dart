@@ -2,28 +2,45 @@ import 'package:flutter/foundation.dart';
 
 /// Single source of truth for all runtime configuration.
 ///
-/// Base URL selection:
-///   Flutter Web (kIsWeb) → localhost (browser talks to local backend directly)
-///   Android Emulator     → 10.0.2.2  (AVD special loopback for host machine)
-///   Physical device      → set FLUTTER_BACKEND_URL env var at build time,
-///                          or override [backendUrl] before app starts.
+/// Backend URL priority order:
+///   1. --dart-define=BACKEND_URL=https://... (build-time override — used for production)
+///   2. kIsWeb → relative URL via localhost (local dev)
+///   3. Android emulator → 10.0.2.2 (AVD loopback)
+///   4. Physical device → LAN IP (local dev with USB)
 ///
-/// To override at build time:
-///   flutter run --dart-define=BACKEND_URL=http://192.168.1.x:8000
+/// Production build:
+///   flutter build web --dart-define=BACKEND_URL=https://chitral-safe-backend.onrender.com
+///
+/// Local dev build:
+///   flutter run -d chrome --web-port 8080
 class AppConfig {
   AppConfig._();
 
   // ── Backend URL ─────────────────────────────────────────────────────────────
+  /// Injected at build time via --dart-define=BACKEND_URL=https://...
   static const String _customUrl = String.fromEnvironment(
     'BACKEND_URL',
     defaultValue: '',
   );
 
+  /// Production backend on Render.com
+  static const String _productionUrl = 'https://chitral-safe-backend.onrender.com';
+
   static String get backendUrl {
+    // 1. Build-time override (used for APK + production web builds)
     if (_customUrl.isNotEmpty) return _customUrl;
-    if (kIsWeb) return 'http://localhost:8002';
-    // LAN backend for physical devices; override with BACKEND_URL when needed.
-    return 'http://192.168.18.253:8002';
+
+    // 2. Web: use production URL in release, localhost in debug
+    if (kIsWeb) {
+      // In release web build, use production backend
+      return kReleaseMode ? _productionUrl : 'http://localhost:8002';
+    }
+
+    // 3. Android emulator
+    // return 'http://10.0.2.2:8002';
+
+    // 4. Physical device on LAN (change IP to your PC's WiFi IP)
+    return 'http://192.168.100.42:8002';
   }
 
   // ── Feature flags ───────────────────────────────────────────────────────────
